@@ -276,4 +276,4 @@ export const SOURCES = [
 
 export const DISCLAIMER = "These are estimates for healthy people, not medical advice. Anyone with a medical condition, a pregnancy or a daily medication should check with a doctor before starting a weight-loss ration.";
 
-export const SITE_URL = "https://bretts600.github.io/prep/";
+export const SITE_URL = "https://brettschroyer.github.io/prep/";

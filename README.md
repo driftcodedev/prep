@@ -9,7 +9,7 @@ A one-page calculator for storing food for a long power outage. You enter each p
 - **The weekly weigh-in rules** and the cooking and storage notes.
 - **The full report on paper**: print it from the page, or download it as a PDF.
 
-Live site: https://bretts600.github.io/prep/
+Live site: https://brettschroyer.github.io/prep/
 
 ## How it works
 
