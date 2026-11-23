@@ -1,5 +1,8 @@
 // Calculation engine. Pure functions only, so it runs the same in the browser and in tests.
-import { FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET } from "./data.js";
+import {
+  FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET, productsFor,
+  BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE,
+} from "./data.js";
 
 const KG_PER_LB = 0.45359237;
 const KCAL_PER_KG = 7700; // energy in 1 kg of body-weight change
@@ -159,7 +162,7 @@ export function planPerson(p, days) {
   const isChild = p.age < 18;
   const plan = {
     person: p, isChild, warnings: [], supplement: supplementFor(p),
-    bmi: bmi(p.weightLb, p.heightIn),
+    bmi: bmi(p.weightLb, p.heightIn), waterCups: waterCups(p),
   };
 
   if (isChild) {
@@ -290,13 +293,54 @@ function warningsFor(plan) {
   return w;
 }
 
+// ---------- water ----------
+
+// Cups of drinking water a day. Adults and teens: the emergency guideline of at least ½ gallon
+// (CDC, Ready.gov, state health departments). Young children, pregnancy and breastfeeding:
+// National Academies adequate intake from drinks, which includes milk.
+export function waterCups(p) {
+  const f = p.flags || {};
+  if (p.age < 4) return 4;
+  if (p.age < 9) return 5;
+  if (p.age < 14) return p.sex === "male" ? 8 : 7;
+  if (f.breastfeeding) return 13;
+  if (f.pregnant) return 10;
+  return 8;
+}
+
+// Cheapest mix of LifeStraw packs giving one straw each to n people.
+// One spare straw is taken when it costs less than SPARE_VALUE extra.
+const SPARE_VALUE = 5;
+export function strawPacks(n, products = PRODUCTS) {
+  if (n <= 0) return { packs: [], straws: 0, cost: 0 };
+  const sizes = ["straw5", "straw3", "straw1"].map((k) => ({ k, size: products[k].size, price: products[k].price }));
+  let best = null;
+  for (let a = 0; a <= Math.ceil(n / sizes[0].size) + 1; a++) {
+    for (let b = 0; b <= Math.ceil(n / sizes[1].size) + 1; b++) {
+      for (let c = 0; c <= n + 1; c++) {
+        const straws = a * sizes[0].size + b * sizes[1].size + c * sizes[2].size;
+        if (straws < n || straws > n + 1) continue;
+        const cost = a * sizes[0].price + b * sizes[1].price + c * sizes[2].price;
+        const score = cost - (straws > n ? SPARE_VALUE : 0);
+        const packs = a + b + c;
+        if (!best || score < best.score - 1e-9 || (Math.abs(score - best.score) < 1e-9 && packs < best.packCount)) {
+          best = { score, cost, straws, packCount: packs, counts: [a, b, c] };
+        }
+      }
+    }
+  }
+  const packs = sizes.map((s, i) => ({ key: s.k, qty: best.counts[i] })).filter((x) => x.qty > 0);
+  return { packs, straws: best.straws, cost: best.cost };
+}
+
 // ---------- household ----------
 
-export function planHousehold({ months, reservePct = 20, hasScale = false, people }) {
+export function planHousehold({ months, reservePct = 20, store = "costco", owned = {}, hasScale = false, people }) {
   const days = Math.round(months * 30.4);
   const reserve = 1 + reservePct / 100;
   const valid = people.filter((p) => validatePerson(p).length === 0);
   const plans = valid.map((p) => planPerson(p, days));
+  const have = { scale: hasScale, ...owned };
 
   const sum = { rice: 0, beans: 0, oats: 0, pb: 0, oil: 0, milk: 0, whole: 0, salt: 0 };
   const supp = {};
@@ -308,45 +352,15 @@ export function planHousehold({ months, reservePct = 20, hasScale = false, peopl
   const grams = {};
   for (const k of Object.keys(sum)) grams[k] = sum[k] * FOODS[k].grams * reserve;
 
-  const lines = [];
-  const addLine = (key, qty, amountText) => {
-    if (qty <= 0) return;
-    const prod = PRODUCTS[key];
-    lines.push({ key, ...prod, qty, amountText, cost: qty * prod.price });
-  };
-  const lbText = (g) => `${Math.round(g / 453.6)} lb`;
-
-  for (const key of ["rice", "beans", "oats", "pb", "oil", "salt", "milk", "whole"]) {
-    if (grams[key] <= 0) continue;
-    const qty = Math.ceil(grams[key] / PRODUCTS[key].sizeGrams - 1e-9);
-    let amount;
-    if (key === "oil") amount = `${(sum.oil * reserve / 256).toFixed(1)} gal`;
-    else if (key === "pb") amount = `${Math.round(grams.pb / 28.35)} oz`;
-    else if (key === "milk" || key === "whole") amount = `${Math.round(sum[key] * reserve)} cups of milk`;
-    else if (key === "salt") amount = `${Math.round(grams.salt / 28.35)} oz`;
-    else amount = lbText(grams[key]);
-    addLine(key, qty, amount);
-  }
-
-  for (const key of ["multiMen", "multiWomen", "multiWomen50", "multiKids", "drops"]) {
-    if (!supp[key]) continue;
-    const need = supp[key] * reserve;
-    addLine(key, Math.ceil(need / PRODUCTS[key].size - 1e-9), key === "drops" ? `${Math.ceil(need)} mL` : `${Math.ceil(need)} tablets`);
-  }
-  if (plans.some((pl) => pl.person.age >= 4)) addLine("vitC", 1, "backup supply");
-
   const riceLb = grams.rice / 453.6;
   const beansLb = grams.beans / 453.6;
   const buckets = (riceLb > 0 ? Math.ceil(riceLb / LB_PER_BUCKET) : 0) + (beansLb > 0 ? Math.ceil(beansLb / LB_PER_BUCKET) : 0);
-  if (buckets > 0) {
-    addLine("buckets", Math.ceil(buckets / PRODUCTS.buckets.size), `${buckets} buckets`);
-    addLine("mylar", Math.ceil(buckets / PRODUCTS.mylar.size), `${buckets} bags`);
-  }
-  if (!hasScale && plans.length) addLine("scale", 1, "for weekly weigh-ins");
+  const strawPeople = plans.filter((pl) => pl.person.age >= STRAW_MIN_AGE).length;
 
-  const total = lines.reduce((a, l) => a + l.cost, 0);
-  const byStore = {};
-  for (const l of lines) byStore[l.store] = (byStore[l.store] || 0) + l.cost;
+  const ctx = { plans, sum, supp, grams, reserve, buckets, strawPeople, have };
+  const shop = shoppingFor(ctx, productsFor(store));
+  const otherStore = store === "walmart" ? "costco" : "walmart";
+  const other = plans.length ? { store: otherStore, total: shoppingFor(ctx, productsFor(otherStore)).total } : null;
 
   // Daily cooking totals (first-phase rations) and each person's share of the pot.
   const cook = { rice: 0, beans: 0, oats: 0, milk: 0, whole: 0 };
@@ -359,7 +373,83 @@ export function planHousehold({ months, reservePct = 20, hasScale = false, peopl
     beansCooked: pl.phase1.beans * 2.5,
   }));
 
-  return { days, months, reservePct, plans, invalidCount: people.length - valid.length, lines, total, byStore, buckets, cook, shares };
+  // Gear lifespans.
+  const firesPerLighter = BIC_LIGHTS / LIGHTS_PER_FIRE;
+  const waterCupsTotal = plans.reduce((a, pl) => a + pl.waterCups, 0);
+  const gear = {
+    firesPerLighter,
+    lighterMonths: firesPerLighter / 30.4,
+    trayYears: (PRODUCTS.lighters.size * firesPerLighter) / 365,
+    strawPeople,
+    straws: shop.straws,
+    strawGallons: LIFESTRAW_GALLONS,
+    adultStrawYears: LIFESTRAW_GALLONS / (8 / 16) / 365,
+    waterCupsTotal,
+    waterGallonsTotal: waterCupsTotal / 16,
+  };
+
+  return {
+    days, months, reservePct, store, plans, invalidCount: people.length - valid.length,
+    lines: shop.lines, total: shop.total, byStore: shop.byStore, byGroup: shop.byGroup,
+    buckets, cook, shares, gear, other,
+  };
+}
+
+function shoppingFor(ctx, products) {
+  const { plans, sum, supp, grams, reserve, buckets, strawPeople, have } = ctx;
+  const lines = [];
+  const addLine = (key, qty, amountText, group) => {
+    if (qty <= 0) return;
+    const prod = products[key];
+    lines.push({ key, ...prod, group, qty, amountText, cost: qty * prod.price });
+  };
+  const lbText = (g) => `${Math.round(g / 453.6)} lb`;
+
+  for (const key of ["rice", "beans", "oats", "pb", "oil", "salt", "milk", "whole"]) {
+    if (grams[key] <= 0) continue;
+    const qty = Math.ceil(grams[key] / products[key].sizeGrams - 1e-9);
+    let amount;
+    if (key === "oil") amount = `${(sum.oil * reserve / 256).toFixed(1)} gal`;
+    else if (key === "pb") amount = `${Math.round(grams.pb / 28.35)} oz`;
+    else if (key === "milk" || key === "whole") amount = `${Math.round(sum[key] * reserve)} cups of milk`;
+    else if (key === "salt") amount = `${Math.round(grams.salt / 28.35)} oz`;
+    else amount = lbText(grams[key]);
+    addLine(key, qty, amount, "food");
+  }
+
+  for (const key of ["multiMen", "multiWomen", "multiWomen50", "multiKids", "drops"]) {
+    if (!supp[key]) continue;
+    const need = supp[key] * reserve;
+    addLine(key, Math.ceil(need / products[key].size - 1e-9), key === "drops" ? `${Math.ceil(need)} mL` : `${Math.ceil(need)} tablets`, "food");
+  }
+  if (plans.some((pl) => pl.person.age >= 4)) addLine("vitC", 1, "backup supply", "food");
+
+  if (buckets > 0) {
+    addLine("buckets", Math.ceil(buckets / products.buckets.size), `${buckets} buckets`, "storage");
+    addLine("mylar", Math.ceil(buckets / products.mylar.size), `${buckets} bags`, "storage");
+  }
+  if (!have.scale && plans.length) addLine("scale", 1, "for weekly weigh-ins", "storage");
+
+  let straws = 0;
+  if (plans.length) {
+    if (!have.lighters) addLine("lighters", 1, `${products.lighters.size} lighters`, "gear");
+    if (!have.filters && strawPeople > 0) {
+      const sp = strawPacks(strawPeople, products);
+      straws = sp.straws;
+      const covers = `${sp.straws} straw${sp.straws > 1 ? "s" : ""} for ${strawPeople} ${strawPeople === 1 ? "person" : "people"}${sp.straws > strawPeople ? " + spare" : ""}`;
+      sp.packs.forEach((pk, i) => addLine(pk.key, pk.qty, i === 0 ? covers : "", "gear"));
+    }
+    if (!have.axe) addLine("axe", 1, "splitting firewood", "gear");
+  }
+
+  const total = lines.reduce((a, l) => a + l.cost, 0);
+  const byStore = {};
+  const byGroup = {};
+  for (const l of lines) {
+    byStore[l.store] = (byStore[l.store] || 0) + l.cost;
+    byGroup[l.group] = (byGroup[l.group] || 0) + l.cost;
+  }
+  return { lines, total, byStore, byGroup, straws };
 }
 
 // ---------- formatting ----------

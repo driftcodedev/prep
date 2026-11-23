@@ -24,7 +24,7 @@
     <div class="wrap">
       <h1 class="wordmark">prep</h1>
       <p class="lede">Food for a long power outage, worked out person by person.</p>
-      <p class="intro">Enter everyone you're storing food for. You'll get each person's daily scoops, one shopping list for Costco and Amazon, and pages to print while the lights are still on.</p>
+      <p class="intro">Enter everyone you're storing food for. You'll get each person's daily scoops and drinking water, one shopping list (Costco or Walmart, plus Amazon) with the lighters, water filters and axe to go with it, and a full report to print or save as a PDF while the lights are still on.</p>
     </div>
   </header>
 
@@ -47,10 +47,15 @@
           </select>
           <span class="field-hint">Covers spills, hungrier weeks and scooping mistakes.</span>
         </label>
-        <label class="check settings-check">
-          <input type="checkbox" id="has-scale">
-          <span>We already own a bathroom scale</span>
+        <label class="field">
+          <span class="field-label">Where you'll shop</span>
+          <select id="store"></select>
+          <span class="field-hint">Costco needs a membership; Walmart doesn't. Prices and package sizes change to match.</span>
         </label>
+        <fieldset class="field owned-field">
+          <legend class="field-label">Already have? Leave it off the list</legend>
+          <div class="owned" id="owned"></div>
+        </fieldset>
       </div>
 
       <div id="people" class="people"></div>

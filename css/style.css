@@ -125,7 +125,11 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 
 .check { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
 .check input { width: 1.15rem; height: 1.15rem; accent-color: var(--lid); }
-.settings-check { align-self: end; min-height: 2.75rem; }
+
+.owned-field { margin: 0; padding: 0; border: 0; }
+.owned-field legend { padding: 0; margin-bottom: 0.3rem; }
+.owned { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; padding-top: 0.35rem; }
+.owned .check { white-space: nowrap; }
 
 .people { display: flex; flex-direction: column; gap: 1.25rem; }
 
@@ -186,6 +190,18 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 
 .results-head { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
 .results-head .section-title { margin: 0; }
+
+.report-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; }
+.pdf-status { font-size: 0.9rem; color: var(--ink-2); }
+.pdf-status:empty { display: none; }
+.btn:disabled { opacity: 0.6; cursor: progress; }
+.report-foot {
+  margin-top: 3rem; padding: 1.25rem 0 0.5rem;
+  border-top: 3px solid var(--ink);
+  display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem;
+}
+.report-foot p { margin: 0; font-weight: 700; max-width: 40ch; }
+.print-meta { display: none; }
 .results-intro { margin: 0.5rem 0 1.25rem; color: var(--ink-2); }
 .incomplete { margin: 0.75rem 0 0; color: var(--bean); font-weight: 700; }
 
@@ -221,6 +237,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
   overflow-wrap: anywhere;
 }
 .card-status { margin: 0.35rem 0 0; font-weight: 700; color: var(--lid); }
+.card-who { margin: 0.15rem 0 0; font-size: 0.875rem; color: var(--ink-2); }
 .card-energy { margin: 0 0 0.75rem; font-size: 0.95rem; color: var(--ink-2); }
 
 .scoops { display: flex; flex-direction: column; }
@@ -264,11 +281,31 @@ table.data { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 .data thead th { font-size: 0.9rem; color: var(--ink-2); border-bottom: 1.5px solid var(--ink); }
 .data tbody th { font-weight: 700; }
 .data .num { text-align: right; white-space: nowrap; }
+.data thead th.num { white-space: normal; }
 .data td small { display: block; color: var(--ink-2); font-size: 0.8rem; }
 .shop td:nth-child(2) { color: var(--ink-2); }
+/* Same column widths in every store table so they line up down the page. */
+table.shop { table-layout: fixed; min-width: 38rem; }
+.shop th:nth-child(1) { width: 27%; }
+.shop th:nth-child(2) { width: 30%; }
+.shop th:nth-child(3) { width: 12%; }
+.shop th:nth-child(4) { width: 18%; }
+.shop th:nth-child(5) { width: 13%; }
 
-.shop-summary { font-size: 1.2rem; }
+.shop-summary { font-size: 1.2rem; margin-bottom: 0.4rem; }
 .shop-summary strong { font-size: 1.35rem; }
+.shop-compare { margin-top: 0; color: var(--ink-2); }
+.shop-compare .btn-link { color: var(--lid); font-weight: 700; }
+
+/* Fire and water: three items side by side, each under a heavy rule like a bucket lid seam. */
+.gear { max-width: none; }
+.gear-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); gap: 1.5rem 2rem; margin-top: 1.25rem; }
+.gear-item { border-top: 3px solid var(--ink); padding-top: 0.75rem; }
+.gear-item p { margin: 0.5rem 0; }
+.gear-item .plain { margin: 0.5rem 0; }
+.gear-title { margin: 0; font-family: var(--display); font-weight: 800; font-size: 1.75rem; line-height: 1; }
+.gear-buy { font-weight: 700; color: var(--lid); }
+.gear-item .gear-links { margin-top: -0.25rem; font-weight: 700; }
 
 .notes, .plain { padding-left: 1.2rem; max-width: 68ch; }
 .notes li, .plain li { margin-top: 0.5rem; }
@@ -309,7 +346,13 @@ table.data { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 @media print {
   @page { margin: 0.5in; }
   body { background: #fff; font-size: 10.5pt; }
-  .setup, .people-actions, .privacy, #print, .intro { display: none !important; }
+  .setup, .people-actions, .privacy, .intro, .report-actions, .report-foot, .shop-compare .btn-link { display: none !important; }
+  .print-meta { display: block; margin: 0 0 6pt; font-size: 9pt; color: var(--ink-2); }
+  .print-meta p { margin: 0; }
+  .card-who { font-size: 8pt; }
+  .gear-grid { grid-template-columns: 1fr; gap: 8pt; }
+  .gear-item { break-inside: avoid; page-break-inside: avoid; }
+  .gear-title { font-size: 15pt; }
   .masthead { padding: 0 0 0.5rem; }
   .wordmark { font-size: 40pt; }
   .lede { font-size: 13pt; margin-top: 4pt; max-width: none; }

@@ -1,5 +1,6 @@
 // All food values, product sizes and prices live here so they are easy to update.
 // Prices were checked 18–23 November 2026. Costco prices are warehouse prices and vary by location.
+// Amazon gear and Walmart prices were checked 23 November 2026.
 
 export const PRICES_CHECKED = "18–23 November 2026";
 
@@ -105,7 +106,110 @@ export const PRODUCTS = {
     size: 1, price: 19.97,
     url: "https://www.amazon.com/bathroom-scale-analog/s?k=bathroom+scale+analog",
   },
+
+  // Fire and water gear. Amazon in both store plans.
+  lighters: {
+    item: "BIC Classic lighters", pack: "50-count tray", store: "Amazon", where: "Online", gear: true,
+    size: 50, price: 53.99,
+    url: "https://www.amazon.com/BIC-Classic-Lighter-Assorted-50-Count/dp/B00BQEFUOA",
+  },
+  straw1: {
+    item: "LifeStraw water filter", pack: "1-pack, LifeStraw Personal", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 17.95,
+    url: "https://www.amazon.com/dp/B006QF3TW4",
+  },
+  straw3: {
+    item: "LifeStraw water filters", pack: "3-pack, LifeStraw Personal", store: "Amazon", where: "Online", gear: true,
+    size: 3, price: 38.99, priceNote: "Black Friday price; usually $52.53",
+    url: "https://www.amazon.com/LifeStraw-Personal-Water-Filter-Piece/dp/B072BC51LT",
+  },
+  straw5: {
+    item: "LifeStraw water filters", pack: "5-pack, LifeStraw Personal", store: "Amazon", where: "Online", gear: true,
+    size: 5, price: 74.88, priceNote: "List price $79.95",
+    url: "https://www.amazon.com/dp/B087D7K48X",
+  },
+  axe: {
+    item: "Splitting axe", pack: "Fiskars X27 Super Splitting Axe, 36 in", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 69.98,
+    url: "https://www.amazon.com/Fiskars-Super-Splitting-Inch-378841-1002/dp/B004M3BAQE",
+  },
 };
+
+// The no-membership plan swaps the Costco items, and the Amazon food and vitamins, for Walmart.
+// Buckets, mylar, toddler drops, the scale and the gear stay on Amazon.
+// Walmart prices checked on walmart.com, 23 November 2026.
+const WALMART = {
+  rice: {
+    item: "White rice", pack: "20-lb bag, Great Value long grain", sizeGrams: 9072, price: 11.57,
+    url: "https://www.walmart.com/ip/Great-Value-Long-Grain-Enriched-Rice-20-lb/10315883",
+  },
+  beans: {
+    item: "Pinto beans", pack: "20-lb bag, Great Value", sizeGrams: 9072, price: 14.98,
+    url: "https://www.walmart.com/ip/Great-Value-Pinto-Beans-20-lb/10315741",
+  },
+  oats: {
+    item: "Rolled oats", pack: "42-oz canister, Great Value old fashioned", sizeGrams: 1191, price: 4.18,
+    url: "https://www.walmart.com/ip/Great-Value-Instant-100-Whole-Grain-Old-Fashioned-Oats-Cup-42-oz/10314925",
+  },
+  pb: {
+    item: "Peanut butter", pack: "40-oz jar, Great Value creamy", sizeGrams: 1134, price: 3.98,
+    url: "https://www.walmart.com/ip/Great-Value-Creamy-Peanut-Butter-40-oz-Jar/10315479",
+  },
+  oil: {
+    item: "Vegetable oil", pack: "1-gallon bottle, Great Value", sizeGrams: 256 * 13.6, price: 8.78,
+    url: "https://www.walmart.com/ip/Great-Value-Vegetable-Oil-1-Gallon/10451011",
+  },
+  salt: {
+    item: "Iodized salt", pack: "26-oz canister, Morton", sizeGrams: 737, price: 1.52,
+    url: "https://www.walmart.com/ip/Morton-Iodized-Salt-26-oz/10448936",
+  },
+  milk: {
+    item: "Nonfat dry milk", pack: "64-oz bag, Great Value instant", sizeGrams: 1814, price: 23.58,
+    url: "https://www.walmart.com/ip/Great-Value-Instant-Nonfat-Dry-Milk-64-oz-Bag-Makes-20-Quarts-80-Servings-per-Container/10415475",
+  },
+  whole: {
+    item: "Whole dry milk (under age 2)", pack: "56.4-oz can, Nido Fortificada", sizeGrams: 1599, price: 19.93,
+    url: "https://www.walmart.com/ip/NIDO-Fortificada-Dry-Whole-Milk-Powder-with-Vitamins-A-C-D-Iron-Calcium-56-4-oz-Canister/14869811",
+  },
+  multiMen: {
+    item: "Men's multivitamin", pack: "200 tablets, Equate One Daily Men's", size: 200, price: 9.82,
+    url: "https://www.walmart.com/ip/Equate-One-Daily-Men-s-Multivitamin-Multimineral-Supplement-Tablets-200-Count/10324918",
+  },
+  multiWomen: {
+    item: "Women's multivitamin with iron", pack: "200 tablets, Equate One Daily Women's", size: 200, price: 9.82,
+    url: "https://www.walmart.com/ip/Equate-One-Daily-Women-s-Multivitamin-Multimineral-Supplement-Tablets-for-Women-s-Health-200-Count/10324688",
+  },
+  multiWomen50: {
+    item: "Women's 50+ multivitamin", pack: "200 tablets, Equate Complete Women 50+", size: 200, price: 12.94,
+    url: "https://www.walmart.com/ip/Equate-Complete-Multivitamin-Multimineral-Supplement-Tablets-Women-50-200-Count/46521544",
+  },
+  multiKids: {
+    item: "Children's chewable multivitamin", pack: "150 tablets, Equate Children's Chewable Complete", size: 150, price: 8.64,
+    url: "https://www.walmart.com/ip/Equate-Children-s-Chewable-Complete-Multivitamin-Tablets-for-Children-s-Health-150-Count/10324825",
+  },
+  vitC: {
+    item: "Vitamin C, backup", pack: "100 tablets, Spring Valley 500 mg", size: 100, price: 4.74,
+    url: "https://www.walmart.com/ip/Spring-Valley-Vitamin-C-with-Rose-Hips-500-mg-100-Count-Dietary-Supplement-Tablets-for-Immune-Health/6139509340",
+  },
+};
+
+export const STORE_PLANS = {
+  costco: { label: "Costco + Amazon", choice: "Costco and Amazon", stores: ["Costco", "Amazon"] },
+  walmart: { label: "Walmart + Amazon", choice: "Walmart and Amazon", stores: ["Walmart", "Amazon"] },
+};
+
+export function productsFor(plan = "costco") {
+  if (plan !== "walmart") return PRODUCTS;
+  const out = { ...PRODUCTS };
+  for (const [k, v] of Object.entries(WALMART)) out[k] = { ...v, store: "Walmart", where: "Online or in store" };
+  return out;
+}
+
+// Gear lifespans.
+export const BIC_LIGHTS = 3000;          // BIC: "up to 3,000 lights" per Classic lighter
+export const LIGHTS_PER_FIRE = 10;       // allow about 10 seconds of flame to get kindling going
+export const LIFESTRAW_GALLONS = 1000;   // LifeStraw Personal: up to 1,000 gallons (4,000 L) of clear water
+export const STRAW_MIN_AGE = 3;          // younger children can't pull hard enough; boil their water
 
 export const COSTCO_MEMBERSHIP = 65;
 export const LB_PER_BUCKET = 33; // rice or beans per 5-gallon bucket, sealed in mylar

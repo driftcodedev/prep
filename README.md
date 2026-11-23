@@ -2,11 +2,12 @@
 
 A one-page calculator for storing food for a long power outage. You enter each person in the household (sex, age, height, weight and activity level) and how many months the food should last. The page then gives you:
 
-- **A daily card for each person**, with level-cup and spoon amounts of rice, pinto beans, oats, peanut butter, oil, dry milk, salt and a vitamin.
+- **A daily card for each person**, with level-cup and spoon amounts of rice, pinto beans, oats, peanut butter, oil, dry milk, salt and a vitamin, plus how much water to drink.
 - **Cooking amounts for the whole household**, with each person's share of the pot.
-- **One shopping list for Costco and Amazon**, rounded up to whole packages, with prices and links.
+- **One shopping list**, rounded up to whole packages, with prices and links. Choose Costco and Amazon (needs a membership) or Walmart and Amazon (no membership).
+- **Fire and water gear**: BIC lighters, LifeStraw filters (the cheapest mix of 1-, 3- and 5-packs for one straw per person age 3 and up) and a splitting axe, with how long each lasts. Tick off anything you already own.
 - **The weekly weigh-in rules** and the cooking and storage notes.
-- **A print layout**, so you have everything on paper before the power goes out.
+- **The full report on paper**: print it from the page, or download it as a PDF.
 
 Live site: https://bretts600.github.io/prep/
 
@@ -21,7 +22,9 @@ Everything runs in the browser. Nothing anyone types is sent or stored anywhere 
 
 ## Updating prices
 
-All prices, package sizes and links are in `js/data.js`. Change the numbers there and update `PRICES_CHECKED`.
+All prices, package sizes and links are in `js/data.js`: `PRODUCTS` for the Costco plan and the Amazon items, `WALMART` for the no-membership plan. Change the numbers there and update `PRICES_CHECKED`. The words shared by the page and the PDF live in `js/content.js`.
+
+The PDF is built in the browser with [pdfmake](https://github.com/bpampuch/pdfmake) 0.3.15 (MIT), kept in `vendor/pdfmake/` and loaded only when someone clicks Download PDF.
 
 ## Running the tests
 

@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson } from "../js/calc.js";
+import { planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups } from "../js/calc.js";
+import { buildPdf } from "../js/pdf.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
 
@@ -81,4 +82,53 @@ test("Cup text is easy to measure", () => {
   assert.equal(cupsText(0.375), "¼ cup + 2 tbsp");
   assert.equal(cupsText(0.125), "2 tbsp");
   assert.equal(cupsText(0.5), "½ cup");
+});
+
+test("LifeStraw packs: cheapest mix, one straw each, spare only when cheap", () => {
+  const ks = (n) => strawPacks(n).packs.map((p) => `${p.qty}x${p.key}`).join("+");
+  assert.equal(ks(1), "1xstraw1");
+  assert.equal(ks(2), "1xstraw3"); // a spare for $3.09 more than two singles
+  assert.equal(ks(3), "1xstraw3");
+  assert.equal(ks(4), "1xstraw3+1xstraw1");
+  for (let n = 1; n <= 12; n++) {
+    const r = strawPacks(n);
+    assert.ok(r.straws >= n && r.straws <= n + 1, `n=${n} straws=${r.straws}`);
+  }
+});
+
+test("Gear goes on the list unless the household already has it", () => {
+  const kids = [brett, { name: "T", sex: "female", age: 2, heightIn: 34, weightLb: 27, activity: "light", flags: {} }];
+  const hh = planHousehold({ months: 6, people: kids });
+  const keys = hh.lines.map((l) => l.key);
+  assert.ok(keys.includes("lighters") && keys.includes("axe"));
+  // The 2-year-old is too young for a straw, so Brett gets a single.
+  assert.equal(hh.lines.find((l) => l.key === "straw1").qty, 1);
+  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true } });
+  assert.ok(!owned.lines.some((l) => l.group === "gear" || l.key === "scale"));
+});
+
+test("Walmart plan needs no Costco and keeps the same food amounts", () => {
+  const c = planHousehold({ months: 6, people: [brett], store: "costco" });
+  const w = planHousehold({ months: 6, people: [brett], store: "walmart" });
+  assert.ok(!w.lines.some((l) => l.store === "Costco"));
+  assert.equal(w.lines.find((l) => l.key === "rice").store, "Walmart");
+  assert.equal(c.lines.find((l) => l.key === "rice").amountText, w.lines.find((l) => l.key === "rice").amountText);
+  assert.equal(Math.round(c.other.total), Math.round(w.total));
+  for (const l of [...c.lines, ...w.lines]) assert.ok(l.url.startsWith("https://") && l.price > 0, l.key);
+});
+
+test("Drinking water: ½ gallon for adults, less for small children", () => {
+  assert.equal(waterCups(brett), 8);
+  assert.equal(waterCups({ sex: "male", age: 1, flags: {} }), 4);
+  assert.equal(waterCups({ sex: "female", age: 30, flags: { breastfeeding: true } }), 13);
+});
+
+test("PDF definition covers the whole report and avoids missing glyphs", () => {
+  const hh = planHousehold({ months: 6, people: [brett, { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }] });
+  const doc = buildPdf(hh, { date: "November 23, 2026" });
+  const text = JSON.stringify(doc.content);
+  for (const heading of ["Daily amounts", "Cooking for everyone", "Shopping list", "Fire and water", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
+    assert.ok(text.includes(heading), heading);
+  }
+  assert.ok(!/[⅓⅔]/.test(text));
 });

@@ -1,5 +1,10 @@
-import { ACTIVITY, PRICES_CHECKED, COSTCO_MEMBERSHIP, LB_PER_BUCKET } from "./data.js";
-import { planHousehold, validatePerson, cupsText, spoonText, fraction } from "./calc.js";
+import { ACTIVITY, PRICES_CHECKED, STORE_PLANS } from "./data.js";
+import { planHousehold, validatePerson } from "./calc.js";
+import {
+  money, todayText, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
+  storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL,
+} from "./content.js";
 
 const STORAGE_KEY = "prep-household-v1";
 const FLAGS = [
@@ -13,8 +18,6 @@ const FLAGS = [
 
 const $ = (sel, el = document) => el.querySelector(sel);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const money = (x) => x.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-const num = (x) => Math.round(x).toLocaleString("en-US");
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 const blankPerson = () => ({ id: newId(), name: "", sex: "", age: "", ft: "", inch: "", weight: "", activity: "light", flags: {} });
@@ -26,7 +29,15 @@ const EXAMPLE = [
   { name: "Leo", sex: "male", age: "1", ft: "2", inch: "6", weight: "22", activity: "light", flags: {} },
 ];
 
-let state = load() || { months: 6, reserve: 20, hasScale: false, people: [blankPerson()] };
+const OWNED = [
+  ["hasScale", "Bathroom scale"],
+  ["hasLighters", "Lighters"],
+  ["hasFilters", "Water filters"],
+  ["hasAxe", "Axe"],
+];
+
+let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, people: [blankPerson()], ...(load() || {}) };
+if (!STORE_PLANS[state.store]) state.store = "costco";
 
 function load() {
   try {
@@ -142,138 +153,87 @@ function glyphs(x, kind) {
 
 // ---------- results ----------
 
-function statusLine(pl) {
-  switch (pl.mode) {
-    case "lose": return `Lose to ${pl.goalLb} lb, then hold there`;
-    case "gain": return `Gain to ${pl.goalLb} lb, then hold there`;
-    case "child": return "Growing child: no dieting";
-    case "pregnant": return "Pregnant: no weight loss, extra food";
-    case "breastfeeding": return "Breastfeeding: no weight loss, extra food";
-    default: return "Hold current weight";
-  }
-}
-
-function milkText(r) {
-  if (r.whole > 0) return `${fraction(r.whole)} cups whole milk (¼ cup powder per cup of water)`;
-  if (r.milk > 0) return `${fraction(r.milk)} cup${r.milk > 1 ? "s" : ""} milk (⅓ cup powder per cup of water)`;
-  return "none";
-}
-
-function row(label, glyphHtml, amount, sub = "") {
-  return `<div class="scoop-row"><span class="scoop-food">${label}${sub ? `<small>${sub}</small>` : ""}</span><span class="scoop-glyphs">${glyphHtml}</span><span class="scoop-amount">${amount}</span></div>`;
-}
-
 function card(pl, hh) {
   const p = pl.person;
-  const r = pl.phase1;
-  const rows = [
-    row("Rice", glyphs(r.rice, "cup"), cupsText(r.rice), "dry"),
-    row("Pinto beans", glyphs(r.beans, "cup"), cupsText(r.beans), "dry"),
-    row("Rolled oats", glyphs(r.oats, "cup"), cupsText(r.oats), "dry"),
-    r.pb > 0 ? row("Peanut butter", glyphs(r.pb, "spoon"), spoonText(r.pb, "tbsp"), "level") : "",
-    row("Vegetable oil", glyphs(r.oil, "spoon"), spoonText(r.oil, "tbsp")),
-    row("Dry milk", "", milkText(r)),
-    row("Iodized salt", "", r.salt > 0 ? spoonText(r.salt, "tsp") : "none added"),
-    row("Vitamin", "", pl.supplement.text),
-  ].join("");
-
-  const facts = [];
-  facts.push(`<p class="card-energy">About ${num(pl.phase1Kcal)} calories and ${num(pl.phase1Protein)} g of protein a day. Needs at least ${num(pl.proteinNeed)} g of protein.</p>`);
-
-  const notes = [];
-  if (pl.mode === "lose" || pl.mode === "gain") {
-    notes.push(`<li>At ${pl.goalLb} lb, switch to ${cupsText(pl.hold.rice)} of rice and ${spoonText(pl.hold.oil, "tbsp")} of oil, about ${num(pl.holdKcal)} calories.</li>`);
-  }
-  if (pl.mode === "lose") {
-    notes.push(pl.minRice < pl.phase1.rice
-      ? `<li>If you lose less than ½ lb a week after week 4, drop to ${cupsText(pl.minRice)} of rice. Never go lower.</li>`
-      : `<li>This is already the lowest safe amount. Don't cut the rice further.</li>`);
-    notes.push(pl.sim.reachedDay
-      ? `<li>Expected to reach ${pl.goalLb} lb in about ${Math.round(pl.sim.reachedDay / 7)} weeks.</li>`
-      : `<li>Expected weight after ${hh.months} month${hh.months > 1 ? "s" : ""}: about ${Math.round(pl.sim.endLb)} lb.</li>`);
-  }
-  if (pl.mode === "gain") {
-    notes.push(pl.sim.reachedDay
-      ? `<li>Expected to reach ${pl.goalLb} lb in about ${Math.round(pl.sim.reachedDay / 7)} weeks.</li>`
-      : `<li>Expected weight after ${hh.months} months: about ${Math.round(pl.sim.endLb)} lb.</li>`);
-  }
-
+  const rows = cardRows(pl).map((r) => `
+      <div class="scoop-row"><span class="scoop-food">${esc(r.label)}${r.sub ? `<small>${esc(r.sub)}</small>` : ""}</span><span class="scoop-glyphs">${r.glyph ? glyphs(...r.glyph) : ""}</span><span class="scoop-amount">${esc(r.amount)}</span></div>`).join("");
+  const notes = cardNotes(pl, hh);
   const warnings = pl.warnings.length ? `<ul class="card-warnings">${pl.warnings.map((w) => `<li>${esc(w)}</li>`).join("")}</ul>` : "";
-
   return `
   <article class="ration-card">
     <header class="card-head">
       <h3 class="card-name">${esc(p.name)}</h3>
-      <p class="card-status">${statusLine(pl)}</p>
+      <p class="card-status">${esc(statusLine(pl))}</p>
+      <p class="card-who">${esc(personSummary(p))}</p>
     </header>
-    ${facts.join("")}
+    <p class="card-energy">${esc(cardEnergy(pl))}</p>
     <div class="scoops" role="table" aria-label="${esc(p.name)}'s daily amounts">${rows}</div>
-    ${notes.length ? `<ul class="card-notes">${notes.join("")}</ul>` : ""}
+    ${notes.length ? `<ul class="card-notes">${notes.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}
     ${warnings}
   </article>`;
 }
 
 function cookingSection(hh) {
-  const c = hh.cook;
-  const rowsHtml = hh.plans.map((pl, i) => {
-    const s = hh.shares[i];
-    const riceCooked = Math.round(s.riceCooked * 4) / 4;
-    const beansCooked = Math.round(s.beansCooked * 4) / 4;
-    return `<tr><th scope="row">${esc(pl.person.name)}</th><td>${riceCooked > 0 ? cupsText(riceCooked) : "none"}</td><td>${beansCooked > 0 ? cupsText(beansCooked) : "none"}</td><td>${cupsText(pl.phase1.oats)} dry</td></tr>`;
-  }).join("");
-  const milkBits = [];
-  if (c.milk > 0) milkBits.push(`${fraction(c.milk)} cups of nonfat milk (${cupsText(c.milk / 3)} powder)`);
-  if (c.whole > 0) milkBits.push(`${fraction(c.whole)} cups of whole milk for the under-2s (${cupsText(c.whole / 4)} powder)`);
+  const c = cookingData(hh);
   return `
   <section class="block" aria-labelledby="cook-title">
     <h2 id="cook-title" class="section-title">Cooking for everyone</h2>
-    <p>Each day, cook <strong>${cupsText(c.rice)} of dry rice</strong> and <strong>${cupsText(c.beans)} of dry beans</strong> for the whole household, then serve each person their share. Cooked rice is roughly three times its dry volume and beans about two and a half times, so the cooked amounts below are close, not exact.</p>
+    <p>Each day, cook <strong>${esc(c.rice)}</strong> and <strong>${esc(c.beans)}</strong> ${esc(c.rest)}</p>
     <div class="table-scroll"><table class="data">
-      <thead><tr><th scope="col">Person</th><th scope="col">Cooked rice</th><th scope="col">Cooked beans</th><th scope="col">Oats</th></tr></thead>
-      <tbody>${rowsHtml}</tbody>
+      <thead><tr>${c.head.map((h) => `<th scope="col">${h}</th>`).join("")}</tr></thead>
+      <tbody>${c.rows.map(([name, ...cells]) => `<tr><th scope="row">${esc(name)}</th>${cells.map((x) => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody>
     </table></div>
-    ${milkBits.length ? `<p>Mix ${milkBits.join(" and ")} a day.</p>` : ""}
-    <p class="muted">Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.</p>
+    ${c.milk ? `<p>${esc(c.milk)}</p>` : ""}
+    <p class="muted">${esc(COOK_NOTE)}</p>
   </section>`;
 }
 
-function shoppingSection(hh) {
-  const groups = [["Costco", "Costco warehouse trip"], ["Amazon", "Amazon order"]];
-  const tables = groups.map(([store, title]) => {
-    const lines = hh.lines.filter((l) => l.store === store);
-    if (!lines.length) return "";
-    const body = lines.map((l) => `
+function shopTable(lines) {
+  const body = lines.map((l) => `
       <tr>
         <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a></th>
         <td>${esc(l.pack)}</td>
         <td class="num">${l.qty}</td>
         <td>${esc(l.amountText)}</td>
-        <td class="num">${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)} each</small>` : ""}</td>
+        <td class="num">${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)}</small>` : ""}</td>
       </tr>`).join("");
-    return `
-    <h3 class="sub-title">${title} <span class="sub-total">${money(hh.byStore[store] || 0)}</span></h3>
+  return `
     <div class="table-scroll"><table class="data shop">
       <thead><tr><th scope="col">Item</th><th scope="col">Buy</th><th scope="col" class="num">How many</th><th scope="col">Covers</th><th scope="col" class="num">Cost</th></tr></thead>
       <tbody>${body}</tbody>
     </table></div>`;
-  }).join("");
+}
 
-  const beans = hh.lines.find((l) => l.key === "beans");
-  const milk = hh.lines.find((l) => l.key === "milk");
-  const notes = [
-    `Costco prices are warehouse prices and vary a little by location. The total leaves out the ${money(COSTCO_MEMBERSHIP)} Costco membership.`,
-    "Amazon's Subscribe &amp; Save takes about 15% off the beans, peanut butter and oil. You can cancel after the first delivery.",
-  ];
-  if (beans && beans.qty > 40) notes.push(`That's ${beans.qty} one-pound bags of beans. Amazon may limit how many fit in one order, so split it up if needed. If your Costco stocks 25-lb pinto bags ($17–21 where sold), those cost less.`);
-  if (milk && milk.qty >= 3) notes.push("Costco's Saco Mix'n Drink 8-lb bag of nonfat dry milk makes 40 quarts for about $35.49–35.99 where it's stocked, which is cheaper per cup than the Amazon bag.");
-  notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag per bucket. The list assumes about ${LB_PER_BUCKET} lb per bucket.`);
-
+function shoppingSection(hh) {
+  const tables = storeGroups(hh).map((g) => `
+    <h3 class="sub-title">${esc(g.title)} <span class="sub-total">${money(g.total)}</span></h3>
+    ${shopTable(g.lines)}`).join("");
   return `
   <section class="block shopping" aria-labelledby="shop-title">
     <h2 id="shop-title" class="section-title">Shopping list</h2>
-    <p class="shop-summary">Everything for ${hh.plans.length} ${hh.plans.length === 1 ? "person" : "people"} for ${hh.months} month${hh.months > 1 ? "s" : ""}${hh.reservePct ? `, plus a ${hh.reservePct}% margin` : ""}: <strong>${money(hh.total)}</strong>.</p>
+    <p class="shop-summary">${esc(shoppingLead(hh))}: <strong>${money(hh.total)}</strong>.</p>
+    <p class="shop-compare">${esc(compareText(hh))} <button type="button" class="btn-link" data-switch-store>${hh.store === "costco" ? "Show the Walmart list" : "Show the Costco list"}</button></p>
     ${tables}
-    <ul class="notes">${notes.map((n) => `<li>${n}</li>`).join("")}</ul>
+    <ul class="notes">${shoppingNotes(hh).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+  </section>`;
+}
+
+function gearSection(hh) {
+  const items = gearItems(hh).map((it) => `
+    <article class="gear-item">
+      <h3 class="gear-title">${esc(it.title)}</h3>
+      <p class="gear-buy">${esc(it.buy)}</p>
+      <p class="gear-links">${it.links.length > 1 ? "On Amazon: " : ""}${it.links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join(", ")}</p>
+      <p><strong>How long it lasts:</strong> ${esc(it.lasts)}</p>
+      ${it.drink ? `<p><strong>How much to drink:</strong> ${esc(it.drink)}</p>` : ""}
+      <ul class="plain">${it.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
+      ${it.packs ? `<p class="muted">${esc(it.packs)}</p>` : ""}
+    </article>`).join("");
+  return `
+  <section class="block gear" aria-labelledby="gear-title">
+    <h2 id="gear-title" class="section-title">Fire and water</h2>
+    <p>Food only helps if you can cook it and drink safely. These three cover a flame, clean drinking water and firewood. They're on the shopping list above; tick them off under "Already have" if you own them.</p>
+    <div class="gear-grid">${items}</div>
   </section>`;
 }
 
@@ -283,36 +243,23 @@ function rulesSection(hh) {
   return `
   <section class="block" aria-labelledby="rules-title">
     <h2 id="rules-title" class="section-title">Weekly weigh-in</h2>
-    <p>The calorie numbers are estimates. The bathroom scale tells you what's really happening, so weigh at the same time each week, after the same morning routine, and adjust.</p>
+    <p>${esc(WEIGH_INTRO)}</p>
     ${hasAdults ? `
     <div class="table-scroll"><table class="data rules">
       <thead><tr><th scope="col">If you're</th><th scope="col">And the scale shows</th><th scope="col">Do this</th></tr></thead>
-      <tbody>
-        <tr><td>Losing weight</td><td>More than 2 lb lost in a week, after week 2</td><td>Add ¼ cup of rice a day</td></tr>
-        <tr><td>Losing weight</td><td>Less than ½ lb lost in a week, after week 4</td><td>Remove ¼ cup of rice, but never go below the lowest amount on your card</td></tr>
-        <tr><td>Losing weight</td><td>You're within a pound or two of your goal</td><td>Switch to the hold amounts on your card</td></tr>
-        <tr><td>Holding weight</td><td>Still losing</td><td>Add ¼ cup of rice each week until your weight holds</td></tr>
-        <tr><td>Holding weight</td><td>Gaining</td><td>Remove ¼ cup of rice</td></tr>
-      </tbody>
+      <tbody>${WEIGH_RULES.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>
     </table></div>` : ""}
-    ${hasKids ? `<p>Weigh children every two weeks. For a child too small to stand on the scale, weigh yourself holding them and subtract your own weight. Children should hold steady or gain. If a child loses weight, add 2 tablespoons of rice or another ½ cup of milk a day.</p>` : ""}
+    ${hasKids ? `<p>${esc(WEIGH_KIDS)}</p>` : ""}
   </section>`;
 }
+
+const leadList = (items) => `<ul class="plain">${items.map((it) => `<li><strong>${esc(it.lead)}:</strong> ${esc(it.text)}</li>`).join("")}</ul>`;
 
 function careSection() {
   return `
   <section class="block" aria-labelledby="care-title">
     <h2 id="care-title" class="section-title">Cooking and storage</h2>
-    <ul class="plain">
-      <li><strong>Beans:</strong> soak overnight in plenty of water (10 cups per 2 cups of beans), drain, then cook in fresh water. Boil hard for at least 10 minutes, 30 to be safe, before simmering 1½–2 hours. A pressure cooker saves a lot of fuel.</li>
-      <li><strong>Start the beans now:</strong> build up to each person's full amount over two to three weeks so stomachs can adjust.</li>
-      <li><strong>Rice:</strong> don't rinse it. Rinsing washes off the added iron and B vitamins.</li>
-      <li><strong>Water and fuel:</strong> plan on about 3 quarts of cooking water per adult per day, plus drinking water and enough fuel to boil it.</li>
-      <li><strong>Vitamins every day:</strong> rice and beans have no vitamin C, and scurvy can start after about four weeks without it. Keep the vitamin C bottle as a backup.</li>
-      <li><strong>Keep your muscle:</strong> push-ups, squats and lunges two or three times a week help anyone who is losing weight hold onto muscle.</li>
-      <li><strong>Storage:</strong> rice and beans sealed in mylar with an oxygen absorber keep for decades. Oil, peanut butter, oats, dry milk and vitamins keep about a year, so replace them yearly.</li>
-      <li><strong>Print this page:</strong> a phone or laptop won't help once the batteries die.</li>
-    </ul>
+    ${leadList(CARE)}
   </section>`;
 }
 
@@ -320,26 +267,19 @@ function aboutSection() {
   return `
   <section class="block about" aria-labelledby="about-title">
     <h2 id="about-title" class="section-title">How the numbers are worked out</h2>
-    <ul class="plain">
-      <li><strong>Healthy weight:</strong> adults above the CDC's healthy range (BMI 18.5–24.9) are planned down to BMI 24.4, the top of that range. Below it, they're planned up to BMI 18.5.</li>
-      <li><strong>Adult calories:</strong> the Mifflin-St Jeor equation times an activity factor. Weight-loss rations are 500 calories below maintenance and never under 1,500 for men or 1,200 for women.</li>
-      <li><strong>Children:</strong> the National Academies' 2023 energy equations, with no weight loss. Under-2s get whole milk, and milk amounts follow the American Academy of Pediatrics.</li>
-      <li><strong>Pregnancy and breastfeeding:</strong> no weight loss, about 350 extra calories when pregnant and 400 when breastfeeding.</li>
-      <li><strong>Shopping list:</strong> a day-by-day weight model for each adult that follows the weekly weigh-in rules, plus the margin you chose, rounded up to whole packages.</li>
-      <li><strong>Food values:</strong> USDA data for rice, beans and peanut butter, and package labels for oats and milk.</li>
-    </ul>
-    <p class="sources">Sources:
-      <a href="https://www.cdc.gov/bmi/adult-calculator/calculator.html" target="_blank" rel="noopener">CDC adult BMI</a>,
-      <a href="https://www.nationalacademies.org/read/26818/chapter/2" target="_blank" rel="noopener">National Academies energy equations (2023)</a>,
-      <a href="https://www.health.harvard.edu/staying-healthy/calorie-deficit-explained-is-it-a-safe-sustainable-approach-to-weight-loss" target="_blank" rel="noopener">Harvard Health on calorie deficits</a>,
-      <a href="https://healthychildren.org/English/healthy-living/nutrition/Pages/recommended-drinks-for-young-children-ages-0-5.aspx" target="_blank" rel="noopener">AAP drinks for young children</a>,
-      <a href="https://tools.myfooddata.com/nutrition-facts/175199/wt1" target="_blank" rel="noopener">USDA pinto beans</a>,
-      <a href="https://tools.myfooddata.com/nutrition-comparison/168877/wt1" target="_blank" rel="noopener">USDA rice</a>,
-      <a href="https://cfaes.osu.edu/news/articles/chow-line-dry-kidney-beans-need-be-boiled" target="_blank" rel="noopener">Ohio State on boiling beans</a>,
-      <a href="https://extension.umaine.edu/food-health/2021/09/02/how-to-store-and-cook-dried-beans/" target="_blank" rel="noopener">University of Maine on dried beans</a>.
-    </p>
-    <p class="muted">These are estimates for healthy people, not medical advice. Anyone with a medical condition, a pregnancy or a daily medication should check with a doctor before starting a weight-loss ration.</p>
+    ${leadList(ABOUT)}
+    <p class="sources">Sources: ${SOURCES.map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>`).join(", ")}.</p>
+    <p class="muted">${esc(DISCLAIMER)}</p>
   </section>`;
+}
+
+function reportActions(where) {
+  return `
+    <div class="report-actions" data-where="${where}">
+      <button type="button" class="btn" data-print>Print the full report</button>
+      <button type="button" class="btn btn-quiet" data-pdf>Download PDF</button>
+      <span class="pdf-status" role="status" aria-live="polite"></span>
+    </div>`;
 }
 
 let renderTimer = null;
@@ -350,7 +290,11 @@ function scheduleRender() {
 
 function renderResults() {
   const people = state.people.map(toPerson);
-  const hh = planHousehold({ months: state.months, reservePct: state.reserve, hasScale: state.hasScale, people });
+  const hh = planHousehold({
+    months: state.months, reservePct: state.reserve, store: state.store, people,
+    owned: { scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe },
+  });
+  lastHousehold = hh;
   const el = $("#results");
   if (!hh.plans.length) {
     el.innerHTML = `<div class="empty"><p>Fill in sex, age, height and weight for at least one person, and the daily amounts and shopping list will appear here.</p></div>`;
@@ -359,20 +303,75 @@ function renderResults() {
   const incomplete = hh.invalidCount > 0
     ? `<p class="incomplete">${hh.invalidCount} ${hh.invalidCount === 1 ? "person isn't" : "people aren't"} included yet. Finish their details above.</p>` : "";
   el.innerHTML = `
+    <div class="print-meta">
+      <p>${esc(planSummary(hh))} Made ${todayText()} at ${SITE_URL.replace("https://", "")}. Prices checked ${PRICES_CHECKED}.</p>
+    </div>
     <div class="results-head">
       <h2 class="section-title">Daily amounts</h2>
-      <button type="button" class="btn" id="print">Print cards and shopping list</button>
+      ${reportActions("top")}
     </div>
     ${incomplete}
     <p class="results-intro">Measure dry food with level cups and spoons. Each card shows one person's day.</p>
     <div class="cards">${hh.plans.map((pl) => card(pl, hh)).join("")}</div>
     ${cookingSection(hh)}
     ${shoppingSection(hh)}
+    ${gearSection(hh)}
     ${rulesSection(hh)}
     ${careSection()}
     ${aboutSection()}
+    <div class="report-foot">
+      <p>Keep a paper copy. Print the whole report, or save it as a PDF to print later.</p>
+      ${reportActions("bottom")}
+    </div>
   `;
-  $("#print").addEventListener("click", () => window.print());
+}
+
+// ---------- print and PDF ----------
+
+let lastHousehold = null;
+let pdfLib = null;
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error(`Couldn't load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+
+async function loadPdfLib() {
+  if (!pdfLib) {
+    pdfLib = (async () => {
+      await loadScript("vendor/pdfmake/pdfmake.min.js");
+      await loadScript("vendor/pdfmake/vfs_fonts.js");
+      return window.pdfMake;
+    })();
+    pdfLib.catch(() => { pdfLib = null; });
+  }
+  return pdfLib;
+}
+
+async function downloadPdf(button) {
+  if (!lastHousehold || !lastHousehold.plans.length) return;
+  const status = button.parentElement.querySelector(".pdf-status");
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = "Making the PDF…";
+  status.textContent = "";
+  try {
+    const [pdfMake, { buildPdf }] = await Promise.all([loadPdfLib(), import("./pdf.js")]);
+    const doc = buildPdf(lastHousehold, { date: todayText() });
+    await pdfMake.createPdf(doc).download(`prep-plan-${new Date().toISOString().slice(0, 10)}.pdf`);
+    status.textContent = "PDF downloaded.";
+  } catch (err) {
+    console.error(err);
+    status.textContent = "The PDF didn't download. Use Print the full report and choose Save as PDF instead.";
+  } finally {
+    button.disabled = false;
+    button.textContent = label;
+  }
 }
 
 // ---------- events ----------
@@ -382,11 +381,31 @@ function init() {
   $("#months").innerHTML = Array.from({ length: 12 }, (_, i) => i + 1)
     .map((m) => `<option value="${m}"${m === Number(state.months) ? " selected" : ""}>${m} month${m > 1 ? "s" : ""}</option>`).join("");
   $("#reserve").value = String(state.reserve);
-  $("#has-scale").checked = !!state.hasScale;
+  $("#store").innerHTML = Object.entries(STORE_PLANS)
+    .map(([k, sp]) => `<option value="${k}"${k === state.store ? " selected" : ""}>${sp.choice}</option>`).join("");
+  $("#owned").innerHTML = OWNED.map(([k, label]) =>
+    `<label class="check"><input type="checkbox" data-owned="${k}"${state[k] ? " checked" : ""}><span>${label}</span></label>`).join("");
 
   $("#months").addEventListener("change", (e) => { state.months = Number(e.target.value); save(); scheduleRender(); });
   $("#reserve").addEventListener("change", (e) => { state.reserve = Number(e.target.value); save(); scheduleRender(); });
-  $("#has-scale").addEventListener("change", (e) => { state.hasScale = e.target.checked; save(); scheduleRender(); });
+  $("#store").addEventListener("change", (e) => { state.store = e.target.value; save(); scheduleRender(); });
+  $("#owned").addEventListener("change", (e) => {
+    const k = e.target.dataset.owned;
+    if (!k) return;
+    state[k] = e.target.checked; save(); scheduleRender();
+  });
+
+  $("#results").addEventListener("click", (e) => {
+    if (e.target.closest("[data-print]")) window.print();
+    const pdfBtn = e.target.closest("[data-pdf]");
+    if (pdfBtn) downloadPdf(pdfBtn);
+    if (e.target.closest("[data-switch-store]")) {
+      state.store = state.store === "costco" ? "walmart" : "costco";
+      $("#store").value = state.store;
+      save(); renderResults();
+      $("#shop-title")?.scrollIntoView({ block: "start" });
+    }
+  });
 
   const people = $("#people");
   people.addEventListener("input", (e) => {
