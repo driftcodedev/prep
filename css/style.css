@@ -81,6 +81,20 @@ strong { font-weight: 700; }
 }
 .sub-total { font-variant-numeric: tabular-nums; }
 
+/* ---------- video ---------- */
+
+.video { padding: 1.75rem 0 2.25rem; border-top: 3px solid var(--ink); }
+.video-frame {
+  position: relative;
+  max-width: 52rem;
+  aspect-ratio: 16 / 9;
+  background: var(--ink);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-link { display: none; }
+
 /* ---------- form ---------- */
 
 .setup {
@@ -348,6 +362,10 @@ table.shop { table-layout: fixed; min-width: 38rem; }
   body { background: #fff; font-size: 10.5pt; }
   .setup, .people-actions, .privacy, .intro, .report-actions, .report-foot, .shop-compare .btn-link { display: none !important; }
   .print-meta { display: block; margin: 0 0 6pt; font-size: 9pt; color: var(--ink-2); }
+  .video { padding: 4pt 0 6pt; border-top: 2px solid #000; }
+  .video .section-title { font-size: 12pt; margin: 0; }
+  .video-frame { display: none; }
+  .video-link { display: block; margin: 2pt 0 0; font-size: 9.5pt; }
   .print-meta p { margin: 0; }
   .card-who { font-size: 8pt; }
   .gear-grid { grid-template-columns: 1fr; gap: 8pt; }

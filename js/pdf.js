@@ -3,7 +3,7 @@ import { PRICES_CHECKED } from "./data.js";
 import {
   money, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEO,
 } from "./content.js";
 
 const C = { ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", bean: "#8a4632", beanTint: "#f5e8e1", lidTint: "#ddeaf0" };
@@ -174,7 +174,11 @@ export function buildPdf(hh, { date = "" } = {}) {
         },
       ],
     },
-    { canvas: [{ type: "line", x1: 0, y1: 0, x2: 532, y2: 0, lineWidth: 2, lineColor: C.ink }], margin: [0, 8, 0, 10] },
+    { canvas: [{ type: "line", x1: 0, y1: 0, x2: 532, y2: 0, lineWidth: 2, lineColor: C.ink }], margin: [0, 8, 0, 6] },
+    {
+      text: [{ text: `${VIDEO.title}  `, bold: true }, { text: VIDEO.linkText, link: VIDEO.url, color: C.lid, decoration: "underline" }],
+      margin: [0, 0, 0, 10],
+    },
     h2("Daily amounts", { margin: [0, 0, 0, 2] }),
     para("Measure dry food with level cups and spoons. Each card shows one person's day.", { color: C.ink2, margin: [0, 0, 0, 8] }),
     ...cardsGrid(hh),

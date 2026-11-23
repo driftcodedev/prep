@@ -276,4 +276,10 @@ export const SOURCES = [
 
 export const DISCLAIMER = "These are estimates for healthy people, not medical advice. Anyone with a medical condition, a pregnancy or a daily medication should check with a doctor before starting a weight-loss ration.";
 
+export const VIDEO = {
+  title: "YouTube video: Grid goes down",
+  url: "https://www.youtube.com/watch?v=IvpyouZfdlU",
+  linkText: "youtube.com/watch?v=IvpyouZfdlU",
+};
+
 export const SITE_URL = "https://driftcodedev.github.io/prep/";
