@@ -207,12 +207,21 @@ export function planPerson(p, days) {
     if (nursing) {
       plan.mode = f.pregnant ? "pregnant" : "breastfeeding";
       plan.goalLb = null;
-    } else if (plan.bmi >= 25) {
-      plan.mode = "lose";
-      plan.goalLb = Math.round(weightAtBmi(GOAL_BMI, p.heightIn));
-    } else if (plan.bmi < MIN_BMI) {
-      plan.mode = "gain";
-      plan.goalLb = Math.ceil(weightAtBmi(MIN_BMI, p.heightIn));
+    } else if (plan.bmi >= 25 || plan.bmi < MIN_BMI) {
+      // Outside the healthy range: aim for it by default, or keep the current weight if they chose that.
+      const lose = plan.bmi >= 25;
+      plan.healthyGoal = {
+        mode: lose ? "lose" : "gain",
+        lb: lose ? Math.round(weightAtBmi(GOAL_BMI, p.heightIn)) : Math.ceil(weightAtBmi(MIN_BMI, p.heightIn)),
+      };
+      if (p.keepWeight) {
+        plan.mode = "hold";
+        plan.goalLb = null;
+        plan.keptWeight = true;
+      } else {
+        plan.mode = plan.healthyGoal.mode;
+        plan.goalLb = plan.healthyGoal.lb;
+      }
     } else {
       plan.mode = "hold";
       plan.goalLb = null;
@@ -419,6 +428,7 @@ function warningsFor(plan) {
   if (p.age < 4) w.push("Never give peanut butter by the spoonful to a child under 4. Spread it thin or stir it into the oatmeal.");
   if (p.age >= 2 && p.age < 4) w.push("Crush the chewable vitamin and mix it into food.");
   if (plan.isChild) w.push("Children should never diet. Weigh them every two weeks; if a child loses weight, add rice or another ½ cup of milk.");
+  if (plan.keptWeight && plan.healthyGoal.mode === "gain") w.push(`Below a healthy weight for this height. The plan holds ${Math.round(p.weightLb)} lb, but gaining to ${plan.healthyGoal.lb} lb would give the body some reserve if food runs short.`);
   if (f.pregnant) w.push("Take a prenatal vitamin instead of the regular multivitamin and keep regular checkups. The extra calories here are a rough estimate.");
   if (plan.nursingExtra) {
     w.push("Keep taking a prenatal or women's multivitamin while breastfeeding. Never cut calories to lose weight while nursing. Drink to thirst, and a glass of water at every feed.");

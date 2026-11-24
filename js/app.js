@@ -1,7 +1,7 @@
 import { ACTIVITY, PRICES_CHECKED, STORE_PLANS } from "./data.js";
 import { planHousehold, validatePerson } from "./calc.js";
 import {
-  money, todayText, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
+  money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, GEAR_INTRO,
 } from "./content.js";
@@ -71,6 +71,8 @@ function toPerson(raw, i) {
     activity: raw.activity,
     feeding: raw.feeding || "formula",
     flags: raw.flags || {},
+    keepWeight: !!raw.keepWeight,
+    id: raw.id,
   };
 }
 
@@ -190,6 +192,14 @@ function glyphs(x, kind) {
 
 // ---------- results ----------
 
+function goalToggle(pl) {
+  const g = goalChoice(pl);
+  if (!g) return "";
+  const id = esc(pl.person.id);
+  const btn = (goal, label, on) => `<button type="button" class="goal-btn" data-goal="${goal}" data-goal-id="${id}" aria-pressed="${on}">${esc(label)}</button>`;
+  return `<div class="goal-toggle" role="group" aria-label="Weight goal for ${esc(pl.person.name)}">${btn("healthy", g.healthyLabel, !g.kept)}${btn("keep", g.keepLabel, g.kept)}</div>`;
+}
+
 function card(pl, hh) {
   const p = pl.person;
   const rows = cardRows(pl).map((r) => `
@@ -202,6 +212,7 @@ function card(pl, hh) {
       <h3 class="card-name">${esc(p.name)}</h3>
       <p class="card-status">${esc(statusLine(pl))}</p>
       <p class="card-who">${esc(personSummary(p))}</p>
+      ${goalToggle(pl)}
     </header>
     <p class="card-energy">${esc(cardEnergy(pl))}</p>
     <div class="scoops" role="table" aria-label="${esc(p.name)}'s daily amounts">${rows}</div>
@@ -439,6 +450,16 @@ function init() {
   });
 
   $("#results").addEventListener("click", (e) => {
+    const goalBtn = e.target.closest("[data-goal]");
+    if (goalBtn) {
+      const raw = state.people.find((p) => p.id === goalBtn.dataset.goalId);
+      if (!raw) return;
+      const goal = goalBtn.dataset.goal;
+      raw.keepWeight = goal === "keep";
+      save(); renderResults();
+      $(`[data-goal-id="${CSS.escape(raw.id)}"][data-goal="${goal}"]`)?.focus({ preventScroll: true });
+      return;
+    }
     if (e.target.closest("[data-print]")) window.print();
     const pdfBtn = e.target.closest("[data-pdf]");
     if (pdfBtn) downloadPdf(pdfBtn);

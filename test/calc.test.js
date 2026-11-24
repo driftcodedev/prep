@@ -226,3 +226,37 @@ test("Breastfeeding follows the baby on the list", () => {
   assert.equal(heavy.weaning.after.mode, "lose");
   assert.ok(heavy.sim.endLb < 190);
 });
+
+test("Keep current weight instead of the healthy-weight goal", () => {
+  const dad = { name: "Dad", sex: "male", age: 53, heightIn: 72, weightLb: 215, activity: "light", flags: {} };
+  const healthy = planPerson(dad, 182);
+  assert.equal(healthy.mode, "lose");
+  assert.equal(healthy.goalLb, 180);
+  assert.deepEqual(healthy.healthyGoal, { mode: "lose", lb: 180 });
+
+  const kept = planPerson({ ...dad, keepWeight: true }, 182);
+  assert.equal(kept.mode, "hold");
+  assert.equal(kept.goalLb, null);
+  assert.equal(kept.keptWeight, true);
+  assert.deepEqual(kept.healthyGoal, { mode: "lose", lb: 180 });
+  assert.ok(kept.phase1Kcal > healthy.phase1Kcal + 300);
+  assert.ok(Math.abs(kept.sim.endLb - 215) < 5); // rice rounds up to the next ¼ cup
+
+  // At a healthy weight the switch does nothing and isn't offered.
+  const fit = planPerson({ ...dad, weightLb: 170, keepWeight: true }, 182);
+  assert.equal(fit.mode, "hold");
+  assert.equal(fit.healthyGoal, undefined);
+  assert.equal(fit.keptWeight, undefined);
+
+  // Underweight and keeping weight: allowed, with a note.
+  const thin = planPerson({ ...dad, weightLb: 125, keepWeight: true }, 182);
+  assert.equal(thin.mode, "hold");
+  assert.match(thin.warnings.join(" "), /Below a healthy weight/);
+
+  // A nursing mother holds weight either way; the choice applies after the baby turns 1.
+  const mom = { name: "Jo", sex: "female", age: 30, heightIn: 65, weightLb: 190, activity: "light", flags: { breastfeeding: true } };
+  const kai = { name: "Kai", sex: "male", age: 0.5, heightIn: NaN, weightLb: 16, activity: "light", flags: {}, feeding: "breast" };
+  const jo = (m) => planHousehold({ months: 12, people: [m, kai] }).plans[0];
+  assert.equal(jo(mom).weaning.after.mode, "lose");
+  assert.equal(jo({ ...mom, keepWeight: true }).weaning.after.mode, "hold");
+});

@@ -58,8 +58,21 @@ export function statusLine(pl) {
     case "infant": return `Baby: ${FEEDING[pl.feeding].toLowerCase()} first, no dieting`;
     case "pregnant": return "Pregnant: no weight loss, extra food";
     case "breastfeeding": return "Breastfeeding: no weight loss, extra food";
-    default: return "Hold current weight";
+    default: return pl.keptWeight ? `Keep current weight, ${Math.round(pl.person.weightLb)} lb` : "Hold current weight";
   }
+}
+
+// The weight-goal switch on a card: healthy weight (the default) or keep the current weight.
+// A nursing mother holds weight anyway, so for her it decides what happens after the baby turns 1.
+export function goalChoice(pl) {
+  const src = pl.healthyGoal ? pl : pl.weaning?.after.healthyGoal ? pl.weaning.after : null;
+  if (!src) return null;
+  const g = src.healthyGoal;
+  return {
+    kept: !!src.keptWeight,
+    healthyLabel: `${g.mode === "lose" ? "Lose" : "Gain"} to ${g.lb} lb${src === pl ? "" : " after nursing"}`,
+    keepLabel: `Keep ${Math.round(pl.person.weightLb)} lb`,
+  };
 }
 
 export function milkText(r) {
@@ -374,7 +387,7 @@ export const CARE = [
 ];
 
 export const ABOUT = [
-  { lead: "Healthy weight", text: "Adults above the CDC's healthy range (BMI 18.5–24.9) are planned down to BMI 24.4, the top of that range. Below it, they're planned up to BMI 18.5." },
+  { lead: "Healthy weight", text: "Adults above the CDC's healthy range (BMI 18.5–24.9) are planned down to BMI 24.4, the top of that range. Below it, they're planned up to BMI 18.5. Each card has a switch to keep the current weight instead." },
   { lead: "Adult calories", text: "The Mifflin-St Jeor equation times an activity factor. Weight-loss rations are 500 calories below maintenance and never under 1,500 for men or 1,200 for women." },
   { lead: "Children", text: "The National Academies' 2023 energy equations, with no weight loss. Under-2s get whole milk, and milk amounts follow the American Academy of Pediatrics." },
   { lead: "Babies under 1", text: "Formula at about 2½ fl oz a day per pound, up to 32 oz, following the American Academy of Pediatrics. Iron-fortified infant cereal from 6 months (5, then 7 tablespoons a day) and a little soft food from 8 months. Vitamin D drops (400 IU) for any breastfed baby, and for formula-fed babies drinking under 32 oz. Weight gain follows typical growth, and at the first birthday the toddler ration takes over." },
