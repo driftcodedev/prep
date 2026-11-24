@@ -10,7 +10,8 @@ const LOSS_DEFICIT = 500; // kcal/day below maintenance during weight loss
 const GAIN_SURPLUS = 300; // kcal/day above maintenance for underweight adults
 const CAL_FLOOR = { male: 1500, female: 1200 }; // never plan an adult below this
 const PREGNANCY_EXTRA = 350; // rough 2nd–3rd trimester increase
-const BREASTFEEDING_EXTRA = 400; // NASEM 2023: 540 for milk minus 140 mobilized
+const BREASTFEEDING_EXTRA = 400; // NASEM 2023, first 6 months: 540 for milk minus 140 from her own stores.
+// (7–12 months is 380, which rounds to the same rice.) Half when the baby also gets formula.
 const GOAL_BMI = 24.4; // just inside the top of the healthy range (18.5–24.9)
 const MIN_BMI = 18.5;
 
@@ -23,6 +24,7 @@ export const weightAtBmi = (b, inches) => (b * inches * inches) / 703;
 const roundStep = (x, step) => Math.round(x / step) * step;
 const ceilStep = (x, step) => Math.ceil(x / step - 1e-9) * step;
 const clamp = (x, lo, hi) => Math.min(hi, Math.max(lo, x));
+const listText = (names) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 
 // ---------- energy ----------
 
@@ -95,7 +97,8 @@ export function ageBand(age) {
 // Everything except rice. Rice is added afterwards to reach the calorie target.
 function baseRation(p, phase, refLb) {
   const special = p.flags || {};
-  const nursing = special.pregnant || special.breastfeeding;
+  const nursing = p.sex === "female" && (special.pregnant || special.breastfeeding);
+  const lactating = p.sex === "female" && special.breastfeeding && !special.pregnant;
   let r;
   switch (ageBand(p.age)) {
     case "under2": r = { beans: 0.25, oats: 0.25, pb: 1, oil: 1, milk: 0, whole: 2, salt: 0 }; break;
@@ -106,7 +109,8 @@ function baseRation(p, phase, refLb) {
     default:
       r = {
         // Beans scale with body size: 1 cup at 180 lb, between ½ and 1¼ cups.
-        beans: clamp(roundStep(toKg(refLb) / toKg(180), 0.25), 0.5, 1.25),
+        // Breastfeeding adds ¼ cup for the extra protein.
+        beans: clamp(roundStep(toKg(refLb) / toKg(180), 0.25), 0.5, 1.25) + (lactating ? 0.25 : 0),
         oats: 0.5, pb: 2, oil: phase === "lose" ? 2 : 3, milk: nursing ? 2 : 1, whole: 0, salt: 1,
       };
   }
@@ -139,8 +143,19 @@ function proteinNeed(p, refLb) {
   if (p.age < 4) return 1.05 * kg;
   if (p.age < 14) return 0.95 * kg;
   if (p.age < 18) return 0.85 * kg;
-  if (f.pregnant || f.breastfeeding) return 1.1 * kg;
+  if (p.sex === "female" && f.breastfeeding && !f.pregnant) return 0.8 * kg + 25; // lactation RDA: 25 g more a day
+  if (p.sex === "female" && f.pregnant) return 1.1 * kg;
   return 0.8 * kg;
+}
+
+// Extra calories for pregnancy or breastfeeding. When a breastfed baby is on the list,
+// p.nursing.share says how much of the baby's milk she makes (1 for breast milk only, ½ with formula).
+function nursingExtra(p) {
+  const f = p.flags || {};
+  if (p.sex !== "female") return 0;
+  if (f.pregnant) return PREGNANCY_EXTRA;
+  if (!f.breastfeeding) return 0;
+  return Math.round(BREASTFEEDING_EXTRA * (p.nursing ? p.nursing.share : 1));
 }
 
 // ---------- validation ----------
@@ -171,13 +186,14 @@ export function planPerson(p, days) {
   if (p.age < 1) return planInfant(p, days);
   const f = p.flags || {};
   const isChild = p.age < 18;
+  const extra = nursingExtra(p);
   const plan = {
     person: p, isChild, warnings: [], supplement: supplementFor(p),
     bmi: bmi(p.weightLb, p.heightIn), waterCups: waterCups(p),
   };
 
   if (isChild) {
-    const eer = childEER(p);
+    const eer = childEER(p) + extra;
     const young = p.age < 9;
     plan.mode = "child";
     plan.goalLb = null;
@@ -185,7 +201,7 @@ export function planPerson(p, days) {
     plan.phase1Target = eer;
     plan.proteinNeed = proteinNeed(p, p.weightLb);
   } else {
-    const nursing = f.pregnant ? PREGNANCY_EXTRA : f.breastfeeding ? BREASTFEEDING_EXTRA : 0;
+    const nursing = extra;
     const maintNow = adultMaintenance(p, toKg(p.weightLb)) + nursing;
     const floor = CAL_FLOOR[p.sex];
     if (nursing) {
@@ -230,7 +246,21 @@ export function planPerson(p, days) {
     plan.holdKcal = kcalOf(plan.hold);
     plan.holdProtein = proteinOf(plan.hold);
   }
-  plan.sim = simulate(plan, days);
+  plan.nursingExtra = f.breastfeeding && !f.pregnant ? extra : 0;
+  plan.nursing = plan.nursingExtra ? p.nursing || null : null;
+
+  // Breastfeeding a baby on the list: the extra food stops at the baby's first birthday,
+  // when the baby moves to whole milk, and she goes on to her regular plan.
+  const link = plan.nursing;
+  if (link && link.days < days) {
+    plan.sim = simulate(plan, link.days);
+    const after = planPerson({ ...p, flags: { ...f, breastfeeding: false }, nursing: undefined }, days - link.days);
+    for (const k of Object.keys(plan.sim.totals)) plan.sim.totals[k] += after.sim.totals[k] || 0;
+    plan.sim.endLb = after.sim.endLb;
+    plan.weaning = { days: link.days, after };
+  } else {
+    plan.sim = simulate(plan, days);
+  }
   plan.warnings = warningsFor(plan);
   return plan;
 }
@@ -371,7 +401,12 @@ function warningsFor(plan) {
   const w = [];
   if (plan.isInfant) {
     const m = plan.ageMonths;
-    if (plan.feeding !== "formula") w.push("Breast milk is the safest baby food in an outage: keep breastfeeding as long as you can. Tick Breastfeeding under Special situations on the mother's card so she gets extra food.");
+    if (plan.feeding !== "formula") {
+      const by = p.nursedBy && p.nursedBy.length ? p.nursedBy : null;
+      w.push(`Breast milk is the safest baby food in an outage: keep breastfeeding as long as you can. ${by
+        ? `${listText(by)}'s card includes extra food for breastfeeding.`
+        : "Tick Breastfeeding under Special situations on the mother's card so she gets extra food."}`);
+    }
     if (plan.feeding !== "breast") {
       w.push("Mix powdered formula exactly as the can says, with water boiled for 1 minute. Never add extra water to stretch it.");
       if (m < 2) w.push("Under 2 months old: let the boiled water cool only about 5 minutes, so it's still hot (at least 158°F), before mixing in the powder, then cool the bottle before feeding. The CDC says ready-to-feed liquid formula is safest at this age in an emergency, so keep some on hand if you can.");
@@ -385,7 +420,15 @@ function warningsFor(plan) {
   if (p.age >= 2 && p.age < 4) w.push("Crush the chewable vitamin and mix it into food.");
   if (plan.isChild) w.push("Children should never diet. Weigh them every two weeks; if a child loses weight, add rice or another ½ cup of milk.");
   if (f.pregnant) w.push("Take a prenatal vitamin instead of the regular multivitamin and keep regular checkups. The extra calories here are a rough estimate.");
-  if (f.breastfeeding) w.push("Keep taking a prenatal or women's multivitamin while breastfeeding. Never cut calories to lose weight while nursing.");
+  if (plan.nursingExtra) {
+    w.push("Keep taking a prenatal or women's multivitamin while breastfeeding. Never cut calories to lose weight while nursing. Drink to thirst, and a glass of water at every feed.");
+    const n = p.nursing;
+    if (n && !n.babies.length) {
+      w.push(n.formulaBaby
+        ? "The baby on the list is set to formula only. If she's breastfeeding, set the baby to Breast milk or Both so her extra food matches."
+        : "No baby under 1 is on the list, so she gets the breastfeeding extra for the whole plan. Add the baby to the list and her extra food will follow the baby's age.");
+    }
+  }
   if (f.peanut) w.push("Peanut butter is left out of this ration and replaced with oil. Keep jars and spoons separate.");
   if (f.diabetes) w.push("This plan is heavy in rice. Talk to a doctor before relying on it; more beans and less rice is gentler on blood sugar.");
   if (f.kidney) w.push("Beans and dry milk are high in potassium and phosphorus. Talk to a doctor before relying on this plan.");
@@ -406,8 +449,8 @@ export function waterCups(p) {
   if (p.age < 4) return 4;
   if (p.age < 9) return 5;
   if (p.age < 14) return p.sex === "male" ? 8 : 7;
-  if (f.breastfeeding) return 13;
-  if (f.pregnant) return 10;
+  if (p.sex === "female" && f.breastfeeding && !f.pregnant) return 13;
+  if (p.sex === "female" && f.pregnant) return 10;
   return 8;
 }
 
@@ -450,11 +493,33 @@ export function strawPacks(n, products = PRODUCTS) {
 
 // ---------- household ----------
 
+// Connect breastfeeding mothers to the breastfed babies on the list: her extra food follows
+// how much breast milk the babies get, and lasts until the youngest turns 1.
+export function linkNursing(people) {
+  const babies = people.filter((p) => p.age < 1);
+  const breastfed = babies.filter((p) => p.feeding === "breast" || p.feeding === "both");
+  const moms = people.filter((p) => p.age >= 1 && p.sex === "female" && p.flags?.breastfeeding && !p.flags?.pregnant);
+  if (!moms.length && !breastfed.length) return people;
+  const link = breastfed.length && moms.length
+    ? {
+      share: breastfed.reduce((a, b) => a + (b.feeding === "breast" ? 1 : 0.5), 0) / moms.length,
+      days: Math.max(...breastfed.map((b) => Math.max(1, Math.round((12 - b.age * 12) * 30.4)))),
+      babies: breastfed.map((b) => ({ name: b.name, feeding: b.feeding })),
+    }
+    : { share: 1, days: Infinity, babies: [], formulaBaby: babies.length > 0 };
+  const momNames = moms.map((m) => m.name);
+  return people.map((p) => {
+    if (moms.includes(p)) return { ...p, nursing: link };
+    if (breastfed.includes(p)) return { ...p, nursedBy: momNames };
+    return p;
+  });
+}
+
 export function planHousehold({ months, reservePct = 20, store = "costco", owned = {}, hasScale = false, people }) {
   const days = Math.round(months * 30.4);
   const reserve = 1 + reservePct / 100;
   const valid = people.filter((p) => validatePerson(p).length === 0);
-  const plans = valid.map((p) => planPerson(p, days));
+  const plans = linkNursing(valid).map((p) => planPerson(p, days));
   const have = { scale: hasScale, ...owned };
 
   const sum = { rice: 0, beans: 0, oats: 0, pb: 0, oil: 0, milk: 0, whole: 0, salt: 0, formula: 0, cereal: 0 };

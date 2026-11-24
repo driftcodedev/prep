@@ -182,3 +182,47 @@ test("A 9-month-old switches to the toddler ration at the first birthday", () =>
   assert.ok(pl.sim.totals.whole > 150); // whole milk after age 1
   assert.ok(pl.sim.suppByKey.dropsD > 80 && pl.sim.suppByKey.drops > 80);
 });
+
+test("Breastfeeding follows the baby on the list", () => {
+  const mom = { name: "Jo", sex: "female", age: 30, heightIn: 65, weightLb: 150, activity: "light", flags: { breastfeeding: true } };
+  const baby = (age, feeding, weightLb = 10) => ({ name: "Kai", sex: "male", age, heightIn: NaN, weightLb, activity: "light", flags: {}, feeding });
+  const jo = (people, months = 6) => planHousehold({ months, people }).plans.find((p) => p.person.name === "Jo");
+
+  // No baby on the list: the full 400 for the whole plan, with a note saying so.
+  const alone = jo([mom]);
+  assert.equal(alone.nursingExtra, 400);
+  assert.equal(alone.weaning, undefined);
+  assert.match(alone.warnings.join(" "), /No baby under 1 is on the list/);
+  // Enough protein: 25 g over her usual need, covered by the extra ¼ cup of beans.
+  assert.ok(Math.abs(alone.proteinNeed - (0.8 * 150 * 0.45359237 + 25)) < 0.01);
+  assert.ok(alone.phase1Protein >= alone.proteinNeed);
+
+  // Breast milk only: full extra. Breast milk and formula: half.
+  assert.equal(jo([mom, baby(0, "breast")]).nursingExtra, 400);
+  const both = jo([mom, baby(0, "both")]);
+  assert.equal(both.nursingExtra, 200);
+  assert.ok(both.phase1Protein >= both.proteinNeed);
+
+  // A 9-month-old turns 1 three months in: her extra stops and the shopping list shrinks.
+  const nine = jo([mom, baby(0.75, "breast", 18)]);
+  assert.equal(nine.weaning.days, 91);
+  assert.equal(nine.weaning.after.mode, "hold");
+  assert.ok(nine.weaning.after.phase1Kcal < nine.phase1Kcal - 300);
+  assert.ok(nine.sim.totals.rice < alone.sim.totals.rice);
+
+  // A formula-fed baby doesn't change her plan, but she's told why.
+  assert.match(jo([mom, baby(0, "formula")]).warnings.join(" "), /set to formula only/);
+
+  // The baby's card names the mother once she's ticked.
+  const hh = planHousehold({ months: 6, people: [mom, baby(0, "breast")] });
+  assert.match(hh.plans[1].warnings[0], /Jo's card includes extra food/);
+  const unticked = planHousehold({ months: 6, people: [{ ...mom, flags: {} }, baby(0, "breast")] });
+  assert.match(unticked.plans[1].warnings[0], /Tick Breastfeeding/);
+  assert.equal(unticked.plans[0].nursingExtra, 0);
+
+  // An overweight mother holds weight while nursing, then loses after the baby turns 1.
+  const heavy = planHousehold({ months: 12, people: [{ ...mom, weightLb: 190 }, baby(0.5, "breast", 16)] }).plans[0];
+  assert.equal(heavy.mode, "breastfeeding");
+  assert.equal(heavy.weaning.after.mode, "lose");
+  assert.ok(heavy.sim.endLb < 190);
+});

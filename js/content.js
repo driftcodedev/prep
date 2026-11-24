@@ -116,8 +116,13 @@ export function cardEnergy(pl) {
     if (pl.feeding === "breast") return "Feed on demand. Babies grow fast, so expect them to want more each month.";
     return `Formula goes by weight: about 2½ fl oz a day per pound, up to 32 oz. The shopping list follows the baby's growth, up to about ${peak} fl oz a day.`;
   }
-  return `About ${num(pl.phase1Kcal)} calories and ${num(pl.phase1Protein)} g of protein a day. Needs at least ${num(pl.proteinNeed)} g of protein.`;
+  const nursing = pl.nursingExtra
+    ? `, including about ${num(pl.nursingExtra)} for breastfeeding${pl.nursing && pl.nursing.share < 1 ? " (half, since the baby also gets formula)" : ""},`
+    : "";
+  return `About ${num(pl.phase1Kcal)} calories${nursing} and ${num(pl.phase1Protein)} g of protein a day. Needs at least ${num(pl.proteinNeed)} g of protein.`;
 }
+
+const namesText = (names) => names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
 
 export function cardNotes(pl, hh) {
   const notes = [];
@@ -129,6 +134,14 @@ export function cardNotes(pl, hh) {
   }
   const after = (weeks) => `Expected to reach ${pl.goalLb} lb in about ${weeks} weeks.`;
   const end = `Expected weight after ${plural(hh.months, "month")}: about ${Math.round(pl.sim.endLb)} lb.`;
+  if (pl.weaning) {
+    const w = pl.weaning.after;
+    const babies = pl.nursing.babies.map((b) => b.name);
+    const months = Math.max(1, Math.round(pl.weaning.days / 30.4));
+    notes.push(`When ${namesText(babies)} ${babies.length > 1 ? "turn" : "turns"} 1, in about ${plural(months, "month")}, the baby moves to whole milk and her extra food stops: ${cupsText(w.phase1.rice)} of rice and ${cupsText(w.phase1.beans)} of beans a day${w.mode === "lose" ? `, losing toward ${w.goalLb} lb` : ""}. The shopping list already includes this.`);
+    notes.push("If she keeps nursing past 1, the toddler drinks less of the whole milk, so she can have what's left over.");
+    if (w.mode === "lose" || w.mode === "gain") notes.push(end);
+  }
   if (pl.mode === "lose" || pl.mode === "gain") {
     notes.push(`At ${pl.goalLb} lb, switch to ${cupsText(pl.hold.rice)} of rice and ${spoonText(pl.hold.oil, "tbsp")} of oil, about ${num(pl.holdKcal)} calories.`);
   }
@@ -365,7 +378,7 @@ export const ABOUT = [
   { lead: "Adult calories", text: "The Mifflin-St Jeor equation times an activity factor. Weight-loss rations are 500 calories below maintenance and never under 1,500 for men or 1,200 for women." },
   { lead: "Children", text: "The National Academies' 2023 energy equations, with no weight loss. Under-2s get whole milk, and milk amounts follow the American Academy of Pediatrics." },
   { lead: "Babies under 1", text: "Formula at about 2½ fl oz a day per pound, up to 32 oz, following the American Academy of Pediatrics. Iron-fortified infant cereal from 6 months (5, then 7 tablespoons a day) and a little soft food from 8 months. Vitamin D drops (400 IU) for any breastfed baby, and for formula-fed babies drinking under 32 oz. Weight gain follows typical growth, and at the first birthday the toddler ration takes over." },
-  { lead: "Pregnancy and breastfeeding", text: "No weight loss, about 350 extra calories when pregnant and 400 when breastfeeding." },
+  { lead: "Pregnancy and breastfeeding", text: "No weight loss while pregnant or nursing. Pregnancy adds about 350 calories. Breastfeeding adds about 400 calories (the National Academies' 2023 figure: about 540 for the milk, minus 140 from her own stores), 25 g of protein (¼ cup more beans) and more water. When a breastfed baby is on the list, her extra follows the baby: half if the baby also gets formula, and it stops at the baby's first birthday, when the baby moves to whole milk and she goes back to her regular plan." },
   { lead: "Drinking water", text: "At least ½ gallon a day for teens and adults, the emergency guideline from the CDC and state health departments. Young children, pregnancy and breastfeeding use the National Academies' intake from drinks, milk included." },
   { lead: "Shopping list", text: "A day-by-day weight model for each adult that follows the weekly weigh-in rules, plus the margin you chose, rounded up to whole packages." },
   { lead: "Food values", text: "USDA data for rice, beans and peanut butter, and package labels for oats and milk." },
@@ -374,6 +387,7 @@ export const ABOUT = [
 export const SOURCES = [
   ["CDC adult BMI", "https://www.cdc.gov/bmi/adult-calculator/calculator.html"],
   ["National Academies energy equations (2023)", "https://www.nationalacademies.org/read/26818/chapter/2"],
+  ["Nutrient needs while breastfeeding (University of Washington)", "https://depts.washington.edu/pwdlearn/revfirststeps/pdfs/5nutrientstable.pdf"],
   ["Harvard Health on calorie deficits", "https://www.health.harvard.edu/staying-healthy/calorie-deficit-explained-is-it-a-safe-sustainable-approach-to-weight-loss"],
   ["AAP drinks for young children", "https://healthychildren.org/English/healthy-living/nutrition/Pages/recommended-drinks-for-young-children-ages-0-5.aspx"],
   ["USDA pinto beans", "https://tools.myfooddata.com/nutrition-facts/175199/wt1"],

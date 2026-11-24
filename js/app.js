@@ -122,6 +122,7 @@ function personFieldset(raw, i) {
         <label class="sub-field" data-baby${isBaby ? "" : " hidden"}><span class="field-label">How the baby is fed</span>
           <select data-k="feeding">${options(FEEDS, raw.feeding || "formula")}</select>
           <span class="field-hint">Formula goes by weight, so height is optional for babies.</span></label>
+        <p class="field-hint nurse-hint" data-nurse-hint aria-live="polite" hidden></p>
       </div>
     </div>
     <div class="person-foot">
@@ -130,6 +131,18 @@ function personFieldset(raw, i) {
     </div>
     <p class="person-error" data-error></p>
   </fieldset>`;
+}
+
+// Under a breastfed baby: point to the mother's card, or offer to mark her as breastfeeding.
+function nurseHint(raw) {
+  if (raw.age !== "0" || !["breast", "both"].includes(raw.feeding)) return "";
+  const name = (p) => esc(p.name.trim() || `Person ${state.people.indexOf(p) + 1}`);
+  const women = state.people.filter((p) => p !== raw && p.sex === "female" && Number(p.age) >= 12);
+  const nursing = women.filter((p) => p.flags?.breastfeeding && !p.flags?.pregnant);
+  if (nursing.length) return `${nursing.map(name).join(" and ")} ${nursing.length > 1 ? "get" : "gets"} extra food for breastfeeding.`;
+  const moms = women.filter((p) => Number(p.age) <= 55);
+  if (!moms.length) return "The mother needs extra food while breastfeeding. Add her to the list and tick Breastfeeding under her Special situations.";
+  return `The mother needs extra food while breastfeeding: ${moms.map((p) => `<button type="button" class="btn-link" data-nurse="${p.id}">Mark ${name(p)} as breastfeeding</button>`).join(" or ")}`;
 }
 
 function renderPeople() {
@@ -145,6 +158,10 @@ function updateErrors() {
     const errs = touched ? validatePerson(toPerson(raw, i)) : [];
     $("[data-error]", fs).textContent = errs.join(" ");
     $(".person-legend", fs).textContent = raw.name.trim() || `Person ${i + 1}`;
+    const hint = $("[data-nurse-hint]", fs);
+    const html = nurseHint(raw);
+    if (hint.innerHTML !== html) hint.innerHTML = html;
+    hint.hidden = !html;
   });
 }
 
@@ -455,6 +472,13 @@ function init() {
     scheduleRender();
   });
   people.addEventListener("click", (e) => {
+    const nurseId = e.target.closest("[data-nurse]")?.dataset.nurse;
+    if (nurseId) {
+      const mom = state.people.find((p) => p.id === nurseId);
+      if (mom) mom.flags = { ...mom.flags, breastfeeding: true };
+      save(); renderPeople(); scheduleRender();
+      return;
+    }
     const id = e.target.dataset?.remove;
     if (!id) return;
     state.people = state.people.filter((p) => p.id !== id);
