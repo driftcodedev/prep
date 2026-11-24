@@ -438,3 +438,8 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 .pot-sizes tr.pick th, .pot-sizes tr.pick td { background: var(--lid-tint); font-weight: 700; }
 .pot-sizes tr.pick th:first-child { padding-left: 0.5rem; }
 .pot-sizes th small { display: block; color: var(--lid); font-size: 0.8rem; font-weight: 700; }
+
+/* All in one pot */
+ol.steps { margin: 0.5rem 0 1rem; padding-left: 1.5rem; max-width: 44rem; }
+ol.steps li { margin: 0.4rem 0; padding-left: 0.25rem; }
+table.serve { max-width: 26rem; }

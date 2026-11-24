@@ -135,7 +135,7 @@ test("PDF definition covers the whole report and avoids missing glyphs", () => {
   const hh = planHousehold({ months: 6, people: [brett, { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }] });
   const doc = buildPdf(hh, { date: "November 23, 2026" });
   const text = JSON.stringify(doc.content);
-  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "Shopping list", "Fire, water and cooking", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
+  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "All in one pot", "Shopping list", "Fire, water and cooking", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
     assert.ok(text.includes(heading), heading);
   }
   assert.ok(!/[⅓⅔]/.test(text));
@@ -309,4 +309,27 @@ test("Camp Dutch oven is sized to the household", () => {
   // Babies who eat nothing from the pot don't count.
   const baby = { name: "B", sex: "male", age: 0, heightIn: NaN, weightLb: 9, activity: "light", flags: {}, feeding: "formula" };
   assert.equal(planHousehold({ months: 6, people: [adult(1), adult(2), baby] }).pot.qt, 5);
+});
+
+test("All in one pot: shares follow each card's calories and add up", () => {
+  const people = [
+    { name: "Sam", sex: "male", age: 34, heightIn: 70, weightLb: 210, activity: "light", flags: {} },
+    { name: "Jo", sex: "female", age: 33, heightIn: 65, weightLb: 150, activity: "light", flags: {} },
+    { name: "Leo", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} },
+    { name: "Baby", sex: "female", age: 0.25, heightIn: NaN, weightLb: 12, activity: "light", flags: {}, feeding: "formula" },
+  ];
+  const hh = planHousehold({ months: 6, people });
+  const o = hh.onePot;
+  // A 3-month-old eats nothing from the pot.
+  assert.deepEqual(o.servings.map((s) => s.name), ["Sam", "Jo", "Leo"]);
+  assert.equal(o.servings.reduce((a, s) => a + s.cups, 0), o.cups);
+  assert.equal(o.cups, Math.round((hh.cook.rice * 3 + hh.cook.beans * 2.5 + hh.cook.oats * 2) * 4) / 4);
+  // Each share is within ¼ cup of that person's calories as a fraction of the pot.
+  const kcal = (pl) => pl.phase1.rice * 675 + pl.phase1.beans * 670 + pl.phase1.oats * 300;
+  const total = hh.plans.reduce((a, pl) => a + kcal(pl), 0);
+  for (const s of o.servings) {
+    const pl = hh.plans.find((p) => p.person.name === s.name);
+    assert.ok(Math.abs(s.cups - (kcal(pl) / total) * o.cups) <= 0.25, s.name);
+  }
+  assert.equal(o.servings.find((s) => s.name === "Leo").young, true);
 });

@@ -247,6 +247,39 @@ export function cookingData(hh) {
   };
 }
 
+// All the day's beans, rice and oats in one pot, and how much to serve each person.
+export function onePotData(hh) {
+  const c = hh.cook;
+  const o = hh.onePot;
+  if (!o.cups || !c.beans || !c.rice) return null;
+  const W = COOK_WATER;
+  const pot = hh.pot;
+  const steps = [
+    `The night before, soak ${cupsText(c.beans)} of dry beans in ${cupsText(c.beans * W.beansSoak)} of water.`,
+    `Drain the beans and save that water for washing or flushing. Put them in the pot with ${cupsText(c.beans * W.beansCook)} of fresh water and the Pot Minder disc. Hang the pot low and boil hard for 10 minutes on a timer.`,
+    "Raise the pot to a simmer, put the lid on and cook for about 1½ hours. Every 30 minutes, give it a stir and add water so the beans stay covered. Move on when a bean squashes easily against the side of the pot.",
+    `Pour the bean liquid into a bowl, then measure ${cupsText(c.rice * W.rice)} of liquid back into the pot: the bean liquid first, topped up with fresh water.`,
+    `Add ${cupsText(c.rice)} of dry rice, lower the pot to bring it back to a boil and stir once. Put the lid on, raise the pot to a simmer and set a 20-minute timer. Don't lift the lid.`,
+  ];
+  if (c.oats > 0) steps.push(`Stir in ${cupsText(c.oats)} of oats and ${cupsText(c.oats * W.oats)} of water. Simmer about 5 minutes, stirring, until thick.`);
+  steps.push(`Take the pot off the heat, fish out the disc and let it sit for 5 minutes. You'll have about ${fraction(o.cups)} cups.`);
+  const onList = hh.lines.some((l) => l.key === "pot");
+  const fit = !onList
+    ? `Use a pot that holds at least ${num(Math.ceil(o.cups / POT_FILL))} cups, so it's no more than ¾ full.`
+    : o.cups <= pot.fillCups
+      ? `It all fits in the ${pot.qt}-quart pot.`
+      : `That's more than the ${pot.qt}-quart pot holds safely (${fraction(pot.fillCups)} cups), so use two pots or make it twice with half of each amount.`;
+  return {
+    lead: `Rather cook everything together? This makes the whole day's beans, rice and oats in one pot: about 2¼ hours, plus soaking the beans overnight. It comes out thick, like a stew. ${fit}`,
+    steps,
+    servingLead: "Then serve each person this much over the day. The shares follow each person's card by calories, so everyone still gets their planned amount.",
+    head: ["Person", "Serve, cooked"],
+    rows: o.servings.map((s) => [s.name, `${cupsText(s.cups)}${s.young ? ", mashed" : ""}`]),
+    total: ["Whole pot", `about ${fraction(o.cups)} cups`],
+    note: "Keep the pot covered and hot over the coals between meals. Cooked rice left warm for more than 2 hours can make people sick, and heating it up again doesn't make it safe.",
+  };
+}
+
 // ---------- fire and water ----------
 
 export function gearItems(hh) {

@@ -505,7 +505,7 @@ export function strawPacks(n, products = PRODUCTS) {
 // ---------- household ----------
 
 // Cooked volume per cup of dry: rice roughly triples, pinto beans grow about 2½ times.
-const COOKED = { rice: 3, beans: 2.5 };
+const COOKED = { rice: 3, beans: 2.5, oats: 2 };
 
 // Round each part to the nearest step so the parts add up exactly to the rounded total
 // (largest remainders get the leftover steps; ties go to the bigger share).
@@ -580,6 +580,7 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
     riceCooked: riceCooked[i],
     beansCooked: beansCooked[i],
   }));
+  const onePot = onePotFor(plans, cook);
   const eaters = plans.filter((pl) => (pl.phase1.rice || 0) + (pl.phase1.beans || 0) > 0).length;
   const pot = potFor(cook, eaters);
 
@@ -616,7 +617,22 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   return {
     days, months, reservePct, store, plans, invalidCount: people.length - valid.length,
     lines: shop.lines, total: shop.total, byStore: shop.byStore, byGroup: shop.byGroup,
-    buckets, cook, shares, gear, other, pot,
+    buckets, cook, shares, gear, other, pot, onePot,
+  };
+}
+
+// All in one pot: the day's beans, rice and oats cooked together, then shared out by calories,
+// so each person still gets the calories their card plans. Shares are rounded to ¼ cup and add up
+// to the pot's total.
+export function onePotFor(plans, cook) {
+  const kcal = plans.map((pl) => (pl.phase1.rice || 0) * FOODS.rice.kcal + (pl.phase1.beans || 0) * FOODS.beans.kcal + (pl.phase1.oats || 0) * FOODS.oats.kcal);
+  const total = kcal.reduce((a, b) => a + b, 0);
+  const cups = Math.round((cook.rice * COOKED.rice + cook.beans * COOKED.beans + cook.oats * COOKED.oats) * 4) / 4;
+  const split = total ? splitRounded(kcal.map((k) => (k / total) * cups), cups) : kcal.map(() => 0);
+  return {
+    cups,
+    servings: plans.map((pl, i) => ({ name: pl.person.name, cups: split[i], young: pl.person.age < 2 }))
+      .filter((s, i) => kcal[i] > 0),
   };
 }
 

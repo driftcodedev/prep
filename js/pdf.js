@@ -1,7 +1,7 @@
 // Builds the full report as a pdfmake document. Pure: takes the household plan, returns a definition.
 import { PRICES_CHECKED } from "./data.js";
 import {
-  money, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
+  money, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEOS, GEAR_INTRO,
 } from "./content.js";
@@ -106,8 +106,24 @@ function cooking(hh) {
     { text: "Cooking over a fire", style: "h3", margin: [0, 4, 0, 3], headlineLevel: 1 },
     para(c.fireLead),
     bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
-    { stack: [para(c.waterTotal), para(COOK_NOTE, { color: C.ink2 })], unbreakable: true },
+    para(c.waterTotal),
+    ...onePot(hh),
+    para(COOK_NOTE, { color: C.ink2 }),
   ].filter(Boolean);
+}
+
+function onePot(hh) {
+  const d = onePotData(hh);
+  if (!d) return [];
+  return [
+    { stack: [{ text: "All in one pot", style: "h3", margin: [0, 4, 0, 3] }, para(d.lead)], unbreakable: true, headlineLevel: 1 },
+    { ol: d.steps.map((s) => ({ text: t(s), margin: [0, 0, 0, 2] })), margin: [0, 0, 0, 6] },
+    { stack: [
+      para(d.servingLead),
+      dataTable(d.head, [...d.rows, d.total].map(([n, a], i, all) => [{ text: t(n), bold: true }, { text: t(a), bold: i === all.length - 1 }]), [120, "*"]),
+    ], unbreakable: true },
+    para(d.note),
+  ];
 }
 
 function shopping(hh) {

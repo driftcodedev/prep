@@ -1,7 +1,7 @@
 import { ACTIVITY, PRICES_CHECKED, STORE_PLANS } from "./data.js";
 import { planHousehold, validatePerson } from "./calc.js";
 import {
-  money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
+  money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, GEAR_INTRO,
 } from "./content.js";
@@ -245,8 +245,25 @@ function cookingSection(hh) {
     <p>${esc(c.fireLead)}</p>
     <ul class="plain">${c.water.map((w) => `<li><strong>${esc(w.label)}:</strong> ${esc(w.text)}</li>`).join("")}</ul>
     <p>${esc(c.waterTotal)}</p>
+    ${onePotBlock(hh)}
     <p class="muted">${esc(COOK_NOTE)}</p>
   </section>`;
+}
+
+function onePotBlock(hh) {
+  const d = onePotData(hh);
+  if (!d) return "";
+  return `
+    <h3 class="sub-title">All in one pot</h3>
+    <p>${esc(d.lead)}</p>
+    <ol class="steps">${d.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
+    <p>${esc(d.servingLead)}</p>
+    <div class="table-scroll"><table class="data serve">
+      <thead><tr>${d.head.map((h) => `<th scope="col">${esc(h)}</th>`).join("")}</tr></thead>
+      <tbody>${d.rows.map(([n, a]) => `<tr><th scope="row">${esc(n)}</th><td>${esc(a)}</td></tr>`).join("")}</tbody>
+      <tfoot><tr><th scope="row">${esc(d.total[0])}</th><td>${esc(d.total[1])}</td></tr></tfoot>
+    </table></div>
+    <p>${esc(d.note)}</p>`;
 }
 
 function shopTable(lines) {
