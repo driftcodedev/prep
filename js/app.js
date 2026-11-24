@@ -239,6 +239,7 @@ function cookingSection(hh) {
     </table></div>
     ${c.milk ? `<p>${esc(c.milk)}</p>` : ""}
     <h3 class="sub-title">Cooking over a fire</h3>
+    <p>${esc(c.fireLead)}</p>
     <ul class="plain">${c.water.map((w) => `<li><strong>${esc(w.label)}:</strong> ${esc(w.text)}</li>`).join("")}</ul>
     <p>${esc(c.waterTotal)}</p>
     <p class="muted">${esc(COOK_NOTE)}</p>

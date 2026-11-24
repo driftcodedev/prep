@@ -4,7 +4,7 @@ import {
   PRODUCTS, COSTCO_MEMBERSHIP, LB_PER_BUCKET, STORE_PLANS, LIFESTRAW_GALLONS, BIC_LIGHTS,
   STRAW_MIN_AGE, ACTIVITY, BLADDER_WEEKS, COOK_WATER,
 } from "./data.js";
-import { fraction, cupsText, spoonText } from "./calc.js";
+import { fraction, cupsText, spoonText, waterUse } from "./calc.js";
 
 export const money = (x) => x.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
 export const cents = (x) => x.toLocaleString("en-US", { style: "currency", currency: "USD" });
@@ -198,11 +198,16 @@ export function cookingData(hh) {
   const u = hh.gear.use;
   const water = [
     { label: "What a simmer looks like", text: "small, lazy bubbles breaking the surface every second or two, with steam rising. A boil is big bubbles churning the whole pot. Over a fire, bring the pot to a boil over the hottest part, then slide it to the edge, set it higher on a rock or grate, or let the fire burn down to glowing coals. If it starts boiling hard again, move it farther from the heat; if the bubbles stop, move it closer." },
-    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water. Bring it to a boil, put the lid on, move it to a simmer and set a 20-minute timer. It's done when you tilt the pot and no water runs, and the grains are soft. If water is left, give it 5 more minutes; if you smell scorching, take it off the heat. Let it sit off the fire with the lid on for 10 minutes. Nothing gets poured away.` },
-    { label: "Beans", text: `soak ${cupsText(c.beans)} of dry beans overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water and drain; save that water for washing or flushing. Cover with ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, boil hard for at least 10 minutes on a timer, then simmer with the lid on for 1½–2 hours. Check every 30 minutes and add water so the beans stay covered. They're done when a bean squashes easily against the side of the pot and is creamy inside, with no chalky center.` },
+    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water makes about ${cupsText(c.riceCooked)} cooked. Bring it to a boil, put the lid on, move it to a simmer and set a 20-minute timer. It's done when you tilt the pot and no water runs, and the grains are soft. If water is left, give it 5 more minutes; if you smell scorching, take it off the heat. Let it sit off the fire with the lid on for 10 minutes. Nothing gets poured away.` },
+    { label: "Beans", text: `${cupsText(c.beans)} of dry beans makes about ${cupsText(c.beansCooked)} cooked. Soak them overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water and drain; save that water for washing or flushing. Cover with ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, boil hard for at least 10 minutes on a timer, then simmer with the lid on for 1½–2 hours. Check every 30 minutes and add water so the beans stay covered. They're done when a bean squashes easily against the side of the pot and is creamy inside, with no chalky center.` },
     { label: "Oats", text: `${cupsText(c.oats)} of oats in ${cupsText(c.oats * COOK_WATER.oats)} of water. Simmer about 5 minutes, stirring, until thick.` },
   ];
-  if (c.milk + c.whole > 0) water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water for the milk. Use boiled water that has cooled, or water from the waterBOB.` });
+  if (c.milk + c.whole > 0) {
+    const parts = [];
+    if (c.milk > 0) parts.push(`${cupsText(c.milk)} for the nonfat milk`);
+    if (c.whole > 0) parts.push(`${cupsText(c.whole)} for the under-2s' whole milk`);
+    water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water${parts.length > 1 ? `: ${parts.join(" and ")}` : ""}. Use boiled water that has cooled, or water from the waterBOB.` });
+  }
   const formulaOz = hh.plans.reduce((a, pl) => a + (pl.phase1.formula || 0), 0);
   if (formulaOz > 0) water.push({ label: "Formula", text: `about ${num(formulaOz)} fl oz a day takes ${fraction(Math.round(formulaOz * 0.9 / 8 * 4) / 4)} cups of water. Boil it for 1 minute, then mix exactly as the can says. Make one bottle at a time and use it within 2 hours.` });
   water.push({ label: "Save wood", text: "once rice has boiled for a minute, or beans have boiled hard for 10, you can take the lidded pot off the fire and wrap it tightly in a blanket or sleeping bag. It keeps cooking in its own heat with no simmering to watch. Check after an hour for rice and 3 hours for beans; if they're not done, bring them back to a boil and wrap again. Eat it hot." });
@@ -215,9 +220,26 @@ export function cookingData(hh) {
     rows,
     milk: milkBits.length ? `Mix ${milkBits.join(" and ")} a day.` : "",
     water,
+    fireLead: "These amounts are for your whole household for one day: the same totals as the bottom row of the table above.",
     waterTotal: (() => {
-      const [d, k, s] = [u.drink, u.cook, u.soak].map(Math.round);
-      return `All together, your household uses about ${num(d + k + s)} cups (${gallonsText(u.total / 16)}) of water a day: ${d} cups to drink, ${k} for cooking and ${s} to soak the next day's beans.`;
+      // Every part is rounded to ¼ cup and the totals are sums of the parts shown, so it adds up.
+      const q = (x) => Math.round(x * 4) / 4;
+      const drinkers = hh.plans.map((pl) => {
+        const cups = q(waterUse(pl).drink);
+        const milk = !pl.isInfant && pl.person.age < 9 && (pl.phase1.milk || 0) + (pl.phase1.whole || 0) > 0;
+        return { name: pl.person.name, cups, milk };
+      }).filter((x) => x.cups > 0);
+      const cook = [
+        [q(c.rice * COOK_WATER.rice), "rice"], [q(c.beans * COOK_WATER.beansCook), "beans"],
+        [q(c.oats * COOK_WATER.oats), "oats"], [q(c.milk + c.whole), "milk"], [q(formulaOz * 0.9 / 8), "formula"],
+      ].filter(([x]) => x > 0);
+      const d = drinkers.reduce((a, x) => a + x.cups, 0);
+      const k = cook.reduce((a, [x]) => a + x, 0);
+      const s = q(c.beans * COOK_WATER.beansSoak);
+      const list = (items) => items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+      const who = drinkers.map((x) => `${x.name} ${fraction(x.cups)}${x.milk ? " plus milk" : ""}`).join(", ");
+      const what = list(cook.map(([x, food]) => `${fraction(x)} for ${food}`));
+      return `All together, your household uses about ${fraction(d + k + s)} cups (${gallonsText((d + k + s) / 16)}) of water a day: ${fraction(d)} cups to drink (${who}), ${fraction(k)} for cooking (${what}) and ${fraction(s)} to soak the next day's beans.`;
     })(),
   };
 }

@@ -104,6 +104,7 @@ function cooking(hh) {
     }), [90, "*", "*", "*"]),
     c.milk ? para(c.milk) : null,
     { text: "Cooking over a fire", style: "h3", margin: [0, 4, 0, 3], headlineLevel: 1 },
+    para(c.fireLead),
     bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
     { stack: [para(c.waterTotal), para(COOK_NOTE, { color: C.ink2 })], unbreakable: true },
   ].filter(Boolean);
