@@ -2,7 +2,7 @@
 // Plain text only. A "lead" is the bold start of a bullet.
 import {
   PRODUCTS, COSTCO_MEMBERSHIP, LB_PER_BUCKET, STORE_PLANS, LIFESTRAW_GALLONS, BIC_LIGHTS,
-  STRAW_MIN_AGE, ACTIVITY,
+  STRAW_MIN_AGE, ACTIVITY, BLADDER_WEEKS, COOK_WATER,
 } from "./data.js";
 import { fraction, cupsText, spoonText } from "./calc.js";
 
@@ -10,6 +10,17 @@ export const money = (x) => x.toLocaleString("en-US", { style: "currency", curre
 export const cents = (x) => x.toLocaleString("en-US", { style: "currency", currency: "USD" });
 export const num = (x) => Math.round(x).toLocaleString("en-US");
 const plural = (n, one, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+export function gallonsText(g) {
+  if (g < 0.9) return `${fraction(Math.max(0.25, Math.round(g * 4) / 4))} gallon`;
+  const r = Math.round(g * 4) / 4;
+  return `${fraction(r)} gallon${r > 1 ? "s" : ""}`;
+}
+
+export function weeksText(days) {
+  const w = Math.round(days / 7);
+  return w <= 1 ? "about a week" : `about ${w} weeks`;
+}
 
 export function todayText(d = new Date()) {
   return d.toLocaleDateString("en-US", { day: "numeric", month: "long", year: "numeric" });
@@ -104,6 +115,13 @@ export function cookingData(hh) {
   const milkBits = [];
   if (c.milk > 0) milkBits.push(`${fraction(c.milk)} cups of nonfat milk (${cupsText(c.milk / 3)} powder)`);
   if (c.whole > 0) milkBits.push(`${fraction(c.whole)} cups of whole milk for the under-2s (${cupsText(c.whole / 4)} powder)`);
+  const u = hh.gear.use;
+  const water = [
+    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water. Bring it to a boil, cover, and simmer on low about 20 minutes until the water is gone. Nothing gets poured away.` },
+    { label: "Beans", text: `soak ${cupsText(c.beans)} of dry beans overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water, drain, then simmer in ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, topping up if it boils low. Save the soaking water for washing or flushing.` },
+    { label: "Oats", text: `${cupsText(c.oats)} of oats in ${cupsText(c.oats * COOK_WATER.oats)} of water.` },
+  ];
+  if (c.milk + c.whole > 0) water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water for the milk.` });
   return {
     rice: `${cupsText(c.rice)} of dry rice`,
     beans: `${cupsText(c.beans)} of dry beans`,
@@ -111,6 +129,11 @@ export function cookingData(hh) {
     head: ["Person", "Cooked rice", "Cooked beans", "Oats"],
     rows,
     milk: milkBits.length ? `Mix ${milkBits.join(" and ")} a day.` : "",
+    water,
+    waterTotal: (() => {
+      const [d, k, s] = [u.drink, u.cook, u.soak].map(Math.round);
+      return `All together, your household uses about ${num(d + k + s)} cups (${gallonsText(u.total / 16)}) of water a day: ${d} cups to drink, ${k} for cooking and ${s} to soak the next day's beans.`;
+    })(),
   };
 }
 
@@ -164,6 +187,35 @@ export function gearItems(hh) {
       packs: `Pack prices: 1 for ${cents(P.straw1.price)}, 3 for ${cents(P.straw3.price)} (${P.straw3.priceNote}), 5 for ${cents(P.straw5.price)}. The list picks the cheapest mix that gives everyone their own straw.`,
     },
     {
+      key: "bladder",
+      title: "Water: waterBOB bathtub bladder",
+      product: P.bladder,
+      links: [{ label: "waterBOB on Amazon", url: P.bladder.url }],
+      buy: hh.lines.some((l) => l.key === "bladder") ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump.` : "You already have a water bladder, so it's not on the list.",
+      lasts: `It holds up to ${g.bladderGallons} gallons, depending on the size of your tub. Your household uses about ${gallonsText(g.dailyGallons)} a day for drinking, cooking and soaking beans, so a full one lasts about ${num(g.bladderDays)} days (${weeksText(g.bladderDays)}). Sealed, the water stays fresh for up to ${BLADDER_WEEKS} weeks.`,
+      tips: [
+        "Fill it the moment the power goes out, while the tap still runs: lay it in a clean tub and fill it from the faucet.",
+        "Use the hand pump to fill a pot or pitcher, then put the cap back on. It's tap water, so it's safe to drink as it is.",
+        "Use it for drinking and cooking only. Wash with rain water or the bean soaking water.",
+      ],
+    },
+    {
+      key: "diverter",
+      title: "Water: EarthMinded rain diverter kit",
+      product: P.diverter,
+      links: [{ label: "Kit at Home Depot", url: P.diverter.url }],
+      buy: hh.lines.some((l) => l.key === "diverter") ? `One kit, ${cents(P.diverter.price)} at Home Depot. It comes with the FlexiFit diverter, a spigot, a drain, a hose and a hole saw.` : "You already have a rain diverter, so it's not on the list.",
+      lasts: `It turns a trash can into a rain barrel fed from a gutter downspout. A 500 sq ft section of roof sheds about 300 gallons per inch of rain, so even a light rain fills a can. A 32-gallon can holds about ${num(g.canDays(32))} days of your household's water, and a 45-gallon can about ${num(g.canDays(45))} days.`,
+      tips: [
+        "Use a trash can you already own: 32 to 45 gallons, with a lid and no holes. Set it up now and keep it just for water.",
+        "You need a drill for the hole saw. Install everything now, while you have power, following the installation video at the top of the page. You also need a gutter downspout you're allowed to drill into.",
+        "Mount the diverter level with the top of the can. It stops filling when the can is full, and the rest runs down the downspout as usual.",
+        "Set the can on cinder blocks on level ground so a pot fits under the spigot. Full, it's too heavy to move.",
+        "Lay window screen under the lid or strap it down with a bungee cord to keep mosquitoes and leaves out.",
+        "Roof water carries bird droppings and grit: drink it through a LifeStraw or boil it. Drain the can in deep winter so it doesn't freeze and crack.",
+      ],
+    },
+    {
       key: "axe",
       title: "Firewood: Fiskars X27 splitting axe",
       product: P.axe,
@@ -187,7 +239,7 @@ export function storeGroups(hh) {
     title: titles[store],
     lines: hh.lines.filter((l) => l.store === store && l.group !== "gear"),
   }));
-  groups.push({ title: "Fire and water gear (Amazon)", lines: hh.lines.filter((l) => l.group === "gear") });
+  groups.push({ title: "Fire and water gear", lines: hh.lines.filter((l) => l.group === "gear") });
   return groups.filter((g) => g.lines.length).map((g) => ({ ...g, total: g.lines.reduce((a, l) => a + l.cost, 0) }));
 }
 
@@ -224,6 +276,8 @@ export function shoppingNotes(hh) {
 
 // ---------- cooking, weigh-ins, storage, method ----------
 
+export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood and water: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, and a rain catcher to keep water coming after that. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
+
 export const COOK_NOTE = "Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.";
 
 export const WEIGH_INTRO = "The calorie numbers are estimates. The bathroom scale tells you what's really happening, so weigh at the same time each week, after the same morning routine, and adjust.";
@@ -239,10 +293,10 @@ export const WEIGH_RULES = [
 export const WEIGH_KIDS = "Weigh children every two weeks. For a child too small to stand on the scale, weigh yourself holding them and subtract your own weight. Children should hold steady or gain. If a child loses weight, add 2 tablespoons of rice or another ½ cup of milk a day.";
 
 export const CARE = [
-  { lead: "Beans", text: "Soak overnight in plenty of water (10 cups per 2 cups of beans), drain, then cook in fresh water. Boil hard for at least 10 minutes, 30 to be safe, before simmering 1½–2 hours. A pressure cooker saves a lot of fuel." },
+  { lead: "Beans", text: "Soak overnight in 5 cups of water per cup of beans, drain, then cook in about 3 cups of fresh water per cup. Boil hard for at least 10 minutes, 30 to be safe, before simmering 1½–2 hours with the lid on. A pressure cooker saves a lot of fuel and water." },
   { lead: "Start the beans now", text: "Build up to each person's full amount over two to three weeks so stomachs can adjust." },
-  { lead: "Rice", text: "Don't rinse it. Rinsing washes off the added iron and B vitamins." },
-  { lead: "Water and fuel", text: "Plan on about 3 quarts of cooking water per adult per day, on top of drinking water, and enough fuel or firewood to boil it." },
+  { lead: "Rice", text: "Don't rinse it: rinsing washes off the added iron and B vitamins. Cook it in 2 cups of water per cup of rice with the lid on, so it soaks up all the water." },
+  { lead: "Water and fuel", text: "Cooking for everyone, above, shows how much water your household uses each day. Keep the lid on every pot to save water and firewood." },
   { lead: "Vitamins every day", text: "Rice and beans have no vitamin C, and scurvy can start after about four weeks without it. Keep the vitamin C bottle as a backup." },
   { lead: "Keep your muscle", text: "Push-ups, squats and lunges two or three times a week help anyone who is losing weight hold onto muscle." },
   { lead: "Storage", text: "Rice and beans sealed in mylar with an oxygen absorber keep for decades. Oil, peanut butter, oats, dry milk and vitamins keep about a year, so replace them yearly." },
@@ -271,15 +325,16 @@ export const SOURCES = [
   ["CDC emergency water supply", "https://www.cdc.gov/water-emergency/about/how-to-create-and-store-an-emergency-water-supply.html"],
   ["Ready.gov water", "https://www.ready.gov/water"],
   ["LifeStraw Personal", "https://lifestraw.com/products/lifestraw"],
+  ["waterBOB", "https://www.amazon.com/dp/B001AXLUX2"],
+  ["EarthMinded DIY rain barrel kit", "https://www.homedepot.com/p/EarthMinded-DIY-Rain-Barrel-Diverter-and-Parts-Kit-RBK-0001/203256576"],
   ["BIC Classic lighters", "https://us.bic.com/en_us/bic-special-edition-pocket-lighters-black-8-count.html"],
 ];
 
 export const DISCLAIMER = "These are estimates for healthy people, not medical advice. Anyone with a medical condition, a pregnancy or a daily medication should check with a doctor before starting a weight-loss ration.";
 
-export const VIDEO = {
-  title: "YouTube video: Grid goes down",
-  url: "https://www.youtube.com/watch?v=IvpyouZfdlU",
-  linkText: "youtube.com/watch?v=IvpyouZfdlU",
-};
+export const VIDEOS = [
+  { title: "YouTube video: Grid goes down", url: "https://www.youtube.com/watch?v=IvpyouZfdlU", linkText: "youtube.com/watch?v=IvpyouZfdlU" },
+  { title: "YouTube video: Installing the rain diverter", url: "https://www.youtube.com/watch?v=0gK3Pk67lkw", linkText: "youtube.com/watch?v=0gK3Pk67lkw" },
+];
 
 export const SITE_URL = "https://driftcodedev.github.io/prep/";

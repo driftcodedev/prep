@@ -133,6 +133,16 @@ export const PRODUCTS = {
     size: 1, price: 69.98,
     url: "https://www.amazon.com/Fiskars-Super-Splitting-Inch-378841-1002/dp/B004M3BAQE",
   },
+  bladder: {
+    item: "Bathtub water bladder", pack: "waterBOB, up to 100 gal, with hand pump", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 42.95, priceNote: "Sold by a third-party seller",
+    url: "https://www.amazon.com/dp/B001AXLUX2",
+  },
+  diverter: {
+    item: "Rain diverter kit", pack: "EarthMinded DIY kit, from Home Depot", store: "Home Depot", where: "Online or in store", gear: true,
+    size: 1, price: 41.26,
+    url: "https://www.homedepot.com/p/EarthMinded-DIY-Rain-Barrel-Diverter-and-Parts-Kit-RBK-0001/203256576",
+  },
 };
 
 // The no-membership plan swaps the Costco items, and the Amazon food and vitamins, for Walmart.
@@ -210,6 +220,17 @@ export const BIC_LIGHTS = 3000;          // BIC: "up to 3,000 lights" per Classi
 export const LIGHTS_PER_FIRE = 10;       // allow about 10 seconds of flame to get kindling going
 export const LIFESTRAW_GALLONS = 1000;   // LifeStraw Personal: up to 1,000 gallons (4,000 L) of clear water
 export const STRAW_MIN_AGE = 3;          // younger children can't pull hard enough; boil their water
+export const BLADDER_GALLONS = 100;      // waterBOB: "up to 100 gallons", depending on the tub
+export const BLADDER_WEEKS = 16;         // waterBOB: sealed water "fresh up to 16 weeks"
+
+// Water used in cooking, in cups per cup of dry food (per cup of made-up milk for milk).
+export const COOK_WATER = {
+  rice: 2,       // simmered with the lid on until it's all absorbed: nothing is poured away
+  oats: 2,       // ½ cup oats in 1 cup water
+  milk: 1,       // 1 cup water per cup of milk
+  beansSoak: 5,  // overnight soak (10 cups per 2 cups of beans); reuse it for washing or flushing
+  beansCook: 3,  // fresh water to simmer soaked beans; top up if it boils low
+};
 
 export const COSTCO_MEMBERSHIP = 65;
 export const LB_PER_BUCKET = 33; // rice or beans per 5-gallon bucket, sealed in mylar

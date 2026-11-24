@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups } from "../js/calc.js";
+import { planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse } from "../js/calc.js";
 import { buildPdf } from "../js/pdf.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
@@ -69,7 +69,7 @@ test("Household shopping list adds up", () => {
   assert.equal(rice.qty, 3);
   const buckets = hh.lines.find((l) => l.key === "buckets");
   assert.ok(buckets.qty >= 1);
-  assert.ok(hh.total > 300 && hh.total < 700, `total ${hh.total}`);
+  assert.ok(hh.total > 300 && hh.total < 800, `total ${hh.total}`);
 });
 
 test("Validation catches babies and missing fields", () => {
@@ -103,7 +103,7 @@ test("Gear goes on the list unless the household already has it", () => {
   assert.ok(keys.includes("lighters") && keys.includes("axe"));
   // The 2-year-old is too young for a straw, so Brett gets a single.
   assert.equal(hh.lines.find((l) => l.key === "straw1").qty, 1);
-  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true } });
+  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true, bladder: true, diverter: true } });
   assert.ok(!owned.lines.some((l) => l.group === "gear" || l.key === "scale"));
 });
 
@@ -131,4 +131,21 @@ test("PDF definition covers the whole report and avoids missing glyphs", () => {
     assert.ok(text.includes(heading), heading);
   }
   assert.ok(!/[⅓⅔]/.test(text));
+});
+
+test("Water: Brett uses about 1.3 gallons a day, so a waterBOB lasts about 11 weeks", () => {
+  const big = { ...brett, weightLb: 220 };
+  const pl = planPerson(big, 182);
+  const w = waterUse(pl);
+  // 8 to drink; rice 1½ × 2 + oats ½ × 2 + milk 1 + beans 1 × 3 = 8 to cook; beans 1 × 5 to soak
+  assert.deepEqual([w.drink, w.cook, w.soak], [8, 8, 5]);
+  const hh = planHousehold({ months: 6, people: [big] });
+  assert.equal(Math.round(hh.gear.bladderDays), 76);
+  assert.ok(hh.lines.some((l) => l.key === "diverter" && l.store === "Home Depot"));
+});
+
+test("Young children's milk water isn't counted twice", () => {
+  const pl = planPerson({ name: "Leo", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }, 182);
+  const w = waterUse(pl);
+  assert.equal(w.drink, 2); // 4 cups including 2 cups of milk
 });

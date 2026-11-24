@@ -3,7 +3,7 @@ import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, GEAR_INTRO,
 } from "./content.js";
 
 const STORAGE_KEY = "prep-household-v1";
@@ -34,9 +34,11 @@ const OWNED = [
   ["hasLighters", "Lighters"],
   ["hasFilters", "Water filters"],
   ["hasAxe", "Axe"],
+  ["hasBladder", "Water bladder"],
+  ["hasDiverter", "Rain diverter"],
 ];
 
-let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, people: [blankPerson()], ...(load() || {}) };
+let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, people: [blankPerson()], ...(load() || {}) };
 if (!STORE_PLANS[state.store]) state.store = "costco";
 
 function load() {
@@ -184,6 +186,9 @@ function cookingSection(hh) {
       <tbody>${c.rows.map(([name, ...cells]) => `<tr><th scope="row">${esc(name)}</th>${cells.map((x) => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody>
     </table></div>
     ${c.milk ? `<p>${esc(c.milk)}</p>` : ""}
+    <h3 class="sub-title">Water for the pot</h3>
+    <ul class="plain">${c.water.map((w) => `<li><strong>${esc(w.label)}:</strong> ${esc(w.text)}</li>`).join("")}</ul>
+    <p>${esc(c.waterTotal)}</p>
     <p class="muted">${esc(COOK_NOTE)}</p>
   </section>`;
 }
@@ -232,7 +237,7 @@ function gearSection(hh) {
   return `
   <section class="block gear" aria-labelledby="gear-title">
     <h2 id="gear-title" class="section-title">Fire and water</h2>
-    <p>Food only helps if you can cook it and drink safely. These three cover a flame, clean drinking water and firewood. They're on the shopping list above; tick them off under "Already have" if you own them.</p>
+    <p>${esc(GEAR_INTRO)} Tick off anything you own under "Already have".</p>
     <div class="gear-grid">${items}</div>
   </section>`;
 }
@@ -292,7 +297,10 @@ function renderResults() {
   const people = state.people.map(toPerson);
   const hh = planHousehold({
     months: state.months, reservePct: state.reserve, store: state.store, people,
-    owned: { scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe },
+    owned: {
+      scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe,
+      bladder: !!state.hasBladder, diverter: !!state.hasDiverter,
+    },
   });
   lastHousehold = hh;
   const el = $("#results");

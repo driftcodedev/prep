@@ -83,10 +83,17 @@ strong { font-weight: 700; }
 
 /* ---------- video ---------- */
 
-.video { padding: 1.75rem 0 2.25rem; border-top: 3px solid var(--ink); }
+.videos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+  gap: 1.5rem 2rem;
+  padding: 1.75rem 0 2.25rem;
+  border-top: 3px solid var(--ink);
+}
+.video { min-width: 0; }
+.video .section-title { font-size: 1.3rem; }
 .video-frame {
   position: relative;
-  max-width: 52rem;
   aspect-ratio: 16 / 9;
   background: var(--ink);
   border-radius: var(--radius);
@@ -362,7 +369,8 @@ table.shop { table-layout: fixed; min-width: 38rem; }
   body { background: #fff; font-size: 10.5pt; }
   .setup, .people-actions, .privacy, .intro, .report-actions, .report-foot, .shop-compare .btn-link { display: none !important; }
   .print-meta { display: block; margin: 0 0 6pt; font-size: 9pt; color: var(--ink-2); }
-  .video { padding: 4pt 0 6pt; border-top: 2px solid #000; }
+  .videos { display: block; padding: 4pt 0 6pt; border-top: 2px solid #000; }
+  .video + .video { margin-top: 4pt; }
   .video .section-title { font-size: 12pt; margin: 0; }
   .video-frame { display: none; }
   .video-link { display: block; margin: 2pt 0 0; font-size: 9.5pt; }

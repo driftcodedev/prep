@@ -3,7 +3,7 @@ import { PRICES_CHECKED } from "./data.js";
 import {
   money, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEO,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEOS, GEAR_INTRO,
 } from "./content.js";
 
 const C = { ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", bean: "#8a4632", beanTint: "#f5e8e1", lidTint: "#ddeaf0" };
@@ -11,7 +11,7 @@ const C = { ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", be
 // Roboto has no glyph for thirds.
 const t = (s) => String(s ?? "").replace(/⅓/g, "1/3").replace(/⅔/g, "2/3");
 
-const h2 = (text, opts = {}) => ({ text: t(text), style: "h2", ...opts });
+const h2 = (text, opts = {}) => ({ text: t(text), style: "h2", headlineLevel: 1, ...opts });
 const para = (text, opts = {}) => ({ text: typeof text === "string" ? t(text) : text, style: "p", ...opts });
 const bullets = (items, opts = {}) => ({ ul: items.map((x) => (typeof x === "string" ? t(x) : x)), style: "p", markerColor: C.lid, ...opts });
 const leadBullets = (items) => bullets(items.map((it) => ({ text: [{ text: `${t(it.lead)}: `, bold: true }, t(it.text)] })));
@@ -99,7 +99,15 @@ function cooking(hh) {
     para([{ text: "Each day, cook " }, { text: t(c.rice), bold: true }, " and ", { text: t(c.beans), bold: true }, ` ${t(c.rest)}`]),
     dataTable(c.head, c.rows.map(([n, ...cells]) => [{ text: t(n), bold: true }, ...cells]), [90, "*", "*", "*"]),
     c.milk ? para(c.milk) : null,
-    para(COOK_NOTE, { color: C.ink2 }),
+    {
+      stack: [
+        { text: "Water for the pot", style: "h3", margin: [0, 4, 0, 3] },
+        bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
+        para(c.waterTotal),
+        para(COOK_NOTE, { color: C.ink2 }),
+      ],
+      unbreakable: true,
+    },
   ].filter(Boolean);
 }
 
@@ -110,7 +118,7 @@ function shopping(hh) {
     para(compareText(hh), { color: C.ink2 }),
   ];
   for (const g of storeGroups(hh)) {
-    out.push({ columns: [{ text: t(g.title), style: "h3" }, { text: money(g.total), style: "h3", alignment: "right", width: 80 }], margin: [0, 8, 0, 2] });
+    out.push({ columns: [{ text: t(g.title), style: "h3" }, { text: money(g.total), style: "h3", alignment: "right", width: 80 }], margin: [0, 8, 0, 2], headlineLevel: 1 });
     out.push(dataTable(
       ["Item", "Buy", "How many", "Covers", "Cost"],
       g.lines.map((l) => [
@@ -131,7 +139,7 @@ function shopping(hh) {
 function gear(hh) {
   const out = [
     h2("Fire and water"),
-    para("Food only helps if you can cook it and drink safely. These three cover a flame, clean drinking water and firewood. They're on the shopping list above."),
+    para(GEAR_INTRO),
   ];
   for (const it of gearItems(hh)) {
     const block = [
@@ -175,10 +183,10 @@ export function buildPdf(hh, { date = "" } = {}) {
       ],
     },
     { canvas: [{ type: "line", x1: 0, y1: 0, x2: 532, y2: 0, lineWidth: 2, lineColor: C.ink }], margin: [0, 8, 0, 6] },
-    {
-      text: [{ text: `${VIDEO.title}  `, bold: true }, { text: VIDEO.linkText, link: VIDEO.url, color: C.lid, decoration: "underline" }],
-      margin: [0, 0, 0, 10],
-    },
+    ...VIDEOS.map((v, i) => ({
+      text: [{ text: `${v.title}  `, bold: true }, { text: v.linkText, link: v.url, color: C.lid, decoration: "underline" }],
+      margin: [0, 0, 0, i === VIDEOS.length - 1 ? 10 : 2],
+    })),
     h2("Daily amounts", { margin: [0, 0, 0, 2] }),
     para("Measure dry food with level cups and spoons. Each card shows one person's day.", { color: C.ink2, margin: [0, 0, 0, 8] }),
     ...cardsGrid(hh),
@@ -198,6 +206,12 @@ export function buildPdf(hh, { date = "" } = {}) {
 
   return {
     pageSize: "LETTER",
+    // Keep headings with what follows them.
+    pageBreakBefore: (node, nodeQueries) => {
+      if (node.headlineLevel !== 1) return false;
+      const after = nodeQueries.getFollowingNodesOnPage ? nodeQueries.getFollowingNodesOnPage() : node.followingNodesOnPage;
+      return !after || after.length === 0 || (node.startPosition && node.startPosition.top > 680);
+    },
     pageMargins: [40, 40, 40, 44],
     info: { title: "prep: food plan", author: "prep", subject: t(planSummary(hh)) },
     defaultStyle: { font: "Roboto", fontSize: 9.5, lineHeight: 1.2, color: C.ink },

@@ -1,7 +1,7 @@
 // Calculation engine. Pure functions only, so it runs the same in the browser and in tests.
 import {
   FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET, productsFor,
-  BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE,
+  BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE, BLADDER_GALLONS, COOK_WATER,
 } from "./data.js";
 
 const KG_PER_LB = 0.45359237;
@@ -308,6 +308,18 @@ export function waterCups(p) {
   return 8;
 }
 
+// Daily water for one person on their first-phase ration, in cups.
+// Young children's drinking amount already includes their milk, so the milk water isn't counted twice.
+export function waterUse(pl) {
+  const r = pl.phase1;
+  const milkCups = (r.milk || 0) + (r.whole || 0);
+  const drink = pl.person.age < 9 ? Math.max(0, pl.waterCups - milkCups) : pl.waterCups;
+  const cook = (r.rice || 0) * COOK_WATER.rice + (r.oats || 0) * COOK_WATER.oats +
+    milkCups * COOK_WATER.milk + (r.beans || 0) * COOK_WATER.beansCook;
+  const soak = (r.beans || 0) * COOK_WATER.beansSoak;
+  return { drink, cook, soak, total: drink + cook + soak };
+}
+
 // Cheapest mix of LifeStraw packs giving one straw each to n people.
 // One spare straw is taken when it costs less than SPARE_VALUE extra.
 const SPARE_VALUE = 5;
@@ -376,6 +388,11 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   // Gear lifespans.
   const firesPerLighter = BIC_LIGHTS / LIGHTS_PER_FIRE;
   const waterCupsTotal = plans.reduce((a, pl) => a + pl.waterCups, 0);
+  const use = plans.reduce((a, pl) => {
+    const w = waterUse(pl);
+    return { drink: a.drink + w.drink, cook: a.cook + w.cook, soak: a.soak + w.soak, total: a.total + w.total };
+  }, { drink: 0, cook: 0, soak: 0, total: 0 });
+  const dailyGallons = use.total / 16;
   const gear = {
     firesPerLighter,
     lighterMonths: firesPerLighter / 30.4,
@@ -386,6 +403,11 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
     adultStrawYears: LIFESTRAW_GALLONS / (8 / 16) / 365,
     waterCupsTotal,
     waterGallonsTotal: waterCupsTotal / 16,
+    use,
+    dailyGallons,
+    bladderGallons: BLADDER_GALLONS,
+    bladderDays: dailyGallons ? BLADDER_GALLONS / dailyGallons : 0,
+    canDays: (gal) => (dailyGallons ? gal / dailyGallons : 0),
   };
 
   return {
@@ -440,6 +462,8 @@ function shoppingFor(ctx, products) {
       sp.packs.forEach((pk, i) => addLine(pk.key, pk.qty, i === 0 ? covers : "", "gear"));
     }
     if (!have.axe) addLine("axe", 1, "splitting firewood", "gear");
+    if (!have.bladder) addLine("bladder", 1, "fill when the power goes out", "gear");
+    if (!have.diverter) addLine("diverter", 1, "rain from the roof into a trash can", "gear");
   }
 
   const total = lines.reduce((a, l) => a + l.cost, 0);
