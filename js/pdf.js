@@ -137,7 +137,7 @@ function shopping(hh) {
 
 function gear(hh) {
   const out = [
-    h2("Fire and water"),
+    h2("Fire, water and cooking"),
     para(GEAR_INTRO),
   ];
   for (const it of gearItems(hh)) {
@@ -149,6 +149,14 @@ function gear(hh) {
       ])]),
       para([{ text: "How long it lasts: ", bold: true }, t(it.lasts)]),
     ];
+    if (it.sizes) {
+      block.push(dataTable(it.sizesHead, it.sizes.map((s) => [
+        { text: [t(s.size), s.pick ? { text: "  your size", color: C.lid, bold: true, fontSize: 7.5 } : ""], bold: s.pick },
+        ...[s.cups, s.fill, s.weight].map((x) => ({ text: t(x), bold: s.pick })),
+        { text: t(s.price), bold: s.pick, alignment: "right" },
+      ]), [80, "*", "*", "*", 55], { align: [, , , , "right"] }));
+      block.push(para(it.sizesNote, { color: C.ink2, fontSize: 8.5 }));
+    }
     if (it.drink) block.push(para([{ text: "How much to drink: ", bold: true }, t(it.drink)]));
     block.push(bullets(it.tips));
     if (it.packs) block.push(para(it.packs, { color: C.ink2, fontSize: 8.5 }));

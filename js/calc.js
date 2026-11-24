@@ -2,6 +2,7 @@
 import {
   FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET, productsFor,
   BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE, BLADDER_GALLONS, COOK_WATER, INFANT,
+  POT_SIZES, POT_FILL,
 } from "./data.js";
 
 const KG_PER_LB = 0.45359237;
@@ -564,11 +565,6 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   const buckets = (riceLb > 0 ? Math.ceil(riceLb / LB_PER_BUCKET) : 0) + (beansLb > 0 ? Math.ceil(beansLb / LB_PER_BUCKET) : 0);
   const strawPeople = plans.filter((pl) => pl.person.age >= STRAW_MIN_AGE).length;
 
-  const ctx = { plans, sum, supp, grams, reserve, buckets, strawPeople, have };
-  const shop = shoppingFor(ctx, productsFor(store));
-  const otherStore = store === "walmart" ? "costco" : "walmart";
-  const other = plans.length ? { store: otherStore, total: shoppingFor(ctx, productsFor(otherStore)).total } : null;
-
   // Daily cooking totals (first-phase rations) and each person's share of the pot.
   const cook = { rice: 0, beans: 0, oats: 0, milk: 0, whole: 0 };
   for (const pl of plans) for (const k of Object.keys(cook)) cook[k] += pl.phase1[k] || 0;
@@ -584,6 +580,13 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
     riceCooked: riceCooked[i],
     beansCooked: beansCooked[i],
   }));
+  const eaters = plans.filter((pl) => (pl.phase1.rice || 0) + (pl.phase1.beans || 0) > 0).length;
+  const pot = potFor(cook, eaters);
+
+  const ctx = { plans, sum, supp, grams, reserve, buckets, strawPeople, have, pot };
+  const shop = shoppingFor(ctx, productsFor(store));
+  const otherStore = store === "walmart" ? "costco" : "walmart";
+  const other = plans.length ? { store: otherStore, total: shoppingFor(ctx, productsFor(otherStore)).total } : null;
 
   // Gear lifespans.
   const firesPerLighter = BIC_LIGHTS / LIGHTS_PER_FIRE;
@@ -613,16 +616,32 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   return {
     days, months, reservePct, store, plans, invalidCount: people.length - valid.length,
     lines: shop.lines, total: shop.total, byStore: shop.byStore, byGroup: shop.byGroup,
-    buckets, cook, shares, gear, other,
+    buckets, cook, shares, gear, other, pot,
+  };
+}
+
+// Which camp Dutch oven to buy. Start from the household size (5 qt for 1–2 people, 8 qt for 3–6,
+// 10 qt for 7 or more), then go bigger if the day's biggest batch wouldn't fit ¾ full:
+// beans with their cooking water (4 × the dry beans) or rice with its water (3 × the dry rice).
+export function potFor(cook, eaters) {
+  const needCups = Math.max((cook.beans || 0) * (1 + COOK_WATER.beansCook), (cook.rice || 0) * (1 + COOK_WATER.rice)) / POT_FILL;
+  const deep = POT_SIZES.filter((s) => s.deep);
+  const start = eaters <= 2 ? 5 : eaters <= 6 ? 8 : 10;
+  const pick = deep.find((s) => s.qt >= start && s.qt * 4 >= needCups) || deep[deep.length - 1];
+  const cups = pick.qt * 4;
+  return {
+    ...pick, cups, fillCups: cups * POT_FILL, needCups, eaters,
+    batches: Math.max(1, Math.ceil(needCups / cups - 1e-9)),
+    fullLb: pick.lb + cups * POT_FILL * 0.52, // a cup of water weighs about 0.52 lb
   };
 }
 
 function shoppingFor(ctx, products) {
-  const { plans, sum, supp, grams, reserve, buckets, strawPeople, have } = ctx;
+  const { plans, sum, supp, grams, reserve, buckets, strawPeople, have, pot } = ctx;
   const lines = [];
-  const addLine = (key, qty, amountText, group) => {
+  const addLine = (key, qty, amountText, group, extra = {}) => {
     if (qty <= 0) return;
-    const prod = products[key];
+    const prod = { ...products[key], ...extra };
     lines.push({ key, ...prod, group, qty, amountText, cost: qty * prod.price });
   };
   const lbText = (g) => `${Math.round(g / 453.6)} lb`;
@@ -666,6 +685,9 @@ function shoppingFor(ctx, products) {
     if (!have.axe) addLine("axe", 1, "splitting firewood", "gear");
     if (!have.bladder) addLine("bladder", 1, "fill when the power goes out", "gear");
     if (!have.diverter) addLine("diverter", 1, "rain from the roof into a trash can", "gear");
+    if (!have.pot) addLine("pot", 1, `holds ${pot.cups} cups`, "gear", { pack: `Lodge Deep Camp Dutch Oven, ${pot.qt} qt`, price: pot.price });
+    if (!have.tripod) addLine("tripod", 1, "hangs the pot over the fire", "gear");
+    if (!have.disc) addLine("disc", 1, "chatters when the pot boils", "gear");
     if (!have.timer) addLine("timer", 1, "timing the pot, no batteries", "gear");
   }
 

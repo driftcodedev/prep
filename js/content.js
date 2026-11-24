@@ -2,7 +2,7 @@
 // Plain text only. A "lead" is the bold start of a bullet.
 import {
   PRODUCTS, COSTCO_MEMBERSHIP, LB_PER_BUCKET, STORE_PLANS, LIFESTRAW_GALLONS, BIC_LIGHTS,
-  STRAW_MIN_AGE, ACTIVITY, BLADDER_WEEKS, COOK_WATER,
+  STRAW_MIN_AGE, ACTIVITY, BLADDER_WEEKS, COOK_WATER, POT_SIZES, POT_FILL,
 } from "./data.js";
 import { fraction, cupsText, spoonText, waterUse } from "./calc.js";
 
@@ -197,9 +197,10 @@ export function cookingData(hh) {
   if (c.whole > 0) milkBits.push(`${fraction(c.whole)} cups of whole milk for the under-2s (${cupsText(c.whole / 4)} powder)`);
   const u = hh.gear.use;
   const water = [
-    { label: "What a simmer looks like", text: "small, lazy bubbles breaking the surface every second or two, with steam rising. A boil is big bubbles churning the whole pot. Over a fire, bring the pot to a boil over the hottest part, then slide it to the edge, set it higher on a rock or grate, or let the fire burn down to glowing coals. If it starts boiling hard again, move it farther from the heat; if the bubbles stop, move it closer." },
-    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water makes about ${cupsText(c.riceCooked)} cooked. Bring it to a boil, put the lid on, move it to a simmer and set a 20-minute timer. It's done when you tilt the pot and no water runs, and the grains are soft. If water is left, give it 5 more minutes; if you smell scorching, take it off the heat. Let it sit off the fire with the lid on for 10 minutes. Nothing gets poured away.` },
-    { label: "Beans", text: `${cupsText(c.beans)} of dry beans makes about ${cupsText(c.beansCooked)} cooked. Soak them overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water and drain; save that water for washing or flushing. Cover with ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, boil hard for at least 10 minutes on a timer, then simmer with the lid on for 1½–2 hours. Check every 30 minutes and add water so the beans stay covered. They're done when a bean squashes easily against the side of the pot and is creamy inside, with no chalky center.` },
+    { label: "What a simmer looks like", text: "small, lazy bubbles breaking the surface every second or two, with steam rising. A boil is big bubbles churning the whole pot. Over a fire, hang the pot low on the tripod chain to bring it to a boil, then raise it a few links to hold a simmer. With no tripod, slide the pot to the edge of the fire or let it burn down to glowing coals. If it starts boiling hard again, raise the pot; if the bubbles stop, lower it." },
+    { label: "Hearing the boil", text: "drop the Pot Minder disc into the empty pot before the water and food. It chatters against the bottom when the pot boils. It works best with plain water and beans; with rice it chatters at the first boil, then goes quiet as the rice soaks up the water. Fish it out before serving." },
+    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water makes about ${cupsText(c.riceCooked)} cooked. Bring it to a boil and stir once so no grains stick to the bottom. Put the lid on, raise the pot to a simmer and set a 20-minute timer. Don't stir again or lift the lid until the timer goes off: stirring makes rice gummy and lets the steam out. It's done when you tilt the pot and no water runs, and the grains are soft. If water is left, give it 5 more minutes; if you smell scorching, take it off the heat. Let it sit off the fire with the lid on for 10 minutes. Nothing gets poured away.` },
+    { label: "Beans", text: `${cupsText(c.beans)} of dry beans makes about ${cupsText(c.beansCooked)} cooked. Soak them overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water and drain; save that water for washing or flushing. Cover with ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, boil hard for at least 10 minutes on a timer, then simmer with the lid on for 1½–2 hours. Check every 30 minutes: give them a stir and add water so the beans stay covered. They're done when a bean squashes easily against the side of the pot and is creamy inside, with no chalky center.` },
     { label: "Oats", text: `${cupsText(c.oats)} of oats in ${cupsText(c.oats * COOK_WATER.oats)} of water. Simmer about 5 minutes, stirring, until thick.` },
   ];
   if (c.milk + c.whole > 0) {
@@ -220,7 +221,9 @@ export function cookingData(hh) {
     rows,
     milk: milkBits.length ? `Mix ${milkBits.join(" and ")} a day.` : "",
     water,
-    fireLead: "These amounts are for your whole household for one day: the same totals as the bottom row of the table above.",
+    fireLead: `These amounts are for your whole household for one day: the same totals as the bottom row of the table above. ${hh.pot.batches > 1
+      ? `The beans and their water come to about ${num(hh.pot.needCups * POT_FILL)} cups, more than ${aQuart(hh.pot.qt)} pot (${hh.pot.cups} cups) holds safely, so cook them in ${hh.pot.batches} batches or use two pots.`
+      : `Each batch fits in ${aQuart(hh.pot.qt)} pot (${hh.pot.cups} cups), one at a time.`}`,
     waterTotal: (() => {
       // Every part is rounded to ¼ cup and the totals are sums of the parts shown, so it adds up.
       const q = (x) => Math.round(x * 4) / 4;
@@ -334,6 +337,35 @@ export function gearItems(hh) {
         "Dry, seasoned wood lights and burns far better than fresh-cut. Stack split wood off the ground and under cover.",
       ],
     },
+    potItem(hh),
+    {
+      key: "tripod",
+      title: "Cooking: Lodge camp tripod",
+      product: P.tripod,
+      links: [{ label: "Lodge 43.5-inch tripod on Amazon", url: P.tripod.url }],
+      buy: hh.lines.some((l) => l.key === "tripod") ? `One per household, ${cents(P.tripod.price)} on Amazon.` : "You already have a tripod, so it's not on the list.",
+      lasts: "Solid ½-inch steel bar with a 24-inch galvanized chain, made by Lodge to hang its camp Dutch ovens full of food. Nothing on it wears out.",
+      tips: [
+        "The chain is your stove dial: hang the pot low to bring it to a boil, then raise it a few links to hold a simmer.",
+        "Set the height before the pot is full and hot. To change it, lift the pot off with gloves first, then move the hook.",
+        "It stands 43.5 inches tall, so keep the fire small: a bed of glowing coals rather than tall flames. Flames licking the pot scorch the food.",
+        "Push the legs a little into the ground so it can't tip, and keep children and pets back from the fire.",
+      ],
+    },
+    {
+      key: "disc",
+      title: "Cooking: Pot Minder boil alert",
+      product: P.disc,
+      links: [{ label: "Pot Minder on Amazon", url: P.disc.url }],
+      buy: hh.lines.some((l) => l.key === "disc") ? `One, ${cents(P.disc.price)} on Amazon.` : "You already have a boil alert, so it's not on the list.",
+      lasts: "It's fired ceramic, so it doesn't wear out. It doesn't whistle: it chatters against the bottom of the pot as the water comes to a boil, loud enough to hear near the fire. It also breaks up the foam that makes beans boil over.",
+      tips: [
+        "Put it in the empty pot first, then the food and water.",
+        "It works best with plain water and beans, where there's plenty of loose water. Food piled on top can muffle it.",
+        "With rice it chatters at the first boil, then goes quiet as the rice soaks up the water. That's all you need, since the rice timer starts at the boil.",
+        "Fish it out with a spoon before serving, and let it cool before you touch it.",
+      ],
+    },
     {
       key: "timer",
       title: "Timing: Casio solar watch",
@@ -349,6 +381,48 @@ export function gearItems(hh) {
   ];
 }
 
+const fullText = (f) => (f < 0.4 ? "about a third full" : f < 0.58 ? "about half full" : f < 0.7 ? "about two-thirds full" : "about ¾ full");
+const aQuart = (qt) => `${qt === 8 || qt === 11 || qt === 18 ? "an" : "a"} ${qt}-quart`;
+
+// The pot card: the size picked for this household, and every size in cups.
+function potItem(hh) {
+  const p = hh.pot;
+  const P = PRODUCTS;
+  const c = hh.cook;
+  const beansBatch = c.beans * (1 + COOK_WATER.beansCook);
+  const riceBatch = c.rice * (1 + COOK_WATER.rice);
+  const batch = Math.max(beansBatch, riceBatch);
+  const what = beansBatch >= riceBatch ? "the beans with their water" : "the rice with its water";
+  const onList = hh.lines.some((l) => l.key === "pot");
+  let buy;
+  if (!onList) buy = `You already have a big pot, so it's not on the list. It should hold at least ${num(Math.ceil(p.needCups))} cups and have a wire handle to hang from the tripod.`;
+  else if (p.batches > 1) buy = `For your household: the ${p.qt}-quart (${p.cups} cups), ${cents(p.price)}, the biggest in this style. Your biggest batch of the day, ${what}, is about ${num(batch)} cups, more than it holds safely, so cook it in ${p.batches} batches or buy a second pot.`;
+  else buy = `For your household: the ${p.qt}-quart, which holds ${p.cups} cups, ${cents(p.price)}. Your biggest batch of the day, ${what}, is about ${num(batch)} cups, so it fills the pot ${fullText(batch / p.cups)} and leaves room to boil.${p.qt === 8 ? " It's the usual size for a family of 3 to 6." : ""}`;
+  return {
+    key: "pot",
+    title: "Cooking: Lodge camp Dutch oven",
+    product: P.pot,
+    links: [{ label: "Lodge Deep Camp Dutch Oven on Amazon (pick the size on the page)", url: P.pot.url }],
+    buy,
+    lasts: "Cast iron lasts for generations if you keep the rust off. The legs let it sit right in the coals, the wire handle hangs it from the tripod, and the heavy lid keeps the heat and water in. Lodge makes these in the USA.",
+    sizes: POT_SIZES.map((s) => ({
+      size: `${s.qt} qt${s.deep ? " deep" : ""}`,
+      cups: `${s.qt * 4} cups`,
+      fill: `${fraction(s.qt * 4 * POT_FILL)} cups`,
+      weight: `${s.lb} lb`,
+      price: cents(s.price),
+      pick: onList && s.qt === p.qt,
+    })),
+    sizesHead: ["Size", "Holds", "Fill up to", "Weight", "Price"],
+    sizesNote: "1 quart = 4 cups. Fill a pot no more than ¾ full so it can boil without spilling. The deep ones have taller sides, which suit beans and boiling water, so the plan picks from those: the 5-quart for 1 or 2 people, the 8-quart for 3 to 6, and the 10-quart for 7 or more, going bigger if the day's beans or rice wouldn't fit.",
+    tips: [
+      `Full, the ${p.qt}-quart weighs about ${num(p.fullLb)} lb. Lift it with both hands in heavy leather gloves: the wire handle and the lid get very hot.`,
+      "After washing, dry it over the fire, then wipe a thin coat of oil inside so it doesn't rust. Don't leave food or water sitting in it.",
+      "One pot is enough if you cook one batch at a time: oats, then beans, then rice. Keep cooked food covered and eat it within 2 hours, or keep it hot.",
+    ],
+  };
+}
+
 // ---------- shopping ----------
 
 export function storeGroups(hh) {
@@ -358,7 +432,7 @@ export function storeGroups(hh) {
     title: titles[store],
     lines: hh.lines.filter((l) => l.store === store && l.group !== "gear"),
   }));
-  groups.push({ title: "Fire and water gear", lines: hh.lines.filter((l) => l.group === "gear") });
+  groups.push({ title: "Fire, water and cooking gear", lines: hh.lines.filter((l) => l.group === "gear") });
   return groups.filter((g) => g.lines.length).map((g) => ({ ...g, total: g.lines.reduce((a, l) => a + l.cost, 0) }));
 }
 
@@ -395,7 +469,7 @@ export function shoppingNotes(hh) {
 
 // ---------- cooking, weigh-ins, storage, method ----------
 
-export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood and water: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, and a rain catcher to keep water coming after that. A solar watch times the pot without batteries. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
+export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water and the pot: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
 
 export const COOK_NOTE = "Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.";
 

@@ -37,9 +37,12 @@ const OWNED = [
   ["hasBladder", "Water bladder"],
   ["hasDiverter", "Rain diverter"],
   ["hasTimer", "Battery-free timer"],
+  ["hasPot", "Big pot for the fire"],
+  ["hasTripod", "Cooking tripod"],
+  ["hasDisc", "Boil alert disc"],
 ];
 
-let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, people: [blankPerson()], ...(load() || {}) };
+let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, hasPot: false, hasTripod: false, hasDisc: false, people: [blankPerson()], ...(load() || {}) };
 if (!STORE_PLANS[state.store]) state.store = "costco";
 
 function load() {
@@ -276,20 +279,33 @@ function shoppingSection(hh) {
   </section>`;
 }
 
+function potSizes(it) {
+  const rows = it.sizes.map((s) => `
+        <tr${s.pick ? ' class="pick"' : ""}><th scope="row">${esc(s.size)}${s.pick ? '<small>Your size</small>' : ""}</th><td>${esc(s.cups)}</td><td>${esc(s.fill)}</td><td>${esc(s.weight)}</td><td class="num">${esc(s.price)}</td></tr>`).join("");
+  return `
+      <div class="table-scroll"><table class="data pot-sizes">
+        <caption>Every size, on the same Amazon page</caption>
+        <thead><tr>${it.sizesHead.map((h, i) => `<th scope="col"${i === it.sizesHead.length - 1 ? ' class="num"' : ""}>${esc(h)}</th>`).join("")}</tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+      <p class="muted">${esc(it.sizesNote)}</p>`;
+}
+
 function gearSection(hh) {
   const items = gearItems(hh).map((it) => `
-    <article class="gear-item">
+    <article class="gear-item${it.sizes ? " gear-wide" : ""}">
       <h3 class="gear-title">${esc(it.title)}</h3>
       <p class="gear-buy">${esc(it.buy)}</p>
       <p class="gear-links">${it.links.length > 1 ? "On Amazon: " : ""}${it.links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join(", ")}</p>
       <p><strong>How long it lasts:</strong> ${esc(it.lasts)}</p>
+      ${it.sizes ? potSizes(it) : ""}
       ${it.drink ? `<p><strong>How much to drink:</strong> ${esc(it.drink)}</p>` : ""}
       <ul class="plain">${it.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
       ${it.packs ? `<p class="muted">${esc(it.packs)}</p>` : ""}
     </article>`).join("");
   return `
   <section class="block gear" aria-labelledby="gear-title">
-    <h2 id="gear-title" class="section-title">Fire and water</h2>
+    <h2 id="gear-title" class="section-title">Fire, water and cooking</h2>
     <p>${esc(GEAR_INTRO)} Tick off anything you own under "Already have".</p>
     <div class="gear-grid">${items}</div>
   </section>`;
@@ -353,6 +369,7 @@ function renderResults() {
     owned: {
       scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe,
       bladder: !!state.hasBladder, diverter: !!state.hasDiverter, timer: !!state.hasTimer,
+      pot: !!state.hasPot, tripod: !!state.hasTripod, disc: !!state.hasDisc,
     },
   });
   lastHousehold = hh;

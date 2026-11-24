@@ -2,7 +2,7 @@
 // Prices were checked 18–23 November 2026. Costco prices are warehouse prices and vary by location.
 // Amazon gear and Walmart prices were checked 23 November 2026.
 
-export const PRICES_CHECKED = "18–23 November 2026";
+export const PRICES_CHECKED = "18–24 November 2026";
 
 // Dry-measure nutrition. Sources: USDA FoodData Central (rice, pinto beans, peanut butter),
 // Quaker label (oats), product labels (dry milk).
@@ -168,7 +168,35 @@ export const PRODUCTS = {
     size: 1, price: 41.26,
     url: "https://www.homedepot.com/p/EarthMinded-DIY-Rain-Barrel-Diverter-and-Parts-Kit-RBK-0001/203256576",
   },
+  // Cooking gear, checked on Amazon 24 November 2026. The pot's size and price come from POT_SIZES.
+  pot: {
+    item: "Cast iron camp Dutch oven", pack: "Lodge Deep Camp Dutch Oven", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 99.0,
+    url: "https://www.amazon.com/dp/B004W4TXZI",
+  },
+  tripod: {
+    item: "Campfire cooking tripod", pack: "Lodge 3TP2, 43.5-in legs, 24-in chain", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 49.95,
+    url: "https://www.amazon.com/dp/B00029I3EE",
+  },
+  disc: {
+    item: "Boil alert disc", pack: "JBK Pot Minder, ceramic", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 12.44,
+    url: "https://www.amazon.com/dp/B000XPTFIK",
+  },
 };
+
+// Lodge camp Dutch ovens: one Amazon listing with every size (pick it on the page).
+// Prices from that listing, 24 November 2026; sizes and weights from Lodge's specs.
+// "Deep" ones have taller sides, better for beans and boiling water.
+export const POT_SIZES = [
+  { qt: 4, inches: 10, deep: false, lb: 11.7, price: 59.22 },
+  { qt: 5, inches: 10, deep: true, lb: 13.1, price: 74.9 },
+  { qt: 6, inches: 12, deep: false, lb: 18, price: 79.9 },
+  { qt: 8, inches: 12, deep: true, lb: 19.4, price: 99.0 },
+  { qt: 10, inches: 14, deep: true, lb: 25.5, price: 109.9 },
+];
+export const POT_FILL = 0.75; // fill no more than ¾ full so it can boil without spilling
 
 // The no-membership plan swaps the Costco items, and the Amazon food and vitamins, for Walmart.
 // Buckets, mylar, toddler drops, the scale and the gear stay on Amazon.

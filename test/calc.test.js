@@ -69,7 +69,10 @@ test("Household shopping list adds up", () => {
   assert.equal(rice.qty, 3);
   const buckets = hh.lines.find((l) => l.key === "buckets");
   assert.ok(buckets.qty >= 1);
-  assert.ok(hh.total > 300 && hh.total < 800, `total ${hh.total}`);
+  // Food and storage, then the one-time gear (fire, water and cooking).
+  const food = hh.total - hh.byGroup.gear;
+  assert.ok(food > 200 && food < 600, `food and storage ${food}`);
+  assert.ok(hh.byGroup.gear > 400 && hh.byGroup.gear < 700, `gear ${hh.byGroup.gear}`);
 });
 
 test("Validation: babies of any length are fine, missing fields are caught", () => {
@@ -105,10 +108,10 @@ test("Gear goes on the list unless the household already has it", () => {
   const kids = [brett, { name: "T", sex: "female", age: 2, heightIn: 34, weightLb: 27, activity: "light", flags: {} }];
   const hh = planHousehold({ months: 6, people: kids });
   const keys = hh.lines.map((l) => l.key);
-  assert.ok(keys.includes("lighters") && keys.includes("axe"));
+  assert.ok(["lighters", "axe", "pot", "tripod", "disc"].every((k) => keys.includes(k)));
   // The 2-year-old is too young for a straw, so Brett gets a single.
   assert.equal(hh.lines.find((l) => l.key === "straw1").qty, 1);
-  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true, bladder: true, diverter: true, timer: true } });
+  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true, bladder: true, diverter: true, timer: true, pot: true, tripod: true, disc: true } });
   assert.ok(!owned.lines.some((l) => l.group === "gear" || l.key === "scale"));
 });
 
@@ -132,7 +135,7 @@ test("PDF definition covers the whole report and avoids missing glyphs", () => {
   const hh = planHousehold({ months: 6, people: [brett, { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }] });
   const doc = buildPdf(hh, { date: "November 23, 2026" });
   const text = JSON.stringify(doc.content);
-  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "Shopping list", "Fire and water", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
+  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "Shopping list", "Fire, water and cooking", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
     assert.ok(text.includes(heading), heading);
   }
   assert.ok(!/[⅓⅔]/.test(text));
@@ -281,4 +284,29 @@ test("Cooking table adds up to the household pot", () => {
   hh.plans.forEach((pl, i) => { if (pl.phase1.rice > 0) assert.ok(hh.shares[i].riceCooked > 0); });
   assert.deepEqual(splitRounded([3.125, 1.875, 0.625], 5.75), [3.25, 2, 0.5]);
   assert.equal(cupsText(1 / 16), "1 tbsp");
+});
+
+test("Camp Dutch oven is sized to the household", () => {
+  const adult = (i) => ({ name: `A${i}`, sex: "male", age: 34, heightIn: 70, weightLb: 180, activity: "light", flags: {} });
+  const pot = (n) => planHousehold({ months: 6, people: Array.from({ length: n }, (_, i) => adult(i)) }).pot;
+  assert.equal(pot(1).qt, 5);
+  assert.equal(pot(2).qt, 5);
+  assert.equal(pot(4).qt, 8);
+  assert.equal(pot(6).qt, 8);
+  assert.equal(pot(7).qt, 10);
+  assert.equal(pot(4).cups, 32);
+  assert.equal(pot(4).batches, 1);
+  assert.equal(pot(12).batches, 2);
+  // The day's beans and their water fit ¾ full.
+  const p = pot(6);
+  assert.ok(p.needCups <= p.cups);
+  // The shopping line carries the chosen size and its price.
+  const hh = planHousehold({ months: 6, people: [adult(1), adult(2), adult(3)] });
+  const line = hh.lines.find((l) => l.key === "pot");
+  assert.equal(line.price, 99);
+  assert.match(line.pack, /8 qt/);
+  assert.equal(line.amountText, "holds 32 cups");
+  // Babies who eat nothing from the pot don't count.
+  const baby = { name: "B", sex: "male", age: 0, heightIn: NaN, weightLb: 9, activity: "light", flags: {}, feeding: "formula" };
+  assert.equal(planHousehold({ months: 6, people: [adult(1), adult(2), baby] }).pot.qt, 5);
 });

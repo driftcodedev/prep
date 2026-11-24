@@ -430,3 +430,11 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 /* Household total under the cooking table */
 .data tfoot th, .data tfoot td { font-weight: 700; border-top: 1.5px solid var(--ink); border-bottom: 0; }
 .data tfoot td small { font-weight: 700; }
+
+/* Pot sizes: the pot card spans the gear grid so its table has room */
+.gear-wide { grid-column: 1 / -1; }
+.pot-sizes { max-width: 44rem; margin: 0.75rem 0 0.25rem; }
+.pot-sizes caption { text-align: left; font-weight: 700; padding-bottom: 0.35rem; }
+.pot-sizes tr.pick th, .pot-sizes tr.pick td { background: var(--lid-tint); font-weight: 700; }
+.pot-sizes tr.pick th:first-child { padding-left: 0.5rem; }
+.pot-sizes th small { display: block; color: var(--lid); font-size: 0.8rem; font-weight: 700; }
