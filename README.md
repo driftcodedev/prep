@@ -8,7 +8,7 @@ A one-page calculator for storing food for a long power outage. You enter each p
 - **Fire and water gear**: BIC lighters, LifeStraw filters (the cheapest mix of 1-, 3- and 5-packs for one straw per person age 3 and up), a waterBOB bathtub bladder, an EarthMinded rain diverter kit (Home Depot), a splitting axe and a Casio solar watch for timing the pot, with how long each lasts. Tick off anything you already own.
 - **Cooking over a fire**: what a simmer looks like and how to hold one on a fire, timers and doneness checks for rice and beans, and wrapping the pot to save wood.
 - **Water use**: how much water goes in the pot for the rice, beans, oats and milk, the household's daily total, and how long a full waterBOB and a rain-fed trash can last.
-- **Two videos** at the top: what happens when the grid goes down, and how to install the rain diverter.
+- **Three videos** at the top: what happens when the grid goes down, how to install the rain diverter, and a ChatGPT whistleblower interview.
 - **The weekly weigh-in rules** and the cooking and storage notes.
 - **The full report on paper**: print it from the page, or download it as a PDF.
 

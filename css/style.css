@@ -85,13 +85,14 @@ strong { font-weight: 700; }
 
 .videos {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 26rem), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
   gap: 1.5rem 2rem;
   padding: 1.75rem 0 2.25rem;
   border-top: 3px solid var(--ink);
 }
-.video { min-width: 0; }
-.video .section-title { font-size: 1.3rem; }
+/* Titles can wrap to different lengths; push them down so the players line up. */
+.video { min-width: 0; display: flex; flex-direction: column; }
+.video .section-title { font-size: 1.3rem; flex: 1; display: flex; align-items: flex-end; }
 .video-frame {
   position: relative;
   aspect-ratio: 16 / 9;
@@ -371,7 +372,8 @@ table.shop { table-layout: fixed; min-width: 38rem; }
   .print-meta { display: block; margin: 0 0 6pt; font-size: 9pt; color: var(--ink-2); }
   .videos { display: block; padding: 4pt 0 6pt; border-top: 2px solid #000; }
   .video + .video { margin-top: 4pt; }
-  .video .section-title { font-size: 12pt; margin: 0; }
+  .video { display: block; }
+  .video .section-title { font-size: 12pt; margin: 0; display: block; }
   .video-frame { display: none; }
   .video-link { display: block; margin: 2pt 0 0; font-size: 9.5pt; }
   .print-meta p { margin: 0; }

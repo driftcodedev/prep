@@ -349,6 +349,7 @@ export const DISCLAIMER = "These are estimates for healthy people, not medical a
 export const VIDEOS = [
   { title: "YouTube video: Grid goes down", url: "https://www.youtube.com/watch?v=IvpyouZfdlU", linkText: "youtube.com/watch?v=IvpyouZfdlU" },
   { title: "YouTube video: Installing the rain diverter", url: "https://www.youtube.com/watch?v=0gK3Pk67lkw", linkText: "youtube.com/watch?v=0gK3Pk67lkw" },
+  { title: "YouTube video: ChatGPT whistleblower", url: "https://www.youtube.com/watch?v=_g4l7YkDQwA", linkText: "youtube.com/watch?v=_g4l7YkDQwA" },
 ];
 
 export const SITE_URL = "https://driftcodedev.github.io/prep/";
