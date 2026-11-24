@@ -20,7 +20,7 @@ const $ = (sel, el = document) => el.querySelector(sel);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const newId = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
-const blankPerson = () => ({ id: newId(), name: "", sex: "", age: "", ft: "", inch: "", weight: "", activity: "light", flags: {} });
+const blankPerson = () => ({ id: newId(), name: "", sex: "", age: "", months: "0", ft: "", inch: "", weight: "", activity: "light", feeding: "formula", flags: {} });
 
 const EXAMPLE = [
   { name: "Sam", sex: "male", age: "34", ft: "5", inch: "10", weight: "210", activity: "light", flags: {} },
@@ -57,17 +57,26 @@ function save() {
 
 function toPerson(raw, i) {
   const n = (v) => (v === "" || v === null || v === undefined ? NaN : Number(v));
-  const ft = n(raw.ft), inch = raw.inch === "" ? 0 : n(raw.inch);
+  const years = n(raw.age);
+  // Age 0 means a baby under 1: the months picker gives the exact age.
+  const age = years === 0 ? (Number(raw.months) || 0) / 12 : years;
+  const ft = n(raw.ft), inch = n(raw.inch);
+  const hasHeight = Number.isFinite(ft) || Number.isFinite(inch);
   return {
     name: raw.name.trim() || `Person ${i + 1}`,
     sex: raw.sex,
-    age: n(raw.age),
-    heightIn: Number.isFinite(ft) ? ft * 12 + (Number.isFinite(inch) ? inch : 0) : NaN,
+    age,
+    heightIn: hasHeight ? (Number.isFinite(ft) ? ft : 0) * 12 + (Number.isFinite(inch) ? inch : 0) : NaN,
     weightLb: n(raw.weight),
     activity: raw.activity,
+    feeding: raw.feeding || "formula",
     flags: raw.flags || {},
   };
 }
+
+const MONTHS = Array.from({ length: 12 }, (_, m) => [String(m), m === 0 ? "Newborn (under 1 month)" : `${m} month${m > 1 ? "s" : ""} old`]);
+const FEEDS = [["formula", "Formula"], ["breast", "Breast milk"], ["both", "Both"]];
+const options = (list, selected) => list.map(([v, label]) => `<option value="${v}"${v === selected ? " selected" : ""}>${label}</option>`).join("");
 
 // ---------- the form ----------
 
@@ -79,6 +88,7 @@ function activityOptions(selected) {
 
 function personFieldset(raw, i) {
   const id = raw.id;
+  const isBaby = raw.age === "0";
   const flagBoxes = FLAGS.map(([k, label]) =>
     `<label class="check"><input type="checkbox" data-flag="${k}"${raw.flags?.[k] ? " checked" : ""}><span>${label}</span></label>`).join("");
   const anyFlag = FLAGS.some(([k]) => raw.flags?.[k]);
@@ -94,18 +104,25 @@ function personFieldset(raw, i) {
           <option value="female"${raw.sex === "female" ? " selected" : ""}>Female</option>
           <option value="male"${raw.sex === "male" ? " selected" : ""}>Male</option>
         </select></label>
-      <label class="field f-age"><span class="field-label">Age</span>
-        <input type="number" inputmode="numeric" min="1" max="110" step="1" data-k="age" value="${esc(raw.age)}"></label>
+      <div class="field f-age"><label class="field-label" for="age-${id}">Age</label>
+        <input id="age-${id}" type="number" inputmode="numeric" min="0" max="110" step="1" data-k="age" value="${esc(raw.age)}">
+        <select data-k="months" data-baby aria-label="Baby's age in months"${isBaby ? "" : " hidden"}>${options(MONTHS, String(raw.months ?? "0"))}</select>
+        <span class="field-hint" data-not-baby${isBaby ? " hidden" : ""}>Under 1? Enter 0.</span></div>
       <div class="field f-height" role="group" aria-labelledby="h-${id}"><span class="field-label" id="h-${id}">Height</span>
         <div class="pair">
-          <span class="unit-input"><input type="number" inputmode="numeric" min="1" max="8" data-k="ft" value="${esc(raw.ft)}" aria-label="Feet"><span class="unit">ft</span></span>
+          <span class="unit-input"><input type="number" inputmode="numeric" min="0" max="8" data-k="ft" value="${esc(raw.ft)}" aria-label="Feet"><span class="unit">ft</span></span>
           <span class="unit-input"><input type="number" inputmode="numeric" min="0" max="11" data-k="inch" value="${esc(raw.inch)}" aria-label="Inches"><span class="unit">in</span></span>
         </div></div>
       <label class="field f-weight"><span class="field-label">Weight</span>
-        <span class="unit-input"><input type="number" inputmode="decimal" min="15" max="600" data-k="weight" value="${esc(raw.weight)}"><span class="unit">lb</span></span></label>
-      <label class="field f-activity"><span class="field-label">Activity during an outage</span>
-        <select data-k="activity" aria-describedby="a-${id}">${activityOptions(raw.activity)}</select>
-        <span class="field-hint" id="a-${id}" data-activity-hint>${esc(ACTIVITY[raw.activity]?.hint || "")}. Unsure? Pick one level above today.</span></label>
+        <span class="unit-input"><input type="number" inputmode="decimal" min="3" max="600" step="any" data-k="weight" value="${esc(raw.weight)}"><span class="unit">lb</span></span></label>
+      <div class="field f-activity">
+        <label class="sub-field" data-not-baby${isBaby ? " hidden" : ""}><span class="field-label">Activity during an outage</span>
+          <select data-k="activity" aria-describedby="a-${id}">${activityOptions(raw.activity)}</select>
+          <span class="field-hint" id="a-${id}" data-activity-hint>${esc(ACTIVITY[raw.activity]?.hint || "")}. Unsure? Pick one level above today.</span></label>
+        <label class="sub-field" data-baby${isBaby ? "" : " hidden"}><span class="field-label">How the baby is fed</span>
+          <select data-k="feeding">${options(FEEDS, raw.feeding || "formula")}</select>
+          <span class="field-hint">Formula goes by weight, so height is optional for babies.</span></label>
+      </div>
     </div>
     <div class="person-foot">
       <details class="special"${anyFlag ? " open" : ""}><summary>Special situations</summary><div class="flags">${flagBoxes}</div></details>
@@ -423,6 +440,11 @@ function init() {
     const raw = state.people.find((p) => p.id === fs.dataset.id);
     if (!raw) return;
     if (e.target.dataset.k) raw[e.target.dataset.k] = e.target.value;
+    if (e.target.dataset.k === "age") {
+      const baby = raw.age === "0";
+      fs.querySelectorAll("[data-baby]").forEach((el) => { el.hidden = !baby; });
+      fs.querySelectorAll("[data-not-baby]").forEach((el) => { el.hidden = baby; });
+    }
     if (e.target.dataset.k === "activity") {
       const hint = $("[data-activity-hint]", fs);
       if (hint) hint.textContent = `${ACTIVITY[raw.activity]?.hint || ""}. Unsure? Pick one level above today.`;

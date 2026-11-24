@@ -16,6 +16,11 @@ export const FOODS = {
   milk:  { name: "Nonfat dry milk",   unit: "cup",  kcal: 80,  protein: 8,    grams: 23, powderCups: 1 / 3 },
   whole: { name: "Whole dry milk",    unit: "cup",  kcal: 150, protein: 8,    grams: 30, powderCups: 1 / 4 },
   salt:  { name: "Iodized salt",      unit: "tsp",  kcal: 0,   protein: 0,    grams: 6 },
+  // Babies. Formula is counted in fl oz of made-up formula (100 calories per 5 fl oz); a 33.2-oz
+  // (941 g) can makes about 238 fl oz. Infant cereal is counted in level tablespoons of dry cereal
+  // (Gerber: 60 calories per ¼ cup, 15 g).
+  formula: { name: "Infant formula",  unit: "fl oz", kcal: 20, protein: 0.41, grams: 3.95 },
+  cereal:  { name: "Infant cereal",   unit: "tbsp", kcal: 15,  protein: 0.5,  grams: 3.75 },
 };
 
 // What each shopping-list line buys. size is in the same unit the calculator totals:
@@ -75,6 +80,21 @@ export const PRODUCTS = {
     item: "Women's 50+ multivitamin", pack: "300 tablets, One A Day Women's 50+", store: "Costco", where: "Warehouse",
     size: 300, price: 15.99, priceNote: "$15.79–20.99",
     url: "https://app.warehouserunner.com/costco/1274752-one-a-day-women-s-50-healthy-advantage-300-tablets",
+  },
+  formula: {
+    item: "Infant formula (powder)", pack: "42-oz tub, Kirkland Signature ProCare", store: "Costco", where: "Warehouse",
+    sizeGrams: 1190, price: 29.99, priceNote: "$23.97–29.99",
+    url: "https://app.warehouserunner.com/costco/1562719-kirkland-signature-procare-infant-formula-42oz",
+  },
+  cereal: {
+    item: "Infant cereal with iron", pack: "8-oz box, Earth's Best multi-grain", store: "Amazon", where: "Online",
+    sizeGrams: 227, price: 3.88,
+    url: "https://www.amazon.com/dp/B000VK2ASE",
+  },
+  dropsD: {
+    item: "Baby vitamin D drops", pack: "2 × 50 mL, Enfamil D-Vi-Sol", store: "Amazon", where: "Online",
+    size: 100, price: 19.94,
+    url: "https://www.amazon.com/dp/B09LKPFQBC",
   },
   multiKids: {
     item: "Children's chewable multivitamin", pack: "180 tablets, Flintstones Complete", store: "Amazon", where: "Online",
@@ -202,6 +222,18 @@ const WALMART = {
     item: "Children's chewable multivitamin", pack: "150 tablets, Equate Children's Chewable Complete", size: 150, price: 8.64,
     url: "https://www.walmart.com/ip/Equate-Children-s-Chewable-Complete-Multivitamin-Tablets-for-Children-s-Health-150-Count/10324825",
   },
+  formula: {
+    item: "Infant formula (powder)", pack: "33.2-oz can, Parent's Choice Advantage", sizeGrams: 941, price: 24.28,
+    url: "https://www.walmart.com/ip/1231795077",
+  },
+  cereal: {
+    item: "Infant cereal with iron", pack: "8-oz box, Gerber oatmeal", sizeGrams: 227, price: 3.48,
+    url: "https://www.walmart.com/ip/19866765658",
+  },
+  dropsD: {
+    item: "Baby vitamin D drops", pack: "50 mL, Enfamil D-Vi-Sol", size: 50, price: 9.97,
+    url: "https://www.walmart.com/ip/16902073",
+  },
   vitC: {
     item: "Vitamin C, backup", pack: "100 tablets, Spring Valley 500 mg", size: 100, price: 4.74,
     url: "https://www.walmart.com/ip/Spring-Valley-Vitamin-C-with-Rose-Hips-500-mg-100-Count-Dietary-Supplement-Tablets-for-Immune-Health/6139509340",
@@ -235,6 +267,20 @@ export const COOK_WATER = {
   milk: 1,       // 1 cup water per cup of milk
   beansSoak: 5,  // overnight soak (10 cups per 2 cups of beans); reuse it for washing or flushing
   beansCook: 3,  // fresh water to simmer soaked beans; top up if it boils low
+};
+
+// Babies under 1 (American Academy of Pediatrics, CDC, WHO growth standards).
+export const INFANT = {
+  ozPerLb: 2.5,          // formula: about 2½ fl oz a day per pound of body weight
+  maxOz: 32,             // ... and no more than about 32 fl oz a day
+  maxOzFrom10m: 27,      // 10–12 months: 24–30 oz as solid food grows
+  waterPerOz: 0.9,       // fl oz of water per fl oz of made-up formula (each scoop adds a little volume)
+  cerealTbsp: (m) => (m < 6 ? 0 : m < 8 ? 5 : 7),          // 6–8 mo: 4–6 tbsp a day; 8–12 mo: 6–8 tbsp
+  mashCups: (m) => (m < 8 ? 0 : 1 / 16),                    // from 8 mo: 1 tbsp each of dry rice and beans, cooked soft
+  gainLbPerMonth: (m) => (m < 3 ? 2.2 : m < 6 ? 1.1 : 0.65),
+  gainInPerMonth: (m) => (m < 3 ? 1.5 : m < 6 ? 0.8 : 0.53),
+  birthLengthIn: 19.6,
+  dropsMlPerDay: 1,      // D-Vi-Sol: 1 mL = 400 IU vitamin D
 };
 
 export const COSTCO_MEMBERSHIP = 65;

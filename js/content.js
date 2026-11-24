@@ -31,7 +31,19 @@ export function planSummary(hh) {
   return `Plan for ${plural(hh.plans.length, "person", "people")} for ${plural(hh.months, "month")}, shopping at ${shops}.`;
 }
 
+export const FEEDING = { formula: "Formula", breast: "Breast milk", both: "Breast milk and formula" };
+
+export function monthsText(m) {
+  const n = Math.floor(m + 1e-9);
+  return n === 0 ? "newborn" : `${n} month${n === 1 ? "" : "s"} old`;
+}
+
 export function personSummary(p) {
+  if (p.age < 1) {
+    const sex = p.sex === "male" ? "Boy" : "Girl";
+    const len = Number.isFinite(p.heightIn) ? `, ${Math.round(p.heightIn)} in long` : "";
+    return `${sex}, ${monthsText(p.age * 12)}, ${Math.round(p.weightLb * 10) / 10} lb${len}, ${FEEDING[p.feeding || "formula"].toLowerCase()}`;
+  }
   const ft = Math.floor(p.heightIn / 12);
   const inch = Math.round(p.heightIn - ft * 12);
   const sex = p.sex === "male" ? "Male" : "Female";
@@ -43,6 +55,7 @@ export function statusLine(pl) {
     case "lose": return `Lose to ${pl.goalLb} lb, then hold there`;
     case "gain": return `Gain to ${pl.goalLb} lb, then hold there`;
     case "child": return "Growing child: no dieting";
+    case "infant": return `Baby: ${FEEDING[pl.feeding].toLowerCase()} first, no dieting`;
     case "pregnant": return "Pregnant: no weight loss, extra food";
     case "breastfeeding": return "Breastfeeding: no weight loss, extra food";
     default: return "Hold current weight";
@@ -65,7 +78,24 @@ export function waterText(pl) {
 
 // ---------- ration cards ----------
 
+function infantRows(pl) {
+  const r = pl.phase1;
+  const m = pl.ageMonths;
+  const rows = [];
+  if (pl.feeding !== "formula") rows.push({ label: "Breast milk", amount: pl.feeding === "both" ? "About half the feeds, on demand" : "On demand, day and night" });
+  if (pl.feeding !== "breast") rows.push({ label: "Formula", sub: "made up", amount: `${Math.round(r.formula)} fl oz a day now, rising with the baby's weight` });
+  rows.push({ label: "Infant cereal", sub: "dry", amount: m >= 6 ? `${r.cereal} tbsp a day, mixed with breast milk or formula` : "From 6 months: 5 tbsp a day, mixed with breast milk or formula" });
+  rows.push({ label: "Soft food", amount: m >= 8 ? "1 tbsp each of dry rice and beans, cooked soft and mashed" : "From 8 months: 1 tbsp each of dry rice and beans, cooked soft and mashed" });
+  rows.push({ label: "Vitamin D", amount: r.dropsD ? `1 mL drops (D-Vi-Sol) a day${pl.feeding === "formula" ? ", until the baby drinks 32 oz of formula a day" : ""}` : "None needed while the baby drinks 32 oz of formula a day" });
+  const formulaWater = r.formula * 0.9 / 8;
+  rows.push({ label: "Water", amount: m < 6
+    ? `No plain water before 6 months${r.formula ? `. About ${fraction(Math.round(formulaWater * 4) / 4)} cups of boiled water a day goes into formula` : ""}`
+    : `A few sips from a cup, about ½ cup a day${r.formula ? `, plus about ${fraction(Math.round(formulaWater * 4) / 4)} cups of boiled water for formula` : ""}` });
+  return rows;
+}
+
 export function cardRows(pl) {
+  if (pl.isInfant) return infantRows(pl);
   const r = pl.phase1;
   return [
     { label: "Rice", sub: "dry", amount: cupsText(r.rice), glyph: [r.rice, "cup"] },
@@ -81,11 +111,22 @@ export function cardRows(pl) {
 }
 
 export function cardEnergy(pl) {
+  if (pl.isInfant) {
+    const peak = Math.round(pl.infant.peakFormula);
+    if (pl.feeding === "breast") return "Feed on demand. Babies grow fast, so expect them to want more each month.";
+    return `Formula goes by weight: about 2½ fl oz a day per pound, up to 32 oz. The shopping list follows the baby's growth, up to about ${peak} fl oz a day.`;
+  }
   return `About ${num(pl.phase1Kcal)} calories and ${num(pl.phase1Protein)} g of protein a day. Needs at least ${num(pl.proteinNeed)} g of protein.`;
 }
 
 export function cardNotes(pl, hh) {
   const notes = [];
+  if (pl.isInfant) {
+    const i = pl.infant;
+    if (pl.ageMonths < 6) notes.push("At 6 months, start iron-fortified infant cereal. At 8 months, add a little mashed rice and beans from the family pot.");
+    if (i.toddlerDays > 0) notes.push(`Turns 1 in about ${Math.max(1, Math.round(i.daysToOne / 30.4))} month${Math.round(i.daysToOne / 30.4) === 1 ? "" : "s"}. From then on, switch to whole milk (2 cups a day) and the toddler amounts. The shopping list already includes them.`);
+    return notes;
+  }
   const after = (weeks) => `Expected to reach ${pl.goalLb} lb in about ${weeks} weeks.`;
   const end = `Expected weight after ${plural(hh.months, "month")}: about ${Math.round(pl.sim.endLb)} lb.`;
   if (pl.mode === "lose" || pl.mode === "gain") {
@@ -110,7 +151,7 @@ export function cookingData(hh) {
     const s = hh.shares[i];
     const riceCooked = Math.round(s.riceCooked * 4) / 4;
     const beansCooked = Math.round(s.beansCooked * 4) / 4;
-    return [pl.person.name, riceCooked > 0 ? cupsText(riceCooked) : "none", beansCooked > 0 ? cupsText(beansCooked) : "none", `${cupsText(pl.phase1.oats)} dry`];
+    return [pl.person.name, riceCooked > 0 ? cupsText(riceCooked) : "none", beansCooked > 0 ? cupsText(beansCooked) : "none", pl.phase1.oats > 0 ? `${cupsText(pl.phase1.oats)} dry` : "none"];
   });
   const milkBits = [];
   if (c.milk > 0) milkBits.push(`${fraction(c.milk)} cups of nonfat milk (${cupsText(c.milk / 3)} powder)`);
@@ -123,6 +164,8 @@ export function cookingData(hh) {
     { label: "Oats", text: `${cupsText(c.oats)} of oats in ${cupsText(c.oats * COOK_WATER.oats)} of water. Simmer about 5 minutes, stirring, until thick.` },
   ];
   if (c.milk + c.whole > 0) water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water for the milk. Use boiled water that has cooled, or water from the waterBOB.` });
+  const formulaOz = hh.plans.reduce((a, pl) => a + (pl.phase1.formula || 0), 0);
+  if (formulaOz > 0) water.push({ label: "Formula", text: `about ${num(formulaOz)} fl oz a day takes ${fraction(Math.round(formulaOz * 0.9 / 8 * 4) / 4)} cups of water. Boil it for 1 minute, then mix exactly as the can says. Make one bottle at a time and use it within 2 hours.` });
   water.push({ label: "Save wood", text: "once rice has boiled for a minute, or beans have boiled hard for 10, you can take the lidded pot off the fire and wrap it tightly in a blanket or sleeping bag. It keeps cooking in its own heat with no simmering to watch. Check after an hour for rice and 3 hours for beans; if they're not done, bring them back to a boil and wrap again. Eat it hot." });
   return {
     rice: `${cupsText(c.rice)} of dry rice`,
@@ -321,6 +364,7 @@ export const ABOUT = [
   { lead: "Healthy weight", text: "Adults above the CDC's healthy range (BMI 18.5–24.9) are planned down to BMI 24.4, the top of that range. Below it, they're planned up to BMI 18.5." },
   { lead: "Adult calories", text: "The Mifflin-St Jeor equation times an activity factor. Weight-loss rations are 500 calories below maintenance and never under 1,500 for men or 1,200 for women." },
   { lead: "Children", text: "The National Academies' 2023 energy equations, with no weight loss. Under-2s get whole milk, and milk amounts follow the American Academy of Pediatrics." },
+  { lead: "Babies under 1", text: "Formula at about 2½ fl oz a day per pound, up to 32 oz, following the American Academy of Pediatrics. Iron-fortified infant cereal from 6 months (5, then 7 tablespoons a day) and a little soft food from 8 months. Vitamin D drops (400 IU) for any breastfed baby, and for formula-fed babies drinking under 32 oz. Weight gain follows typical growth, and at the first birthday the toddler ration takes over." },
   { lead: "Pregnancy and breastfeeding", text: "No weight loss, about 350 extra calories when pregnant and 400 when breastfeeding." },
   { lead: "Drinking water", text: "At least ½ gallon a day for teens and adults, the emergency guideline from the CDC and state health departments. Young children, pregnancy and breastfeeding use the National Academies' intake from drinks, milk included." },
   { lead: "Shopping list", text: "A day-by-day weight model for each adult that follows the weekly weigh-in rules, plus the margin you chose, rounded up to whole packages." },
@@ -339,6 +383,10 @@ export const SOURCES = [
   ["CDC emergency water supply", "https://www.cdc.gov/water-emergency/about/how-to-create-and-store-an-emergency-water-supply.html"],
   ["Ready.gov water", "https://www.ready.gov/water"],
   ["LifeStraw Personal", "https://lifestraw.com/products/lifestraw"],
+  ["AAP formula amounts", "https://www.healthychildren.org/English/ages-stages/baby/formula-feeding/Pages/Amount-and-Schedule-of-Formula-Feedings.aspx"],
+  ["CDC formula in an emergency", "https://www.cdc.gov/nutrition/emergencies-infant-feeding/powdered-infant-formula.html"],
+  ["CDC vitamin D for babies", "https://www.cdc.gov/nutrition/infantandtoddlernutrition/formula-feeding/how-much-how-often.html"],
+  ["Allina Health feeding schedules", "https://www.allinahealth.org/health-conditions-and-treatments/health-library/patient-education/beginnings/newborn-feeding/general-feeding-schedules"],
   ["waterBOB", "https://www.amazon.com/dp/B001AXLUX2"],
   ["EarthMinded DIY rain barrel kit", "https://www.homedepot.com/p/EarthMinded-DIY-Rain-Barrel-Diverter-and-Parts-Kit-RBK-0001/203256576"],
   ["BIC Classic lighters", "https://us.bic.com/en_us/bic-special-edition-pocket-lighters-black-8-count.html"],

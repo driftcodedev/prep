@@ -1,7 +1,7 @@
 // Calculation engine. Pure functions only, so it runs the same in the browser and in tests.
 import {
   FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET, productsFor,
-  BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE, BLADDER_GALLONS, COOK_WATER,
+  BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE, BLADDER_GALLONS, COOK_WATER, INFANT,
 } from "./data.js";
 
 const KG_PER_LB = 0.45359237;
@@ -65,7 +65,7 @@ export function childEER(p) {
     const [c0, cA, cH, cW] = CHILD_EQ[p.sex][ACTIVITY[p.activity].pal];
     base = c0 + cA * a + cH * cm + cW * kg;
   }
-  return base + growthCost(p.sex, a);
+  return Math.max(500, base + growthCost(p.sex, a));
 }
 
 // ---------- rations ----------
@@ -73,15 +73,17 @@ export function childEER(p) {
 export function kcalOf(r) {
   return (r.rice || 0) * FOODS.rice.kcal + (r.beans || 0) * FOODS.beans.kcal + (r.oats || 0) * FOODS.oats.kcal +
     (r.pb || 0) * FOODS.pb.kcal + (r.oil || 0) * FOODS.oil.kcal + (r.milk || 0) * FOODS.milk.kcal +
-    (r.whole || 0) * FOODS.whole.kcal;
+    (r.whole || 0) * FOODS.whole.kcal + (r.formula || 0) * FOODS.formula.kcal + (r.cereal || 0) * FOODS.cereal.kcal;
 }
 
 export function proteinOf(r) {
   return (r.rice || 0) * FOODS.rice.protein + (r.beans || 0) * FOODS.beans.protein + (r.oats || 0) * FOODS.oats.protein +
-    (r.pb || 0) * FOODS.pb.protein + (r.milk || 0) * FOODS.milk.protein + (r.whole || 0) * FOODS.whole.protein;
+    (r.pb || 0) * FOODS.pb.protein + (r.milk || 0) * FOODS.milk.protein + (r.whole || 0) * FOODS.whole.protein +
+    (r.formula || 0) * FOODS.formula.protein + (r.cereal || 0) * FOODS.cereal.protein;
 }
 
 export function ageBand(age) {
+  if (age < 1) return "infant";
   if (age < 2) return "under2";
   if (age < 4) return "2to3";
   if (age < 9) return "4to8";
@@ -147,10 +149,18 @@ export function validatePerson(p) {
   const errors = [];
   if (!(p.sex === "male" || p.sex === "female")) errors.push("Choose male or female.");
   if (!Number.isFinite(p.age)) errors.push("Enter an age.");
-  else if (p.age < 1) errors.push("Babies under 1 need breast milk or formula, which this plan does not cover.");
+  else if (p.age < 0) errors.push("Check the age.");
   else if (p.age > 110) errors.push("Check the age.");
-  if (!Number.isFinite(p.heightIn) || p.heightIn < 24 || p.heightIn > 96) errors.push("Enter a height between 2 ft and 8 ft.");
-  if (!Number.isFinite(p.weightLb) || p.weightLb < 15 || p.weightLb > 600) errors.push("Enter a weight between 15 and 600 lb.");
+  if (Number.isFinite(p.age) && p.age < 1) {
+    // Babies: height is optional, and formula goes by weight.
+    if (Number.isFinite(p.heightIn) && (p.heightIn < 12 || p.heightIn > 40)) errors.push("Check the baby's length, or leave it blank.");
+    if (!Number.isFinite(p.weightLb) || p.weightLb < 3 || p.weightLb > 40) errors.push("Enter the baby's weight in pounds (3 to 40 lb).");
+    if (!["formula", "breast", "both"].includes(p.feeding || "formula")) errors.push("Choose how the baby is fed.");
+    return errors;
+  }
+  const baby = " For a baby under 1, set the age to 0 and pick the months.";
+  if (!Number.isFinite(p.heightIn) || p.heightIn < 24 || p.heightIn > 96) errors.push(`Enter a height between 2 ft and 8 ft.${Number.isFinite(p.age) && p.age < 2 ? baby : ""}`);
+  if (!Number.isFinite(p.weightLb) || p.weightLb < 12 || p.weightLb > 600) errors.push(`Enter a weight between 12 and 600 lb.${Number.isFinite(p.age) && p.age < 2 && !errors.length ? baby : ""}`);
   if (!ACTIVITY[p.activity]) errors.push("Choose an activity level.");
   return errors;
 }
@@ -158,6 +168,7 @@ export function validatePerson(p) {
 // ---------- one person ----------
 
 export function planPerson(p, days) {
+  if (p.age < 1) return planInfant(p, days);
   const f = p.flags || {};
   const isChild = p.age < 18;
   const plan = {
@@ -224,6 +235,86 @@ export function planPerson(p, days) {
   return plan;
 }
 
+// ---------- babies under 1 ----------
+
+// One day of a baby's food at a given age (months) and weight (lb).
+export function infantDay(m, lb, feeding = "formula") {
+  const share = feeding === "breast" ? 0 : feeding === "both" ? 0.5 : 1;
+  let need = Math.min(INFANT.maxOz, INFANT.ozPerLb * lb);
+  if (m >= 10) need = Math.min(need, INFANT.maxOzFrom10m);
+  const formula = need * share;
+  const mash = INFANT.mashCups(m);
+  return {
+    rice: mash, beans: mash, oats: 0, pb: 0, oil: 0, milk: 0, whole: 0, salt: 0,
+    formula, cereal: INFANT.cerealTbsp(m),
+    breastOz: need - formula,
+    // Vitamin D drops for any breast milk, or for formula under 32 oz a day.
+    dropsD: share < 1 || formula < INFANT.maxOz - 1e-9 ? INFANT.dropsMlPerDay : 0,
+  };
+}
+
+function planInfant(p, days) {
+  const feeding = p.feeding || "formula";
+  const m0 = p.age * 12;
+  const daysToOne = Math.max(0, Math.round((12 - m0) * 30.4));
+  const infantDays = Math.min(days, daysToOne);
+  const totals = { rice: 0, beans: 0, oats: 0, pb: 0, oil: 0, milk: 0, whole: 0, salt: 0, formula: 0, cereal: 0, supp: 0 };
+  const suppByKey = {};
+  let lb = p.weightLb;
+  let len = Number.isFinite(p.heightIn) ? p.heightIn : medianLength(m0);
+  let peakOz = 0;
+  let peakFormula = 0;
+  for (let d = 0; d < infantDays; d++) {
+    const m = m0 + d / 30.4;
+    const day = infantDay(m, lb, feeding);
+    for (const k of Object.keys(totals)) if (k !== "supp") totals[k] += day[k] || 0;
+    if (day.dropsD) suppByKey.dropsD = (suppByKey.dropsD || 0) + day.dropsD;
+    peakOz = Math.max(peakOz, day.formula + day.breastOz);
+    peakFormula = Math.max(peakFormula, day.formula);
+    lb += INFANT.gainLbPerMonth(m) / 30.4;
+    len += INFANT.gainInPerMonth(m) / 30.4;
+  }
+  // After the first birthday, the toddler ration takes over (whole milk and family food).
+  const toddlerDays = days - infantDays;
+  let toddler = null;
+  if (toddlerDays > 0) {
+    toddler = planPerson({ ...p, age: 1, weightLb: Math.max(lb, 15), heightIn: Math.max(len, 26), feeding: undefined }, toddlerDays);
+    for (const k of Object.keys(totals)) if (k !== "supp") totals[k] += toddler.sim.totals[k] || 0;
+    suppByKey[toddler.supplement.key] = (suppByKey[toddler.supplement.key] || 0) + toddler.sim.totals.supp;
+  }
+  const today = infantDay(m0, p.weightLb, feeding);
+  const plan = {
+    person: p, isChild: true, isInfant: true, mode: "infant", feeding, ageMonths: m0, goalLb: null,
+    bmi: NaN, waterCups: m0 < 6 ? 0 : 0.5,
+    supplement: today.dropsD ? { key: "dropsD", perDay: INFANT.dropsMlPerDay, text: "1 mL vitamin D drops" } : null,
+    phase1: today,
+    phase1Target: kcalOf(today) + today.breastOz * 20,
+    proteinNeed: m0 < 6 ? 9.1 : 11,
+    infant: {
+      daysToOne, infantDays, toddlerDays, toddler,
+      at6: m0 < 6 ? infantDay(6, p.weightLb + growthBetween(m0, 6), feeding) : null,
+      peakOz, peakFormula,
+    },
+  };
+  plan.phase1Kcal = kcalOf(today) + today.breastOz * 20; // breast milk is about 20 calories an ounce too
+  plan.phase1Protein = proteinOf(today);
+  plan.sim = { totals, suppByKey, endLb: lb, reachedDay: null, riceChanges: 0 };
+  plan.warnings = warningsFor(plan);
+  return plan;
+}
+
+function growthBetween(m0, m1) {
+  let lb = 0;
+  for (let m = m0; m < m1; m += 1 / 30.4) lb += INFANT.gainLbPerMonth(m) / 30.4;
+  return lb;
+}
+
+function medianLength(m) {
+  let len = INFANT.birthLengthIn;
+  for (let x = 0; x < m; x += 1 / 30.4) len += INFANT.gainInPerMonth(x) / 30.4;
+  return len;
+}
+
 // Day-by-day weight model that also applies the weekly weigh-in rules,
 // so the shopping list matches what each person will actually eat.
 export function simulate(plan, days) {
@@ -278,6 +369,17 @@ function warningsFor(plan) {
   const p = plan.person;
   const f = p.flags || {};
   const w = [];
+  if (plan.isInfant) {
+    const m = plan.ageMonths;
+    if (plan.feeding !== "formula") w.push("Breast milk is the safest baby food in an outage: keep breastfeeding as long as you can. Tick Breastfeeding under Special situations on the mother's card so she gets extra food.");
+    if (plan.feeding !== "breast") {
+      w.push("Mix powdered formula exactly as the can says, with water boiled for 1 minute. Never add extra water to stretch it.");
+      if (m < 2) w.push("Under 2 months old: let the boiled water cool only about 5 minutes, so it's still hot (at least 158°F), before mixing in the powder, then cool the bottle before feeding. The CDC says ready-to-feed liquid formula is safest at this age in an emergency, so keep some on hand if you can.");
+    }
+    w.push("No plain water before 6 months, no honey and no cow's milk to drink before age 1.");
+    w.push("Weigh the baby every week: hold the baby on the scale and subtract your own weight. Babies should keep gaining; if not, feed more often and get medical help if you can.");
+    return w;
+  }
   if (p.age < 2) w.push("Use whole dry milk until the 2nd birthday. Mash the beans and cook the rice soft.");
   if (p.age < 4) w.push("Never give peanut butter by the spoonful to a child under 4. Spread it thin or stir it into the oatmeal.");
   if (p.age >= 2 && p.age < 4) w.push("Crush the chewable vitamin and mix it into food.");
@@ -300,6 +402,7 @@ function warningsFor(plan) {
 // National Academies adequate intake from drinks, which includes milk.
 export function waterCups(p) {
   const f = p.flags || {};
+  if (p.age < 1) return p.age * 12 < 6 ? 0 : 0.5;
   if (p.age < 4) return 4;
   if (p.age < 9) return 5;
   if (p.age < 14) return p.sex === "male" ? 8 : 7;
@@ -313,9 +416,9 @@ export function waterCups(p) {
 export function waterUse(pl) {
   const r = pl.phase1;
   const milkCups = (r.milk || 0) + (r.whole || 0);
-  const drink = pl.person.age < 9 ? Math.max(0, pl.waterCups - milkCups) : pl.waterCups;
+  const drink = pl.isInfant ? pl.waterCups : pl.person.age < 9 ? Math.max(0, pl.waterCups - milkCups) : pl.waterCups;
   const cook = (r.rice || 0) * COOK_WATER.rice + (r.oats || 0) * COOK_WATER.oats +
-    milkCups * COOK_WATER.milk + (r.beans || 0) * COOK_WATER.beansCook;
+    milkCups * COOK_WATER.milk + (r.beans || 0) * COOK_WATER.beansCook + (r.formula || 0) * INFANT.waterPerOz / 8;
   const soak = (r.beans || 0) * COOK_WATER.beansSoak;
   return { drink, cook, soak, total: drink + cook + soak };
 }
@@ -354,11 +457,12 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   const plans = valid.map((p) => planPerson(p, days));
   const have = { scale: hasScale, ...owned };
 
-  const sum = { rice: 0, beans: 0, oats: 0, pb: 0, oil: 0, milk: 0, whole: 0, salt: 0 };
+  const sum = { rice: 0, beans: 0, oats: 0, pb: 0, oil: 0, milk: 0, whole: 0, salt: 0, formula: 0, cereal: 0 };
   const supp = {};
   for (const pl of plans) {
-    for (const k of Object.keys(sum)) sum[k] += pl.sim.totals[k];
-    supp[pl.supplement.key] = (supp[pl.supplement.key] || 0) + pl.sim.totals.supp;
+    for (const k of Object.keys(sum)) sum[k] += pl.sim.totals[k] || 0;
+    if (pl.sim.suppByKey) for (const [k, v] of Object.entries(pl.sim.suppByKey)) supp[k] = (supp[k] || 0) + v;
+    else supp[pl.supplement.key] = (supp[pl.supplement.key] || 0) + pl.sim.totals.supp;
   }
 
   const grams = {};
@@ -427,7 +531,7 @@ function shoppingFor(ctx, products) {
   };
   const lbText = (g) => `${Math.round(g / 453.6)} lb`;
 
-  for (const key of ["rice", "beans", "oats", "pb", "oil", "salt", "milk", "whole"]) {
+  for (const key of ["rice", "beans", "oats", "pb", "oil", "salt", "milk", "whole", "formula", "cereal"]) {
     if (grams[key] <= 0) continue;
     const qty = Math.ceil(grams[key] / products[key].sizeGrams - 1e-9);
     let amount;
@@ -435,14 +539,16 @@ function shoppingFor(ctx, products) {
     else if (key === "pb") amount = `${Math.round(grams.pb / 28.35)} oz`;
     else if (key === "milk" || key === "whole") amount = `${Math.round(sum[key] * reserve)} cups of milk`;
     else if (key === "salt") amount = `${Math.round(grams.salt / 28.35)} oz`;
+    else if (key === "formula") amount = `${Math.round(sum.formula * reserve).toLocaleString("en-US")} fl oz made up`;
+    else if (key === "cereal") amount = `${Math.round(sum.cereal * reserve)} tbsp`;
     else amount = lbText(grams[key]);
     addLine(key, qty, amount, "food");
   }
 
-  for (const key of ["multiMen", "multiWomen", "multiWomen50", "multiKids", "drops"]) {
+  for (const key of ["multiMen", "multiWomen", "multiWomen50", "multiKids", "drops", "dropsD"]) {
     if (!supp[key]) continue;
     const need = supp[key] * reserve;
-    addLine(key, Math.ceil(need / products[key].size - 1e-9), key === "drops" ? `${Math.ceil(need)} mL` : `${Math.ceil(need)} tablets`, "food");
+    addLine(key, Math.ceil(need / products[key].size - 1e-9), key.startsWith("drops") ? `${Math.ceil(need)} mL` : `${Math.ceil(need)} tablets`, "food");
   }
   if (plans.some((pl) => pl.person.age >= 4)) addLine("vitC", 1, "backup supply", "food");
 

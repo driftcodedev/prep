@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse } from "../js/calc.js";
+import { planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse, infantDay } from "../js/calc.js";
 import { buildPdf } from "../js/pdf.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
@@ -72,8 +72,13 @@ test("Household shopping list adds up", () => {
   assert.ok(hh.total > 300 && hh.total < 800, `total ${hh.total}`);
 });
 
-test("Validation catches babies and missing fields", () => {
-  assert.ok(validatePerson({ sex: "male", age: 0, heightIn: 25, weightLb: 15, activity: "light" }).length > 0);
+test("Validation: babies of any length are fine, missing fields are caught", () => {
+  // A newborn with no length entered, and one 12 inches long.
+  assert.equal(validatePerson({ sex: "male", age: 0, heightIn: NaN, weightLb: 7, activity: "light", feeding: "formula" }).length, 0);
+  assert.equal(validatePerson({ sex: "female", age: 0, heightIn: 12, weightLb: 5, activity: "light", feeding: "breast" }).length, 0);
+  assert.ok(validatePerson({ sex: "male", age: 0, heightIn: NaN, weightLb: 2, activity: "light" }).length > 0);
+  // A newborn typed in as age 1 gets pointed to age 0.
+  assert.match(validatePerson({ sex: "male", age: 1, heightIn: 12, weightLb: 10, activity: "light" })[0], /set the age to 0/);
   assert.equal(validatePerson(brett).length, 0);
 });
 
@@ -149,4 +154,31 @@ test("Young children's milk water isn't counted twice", () => {
   const pl = planPerson({ name: "Leo", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }, 182);
   const w = waterUse(pl);
   assert.equal(w.drink, 2); // 4 cups including 2 cups of milk
+});
+
+test("Newborn on formula: 2½ oz per pound, capped at 32 oz, with vitamin D until 32 oz", () => {
+  assert.equal(infantDay(0, 8, "formula").formula, 20);
+  assert.equal(infantDay(3, 14, "formula").formula, 32);
+  assert.equal(infantDay(3, 14, "formula").dropsD, 0);
+  assert.equal(infantDay(0, 8, "formula").dropsD, 1);
+  assert.equal(infantDay(0, 8, "breast").formula, 0);
+  assert.equal(infantDay(7, 17, "breast").cereal, 5);
+  const baby = { name: "B", sex: "male", age: 0, heightIn: NaN, weightLb: 8, activity: "light", flags: {}, feeding: "formula" };
+  const pl = planPerson(baby, 182);
+  assert.equal(pl.mode, "infant");
+  // About 30 oz a day on average over six months.
+  assert.ok(pl.sim.totals.formula > 5000 && pl.sim.totals.formula < 6000, `formula ${pl.sim.totals.formula}`);
+  const hh = planHousehold({ months: 6, people: [baby] });
+  assert.ok(hh.lines.some((l) => l.key === "formula" && l.qty > 15));
+  assert.ok(hh.lines.some((l) => l.key === "dropsD"));
+  assert.ok(!hh.lines.some((l) => l.key.startsWith("straw"))); // too young for a LifeStraw
+});
+
+test("A 9-month-old switches to the toddler ration at the first birthday", () => {
+  const baby = { name: "C", sex: "female", age: 0.75, heightIn: NaN, weightLb: 18, activity: "light", flags: {}, feeding: "breast" };
+  const pl = planPerson(baby, 182);
+  assert.equal(pl.infant.infantDays, 91);
+  assert.equal(pl.infant.toddlerDays, 91);
+  assert.ok(pl.sim.totals.whole > 150); // whole milk after age 1
+  assert.ok(pl.sim.suppByKey.dropsD > 80 && pl.sim.suppByKey.drops > 80);
 });

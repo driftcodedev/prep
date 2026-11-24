@@ -2,7 +2,7 @@
 
 A one-page calculator for storing food for a long power outage. You enter each person in the household (sex, age, height, weight and activity level) and how many months the food should last. The page then gives you:
 
-- **A daily card for each person**, with level-cup and spoon amounts of rice, pinto beans, oats, peanut butter, oil, dry milk, salt and a vitamin, plus how much water to drink.
+- **A daily card for each person**, with level-cup and spoon amounts of rice, pinto beans, oats, peanut butter, oil, dry milk, salt and a vitamin, plus how much water to drink. Babies under 1 get formula, infant cereal and vitamin D drops instead.
 - **Cooking amounts for the whole household**, with each person's share of the pot.
 - **One shopping list**, rounded up to whole packages, with prices and links. Choose Costco and Amazon (needs a membership) or Walmart and Amazon (no membership).
 - **Fire and water gear**: BIC lighters, LifeStraw filters (the cheapest mix of 1-, 3- and 5-packs for one straw per person age 3 and up), a waterBOB bathtub bladder, an EarthMinded rain diverter kit (Home Depot), a splitting axe and a Casio solar watch for timing the pot, with how long each lasts. Tick off anything you already own.
@@ -18,6 +18,7 @@ Live site: https://driftcodedev.github.io/prep/
 
 - Adults above the healthy BMI range (18.5–24.9) are planned down to BMI 24.4, using rations 500 calories below maintenance. Those rations never go under 1,500 calories for men or 1,200 for women. Once they reach that weight, they switch to a ration that holds it. Adult calories use the Mifflin-St Jeor equation times an activity factor.
 - Children (1–17) use the National Academies' 2023 energy equations and never get a weight-loss ration. Children under 2 get whole dry milk, and milk amounts follow the American Academy of Pediatrics.
+- Babies under 1 (enter age 0 and pick the months; height is optional) get formula by weight: about 2½ fl oz per pound a day, up to 32 oz (27 oz from 10 months), following the AAP. The plan grows the baby month by month, adds iron-fortified infant cereal at 6 months and mashed rice and beans at 8 months, and adds vitamin D drops for breastfed babies or those drinking under 32 oz of formula. At the first birthday it switches to the toddler ration. Formula water is counted in the water totals.
 - Pregnant and breastfeeding women never get a weight-loss ration.
 - The shopping list comes from a day-by-day weight model that follows the weekly weigh-in rules, plus the margin you choose.
 
