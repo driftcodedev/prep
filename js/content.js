@@ -58,7 +58,9 @@ export function statusLine(pl) {
     case "infant": return `Baby: ${FEEDING[pl.feeding].toLowerCase()} first, no dieting`;
     case "pregnant": return "Pregnant: no weight loss, extra food";
     case "breastfeeding": return "Breastfeeding: no weight loss, extra food";
-    default: return pl.keptWeight ? `Keep current weight, ${Math.round(pl.person.weightLb)} lb` : "Hold current weight";
+    default: return pl.keptWeight
+      ? `Keep current weight, ${Math.round(pl.person.weightLb)} lb`
+      : `Already at a healthy weight: hold at ${Math.round(pl.person.weightLb)} lb`;
   }
 }
 
