@@ -221,6 +221,11 @@ function card(pl, hh) {
   </article>`;
 }
 
+function cookRow(r) {
+  const amount = (x) => `<td>${esc(x.cooked)}${x.dry ? `<small>${esc(x.dry)}</small>` : ""}</td>`;
+  return `<tr><th scope="row">${esc(r.name)}</th>${amount(r.rice)}${amount(r.beans)}<td>${esc(r.oats)}</td></tr>`;
+}
+
 function cookingSection(hh) {
   const c = cookingData(hh);
   return `
@@ -229,7 +234,8 @@ function cookingSection(hh) {
     <p>Each day, cook <strong>${esc(c.rice)}</strong> and <strong>${esc(c.beans)}</strong> ${esc(c.rest)}</p>
     <div class="table-scroll"><table class="data">
       <thead><tr>${c.head.map((h) => `<th scope="col">${h}</th>`).join("")}</tr></thead>
-      <tbody>${c.rows.map(([name, ...cells]) => `<tr><th scope="row">${esc(name)}</th>${cells.map((x) => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody>
+      <tbody>${c.rows.map(cookRow).join("")}</tbody>
+      <tfoot>${cookRow(c.total)}</tfoot>
     </table></div>
     ${c.milk ? `<p>${esc(c.milk)}</p>` : ""}
     <h3 class="sub-title">Cooking over a fire</h3>

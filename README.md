@@ -3,7 +3,7 @@
 A one-page calculator for storing food for a long power outage. You enter each person in the household (sex, age, height, weight and activity level) and how many months the food should last. The page then gives you:
 
 - **A daily card for each person**, with level-cup and spoon amounts of rice, pinto beans, oats, peanut butter, oil, dry milk, salt and a vitamin, plus how much water to drink. Babies under 1 get formula, infant cereal and vitamin D drops instead.
-- **Cooking amounts for the whole household**, with each person's share of the pot.
+- **Cooking amounts for the whole household**: how much dry rice and beans to cook each day and about how much that makes, with each person's share both cooked and dry, and a household total. Cooked shares are rounded to ¼ cup so they add up to the pot.
 - **One shopping list**, rounded up to whole packages, with prices and links. Choose Costco and Amazon (needs a membership) or Walmart and Amazon (no membership).
 - **Fire and water gear**: BIC lighters, LifeStraw filters (the cheapest mix of 1-, 3- and 5-packs for one straw per person age 3 and up), a waterBOB bathtub bladder, an EarthMinded rain diverter kit (Home Depot), a splitting axe and a Casio solar watch for timing the pot, with how long each lasts. Tick off anything you already own.
 - **Cooking over a fire**: what a simmer looks like and how to hold one on a fire, timers and doneness checks for rice and beans, and wrapping the pot to save wood.

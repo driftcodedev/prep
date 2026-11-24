@@ -175,12 +175,23 @@ export function cardNotes(pl, hh) {
 
 export function cookingData(hh) {
   const c = hh.cook;
+  // Each cell: the cooked amount to serve, and the dry amount it comes from (matching the cards).
+  const cell = (cooked, dry) => (dry > 0 ? { cooked: cooked > 0 ? `${cupsText(cooked)} cooked` : "a spoonful cooked", dry: `from ${cupsText(dry)} dry` } : { cooked: "none", dry: "" });
   const rows = hh.plans.map((pl, i) => {
     const s = hh.shares[i];
-    const riceCooked = Math.round(s.riceCooked * 4) / 4;
-    const beansCooked = Math.round(s.beansCooked * 4) / 4;
-    return [pl.person.name, riceCooked > 0 ? cupsText(riceCooked) : "none", beansCooked > 0 ? cupsText(beansCooked) : "none", pl.phase1.oats > 0 ? `${cupsText(pl.phase1.oats)} dry` : "none"];
+    return {
+      name: pl.person.name,
+      rice: cell(s.riceCooked, pl.phase1.rice),
+      beans: cell(s.beansCooked, pl.phase1.beans),
+      oats: pl.phase1.oats > 0 ? `${cupsText(pl.phase1.oats)} dry` : "none",
+    };
   });
+  const total = {
+    name: "Whole household",
+    rice: cell(c.riceCooked, c.rice),
+    beans: cell(c.beansCooked, c.beans),
+    oats: c.oats > 0 ? `${cupsText(c.oats)} dry` : "none",
+  };
   const milkBits = [];
   if (c.milk > 0) milkBits.push(`${fraction(c.milk)} cups of nonfat milk (${cupsText(c.milk / 3)} powder)`);
   if (c.whole > 0) milkBits.push(`${fraction(c.whole)} cups of whole milk for the under-2s (${cupsText(c.whole / 4)} powder)`);
@@ -198,8 +209,9 @@ export function cookingData(hh) {
   return {
     rice: `${cupsText(c.rice)} of dry rice`,
     beans: `${cupsText(c.beans)} of dry beans`,
-    rest: "for the whole household, then serve each person their share. Cooked rice is roughly three times its dry volume and beans about two and a half times, so the cooked amounts below are close, not exact.",
-    head: ["Person", "Cooked rice", "Cooked beans", "Oats"],
+    rest: `for the whole household. That makes about ${cupsText(c.riceCooked)} of cooked rice and ${cupsText(c.beansCooked)} of cooked beans. Serve each person the cooked amount below. Rice roughly triples when cooked and beans grow about 2½ times, so cooked amounts are close, not exact.`,
+    head: ["Person", "Rice", "Beans", "Oats"],
+    total,
     rows,
     milk: milkBits.length ? `Mix ${milkBits.join(" and ")} a day.` : "",
     water,

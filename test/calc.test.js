@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse, infantDay } from "../js/calc.js";
+import { splitRounded, planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse, infantDay } from "../js/calc.js";
 import { buildPdf } from "../js/pdf.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
@@ -259,4 +259,26 @@ test("Keep current weight instead of the healthy-weight goal", () => {
   const jo = (m) => planHousehold({ months: 12, people: [m, kai] }).plans[0];
   assert.equal(jo(mom).weaning.after.mode, "lose");
   assert.equal(jo({ ...mom, keepWeight: true }).weaning.after.mode, "hold");
+});
+
+test("Cooking table adds up to the household pot", () => {
+  const people = [
+    { name: "Sam", sex: "male", age: 34, heightIn: 70, weightLb: 210, activity: "light", flags: {}, keepWeight: true },
+    { name: "Jo", sex: "female", age: 24, heightIn: 65, weightLb: 150, activity: "light", flags: {} },
+    { name: "Ava", sex: "female", age: 0, heightIn: 12, weightLb: 20, activity: "light", flags: {}, feeding: "breast" },
+    { name: "Leo", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} },
+  ];
+  const hh = planHousehold({ months: 6, people });
+  const sum = (k) => hh.shares.reduce((a, s) => a + s[k], 0);
+  const dry = (k) => hh.plans.reduce((a, pl) => a + (pl.phase1[k] || 0), 0);
+  assert.equal(sum("riceCooked"), hh.cook.riceCooked);
+  assert.equal(sum("beansCooked"), hh.cook.beansCooked);
+  assert.equal(dry("rice"), hh.cook.rice);
+  assert.equal(dry("beans"), hh.cook.beans);
+  assert.ok(Math.abs(hh.cook.riceCooked - hh.cook.rice * 3) <= 0.125);
+  assert.ok(Math.abs(hh.cook.beansCooked - hh.cook.beans * 2.5) <= 0.125);
+  // Everyone who eats rice gets some cooked rice.
+  hh.plans.forEach((pl, i) => { if (pl.phase1.rice > 0) assert.ok(hh.shares[i].riceCooked > 0); });
+  assert.deepEqual(splitRounded([3.125, 1.875, 0.625], 5.75), [3.25, 2, 0.5]);
+  assert.equal(cupsText(1 / 16), "1 tbsp");
 });

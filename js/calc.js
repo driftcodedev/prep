@@ -503,6 +503,22 @@ export function strawPacks(n, products = PRODUCTS) {
 
 // ---------- household ----------
 
+// Cooked volume per cup of dry: rice roughly triples, pinto beans grow about 2½ times.
+const COOKED = { rice: 3, beans: 2.5 };
+
+// Round each part to the nearest step so the parts add up exactly to the rounded total
+// (largest remainders get the leftover steps; ties go to the bigger share).
+export function splitRounded(parts, total, step = 0.25) {
+  const units = parts.map((p) => p / step);
+  const out = units.map((u) => Math.floor(u + 1e-9));
+  let left = Math.round(total / step) - out.reduce((a, b) => a + b, 0);
+  const order = units.map((u, i) => i).filter((i) => units[i] > 0)
+    .sort((a, b) => (units[b] - out[b]) - (units[a] - out[a]) || units[b] - units[a]);
+  for (let k = 0; left > 0 && order.length; k = (k + 1) % order.length) { out[order[k]]++; left--; }
+  for (let k = order.length - 1; left < 0 && k >= 0; k--) if (out[order[k]] > 0) { out[order[k]]--; left++; }
+  return out.map((u) => u * step);
+}
+
 // Connect breastfeeding mothers to the breastfed babies on the list: her extra food follows
 // how much breast milk the babies get, and lasts until the youngest turns 1.
 export function linkNursing(people) {
@@ -556,12 +572,17 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   // Daily cooking totals (first-phase rations) and each person's share of the pot.
   const cook = { rice: 0, beans: 0, oats: 0, milk: 0, whole: 0 };
   for (const pl of plans) for (const k of Object.keys(cook)) cook[k] += pl.phase1[k] || 0;
-  const shares = plans.map((pl) => ({
+  // Cooked shares are rounded to ¼ cup so they add up exactly to the cooked total of the pot.
+  cook.riceCooked = Math.round(cook.rice * COOKED.rice * 4) / 4;
+  cook.beansCooked = Math.round(cook.beans * COOKED.beans * 4) / 4;
+  const riceCooked = splitRounded(plans.map((pl) => (pl.phase1.rice || 0) * COOKED.rice), cook.riceCooked);
+  const beansCooked = splitRounded(plans.map((pl) => (pl.phase1.beans || 0) * COOKED.beans), cook.beansCooked);
+  const shares = plans.map((pl, i) => ({
     name: pl.person.name,
     rice: cook.rice ? pl.phase1.rice / cook.rice : 0,
     beans: cook.beans ? pl.phase1.beans / cook.beans : 0,
-    riceCooked: pl.phase1.rice * 3,
-    beansCooked: pl.phase1.beans * 2.5,
+    riceCooked: riceCooked[i],
+    beansCooked: beansCooked[i],
   }));
 
   // Gear lifespans.
@@ -674,6 +695,7 @@ export function fraction(x) {
 
 export function cupsText(x) {
   if (x <= 0) return "none";
+  if (x < 0.125 - 1e-9) return `${Math.max(1, Math.round(x * 16))} tbsp`; // 16 tbsp to a cup
   // Odd eighths are easier to measure as a quarter-cup step plus 2 tablespoons.
   const eighths = Math.round(x * 8);
   if (eighths % 2 === 1) {

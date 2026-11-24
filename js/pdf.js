@@ -97,7 +97,11 @@ function cooking(hh) {
   return [
     h2("Cooking for everyone"),
     para([{ text: "Each day, cook " }, { text: t(c.rice), bold: true }, " and ", { text: t(c.beans), bold: true }, ` ${t(c.rest)}`]),
-    dataTable(c.head, c.rows.map(([n, ...cells]) => [{ text: t(n), bold: true }, ...cells]), [90, "*", "*", "*"]),
+    dataTable(c.head, [...c.rows, c.total].map((r, i, all) => {
+      const bold = i === all.length - 1;
+      const amount = (x) => ({ text: [{ text: t(x.cooked), bold }, x.dry ? { text: `\n${t(x.dry)}`, fontSize: 7.5, color: C.ink2, bold } : ""] });
+      return [{ text: t(r.name), bold: true }, amount(r.rice), amount(r.beans), { text: t(r.oats), bold }];
+    }), [90, "*", "*", "*"]),
     c.milk ? para(c.milk) : null,
     { text: "Cooking over a fire", style: "h3", margin: [0, 4, 0, 3], headlineLevel: 1 },
     bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
