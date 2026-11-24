@@ -99,15 +99,9 @@ function cooking(hh) {
     para([{ text: "Each day, cook " }, { text: t(c.rice), bold: true }, " and ", { text: t(c.beans), bold: true }, ` ${t(c.rest)}`]),
     dataTable(c.head, c.rows.map(([n, ...cells]) => [{ text: t(n), bold: true }, ...cells]), [90, "*", "*", "*"]),
     c.milk ? para(c.milk) : null,
-    {
-      stack: [
-        { text: "Water for the pot", style: "h3", margin: [0, 4, 0, 3] },
-        bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
-        para(c.waterTotal),
-        para(COOK_NOTE, { color: C.ink2 }),
-      ],
-      unbreakable: true,
-    },
+    { text: "Cooking over a fire", style: "h3", margin: [0, 4, 0, 3], headlineLevel: 1 },
+    bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
+    { stack: [para(c.waterTotal), para(COOK_NOTE, { color: C.ink2 })], unbreakable: true },
   ].filter(Boolean);
 }
 

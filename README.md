@@ -5,7 +5,8 @@ A one-page calculator for storing food for a long power outage. You enter each p
 - **A daily card for each person**, with level-cup and spoon amounts of rice, pinto beans, oats, peanut butter, oil, dry milk, salt and a vitamin, plus how much water to drink.
 - **Cooking amounts for the whole household**, with each person's share of the pot.
 - **One shopping list**, rounded up to whole packages, with prices and links. Choose Costco and Amazon (needs a membership) or Walmart and Amazon (no membership).
-- **Fire and water gear**: BIC lighters, LifeStraw filters (the cheapest mix of 1-, 3- and 5-packs for one straw per person age 3 and up), a waterBOB bathtub bladder, an EarthMinded rain diverter kit (Home Depot) and a splitting axe, with how long each lasts. Tick off anything you already own.
+- **Fire and water gear**: BIC lighters, LifeStraw filters (the cheapest mix of 1-, 3- and 5-packs for one straw per person age 3 and up), a waterBOB bathtub bladder, an EarthMinded rain diverter kit (Home Depot), a splitting axe and a Casio solar watch for timing the pot, with how long each lasts. Tick off anything you already own.
+- **Cooking over a fire**: what a simmer looks like and how to hold one on a fire, timers and doneness checks for rice and beans, and wrapping the pot to save wood.
 - **Water use**: how much water goes in the pot for the rice, beans, oats and milk, the household's daily total, and how long a full waterBOB and a rain-fed trash can last.
 - **Two videos** at the top: what happens when the grid goes down, and how to install the rain diverter.
 - **The weekly weigh-in rules** and the cooking and storage notes.

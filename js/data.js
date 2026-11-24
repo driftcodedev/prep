@@ -138,6 +138,11 @@ export const PRODUCTS = {
     size: 1, price: 42.95, priceNote: "Sold by a third-party seller",
     url: "https://www.amazon.com/dp/B001AXLUX2",
   },
+  timer: {
+    item: "Solar watch with timer", pack: "Casio AQ-S810W, Tough Solar", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 47.26,
+    url: "https://www.amazon.com/dp/B00791R1MI",
+  },
   diverter: {
     item: "Rain diverter kit", pack: "EarthMinded DIY kit, from Home Depot", store: "Home Depot", where: "Online or in store", gear: true,
     size: 1, price: 41.26,

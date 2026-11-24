@@ -464,6 +464,7 @@ function shoppingFor(ctx, products) {
     if (!have.axe) addLine("axe", 1, "splitting firewood", "gear");
     if (!have.bladder) addLine("bladder", 1, "fill when the power goes out", "gear");
     if (!have.diverter) addLine("diverter", 1, "rain from the roof into a trash can", "gear");
+    if (!have.timer) addLine("timer", 1, "timing the pot, no batteries", "gear");
   }
 
   const total = lines.reduce((a, l) => a + l.cost, 0);

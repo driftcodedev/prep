@@ -36,9 +36,10 @@ const OWNED = [
   ["hasAxe", "Axe"],
   ["hasBladder", "Water bladder"],
   ["hasDiverter", "Rain diverter"],
+  ["hasTimer", "Battery-free timer"],
 ];
 
-let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, people: [blankPerson()], ...(load() || {}) };
+let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, people: [blankPerson()], ...(load() || {}) };
 if (!STORE_PLANS[state.store]) state.store = "costco";
 
 function load() {
@@ -186,7 +187,7 @@ function cookingSection(hh) {
       <tbody>${c.rows.map(([name, ...cells]) => `<tr><th scope="row">${esc(name)}</th>${cells.map((x) => `<td>${esc(x)}</td>`).join("")}</tr>`).join("")}</tbody>
     </table></div>
     ${c.milk ? `<p>${esc(c.milk)}</p>` : ""}
-    <h3 class="sub-title">Water for the pot</h3>
+    <h3 class="sub-title">Cooking over a fire</h3>
     <ul class="plain">${c.water.map((w) => `<li><strong>${esc(w.label)}:</strong> ${esc(w.text)}</li>`).join("")}</ul>
     <p>${esc(c.waterTotal)}</p>
     <p class="muted">${esc(COOK_NOTE)}</p>
@@ -299,7 +300,7 @@ function renderResults() {
     months: state.months, reservePct: state.reserve, store: state.store, people,
     owned: {
       scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe,
-      bladder: !!state.hasBladder, diverter: !!state.hasDiverter,
+      bladder: !!state.hasBladder, diverter: !!state.hasDiverter, timer: !!state.hasTimer,
     },
   });
   lastHousehold = hh;

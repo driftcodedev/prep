@@ -117,11 +117,13 @@ export function cookingData(hh) {
   if (c.whole > 0) milkBits.push(`${fraction(c.whole)} cups of whole milk for the under-2s (${cupsText(c.whole / 4)} powder)`);
   const u = hh.gear.use;
   const water = [
-    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water. Bring it to a boil, cover, and simmer on low about 20 minutes until the water is gone. Nothing gets poured away.` },
-    { label: "Beans", text: `soak ${cupsText(c.beans)} of dry beans overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water, drain, then simmer in ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, topping up if it boils low. Save the soaking water for washing or flushing.` },
-    { label: "Oats", text: `${cupsText(c.oats)} of oats in ${cupsText(c.oats * COOK_WATER.oats)} of water.` },
+    { label: "What a simmer looks like", text: "small, lazy bubbles breaking the surface every second or two, with steam rising. A boil is big bubbles churning the whole pot. Over a fire, bring the pot to a boil over the hottest part, then slide it to the edge, set it higher on a rock or grate, or let the fire burn down to glowing coals. If it starts boiling hard again, move it farther from the heat; if the bubbles stop, move it closer." },
+    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water. Bring it to a boil, put the lid on, move it to a simmer and set a 20-minute timer. It's done when you tilt the pot and no water runs, and the grains are soft. If water is left, give it 5 more minutes; if you smell scorching, take it off the heat. Let it sit off the fire with the lid on for 10 minutes. Nothing gets poured away.` },
+    { label: "Beans", text: `soak ${cupsText(c.beans)} of dry beans overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water and drain; save that water for washing or flushing. Cover with ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, boil hard for at least 10 minutes on a timer, then simmer with the lid on for 1½–2 hours. Check every 30 minutes and add water so the beans stay covered. They're done when a bean squashes easily against the side of the pot and is creamy inside, with no chalky center.` },
+    { label: "Oats", text: `${cupsText(c.oats)} of oats in ${cupsText(c.oats * COOK_WATER.oats)} of water. Simmer about 5 minutes, stirring, until thick.` },
   ];
-  if (c.milk + c.whole > 0) water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water for the milk.` });
+  if (c.milk + c.whole > 0) water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water for the milk. Use boiled water that has cooled, or water from the waterBOB.` });
+  water.push({ label: "Save wood", text: "once rice has boiled for a minute, or beans have boiled hard for 10, you can take the lidded pot off the fire and wrap it tightly in a blanket or sleeping bag. It keeps cooking in its own heat with no simmering to watch. Check after an hour for rice and 3 hours for beans; if they're not done, bring them back to a boil and wrap again. Eat it hot." });
   return {
     rice: `${cupsText(c.rice)} of dry rice`,
     beans: `${cupsText(c.beans)} of dry beans`,
@@ -207,8 +209,8 @@ export function gearItems(hh) {
       buy: hh.lines.some((l) => l.key === "diverter") ? `One kit, ${cents(P.diverter.price)} at Home Depot. It comes with the FlexiFit diverter, a spigot, a drain, a hose and a hole saw.` : "You already have a rain diverter, so it's not on the list.",
       lasts: `It turns a trash can into a rain barrel fed from a gutter downspout. A 500 sq ft section of roof sheds about 300 gallons per inch of rain, so even a light rain fills a can. A 32-gallon can holds about ${num(g.canDays(32))} days of your household's water, and a 45-gallon can about ${num(g.canDays(45))} days.`,
       tips: [
-        "Use a trash can you already own: 32 to 45 gallons, with a lid and no holes. Set it up now and keep it just for water.",
-        "You need a drill for the hole saw. Install everything now, while you have power, following the installation video at the top of the page. You also need a gutter downspout you're allowed to drill into.",
+        "Use a trash can you already own: 32 to 45 gallons, with a lid and no holes. Keep it just for water.",
+        "You need a drill for the hole saw. Keep it fully charged, and top it up every few months, so you can install the kit even after the power goes out. The installation video at the top of the page shows how. You also need a gutter downspout you're allowed to drill into.",
         "Mount the diverter level with the top of the can. It stops filling when the can is full, and the rest runs down the downspout as usual.",
         "Set the can on cinder blocks on level ground so a pot fits under the spigot. Full, it's too heavy to move.",
         "Lay window screen under the lid or strap it down with a bungee cord to keep mosquitoes and leaves out.",
@@ -225,6 +227,18 @@ export function gearItems(hh) {
       tips: [
         "Split on a chopping block with your feet apart, and keep everyone at least two axe lengths away. Keep the sheath on when it's not in use.",
         "Dry, seasoned wood lights and burns far better than fresh-cut. Stack split wood off the ground and under cover.",
+      ],
+    },
+    {
+      key: "timer",
+      title: "Timing: Casio solar watch",
+      product: P.timer,
+      links: [{ label: "Casio AQ-S810W on Amazon", url: P.timer.url }],
+      buy: hh.lines.some((l) => l.key === "timer") ? `One per household, ${cents(P.timer.price)} on Amazon.` : "You already have a battery-free timer, so it's not on the list.",
+      lasts: "It never needs a battery: sunlight or any indoor light charges it, and a full charge runs about 10 months in the dark. It has two countdown timers that beep when time is up, plus alarms and a stopwatch.",
+      tips: [
+        "Set a countdown for each step on the cooking list: 20 minutes for rice, 10 minutes of hard boiling for beans, then 30-minute checks while they simmer.",
+        "Leave it in a sunny window or wear it outside for a few hours a week to keep it charged.",
       ],
     },
   ];
@@ -276,7 +290,7 @@ export function shoppingNotes(hh) {
 
 // ---------- cooking, weigh-ins, storage, method ----------
 
-export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood and water: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, and a rain catcher to keep water coming after that. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
+export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood and water: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, and a rain catcher to keep water coming after that. A solar watch times the pot without batteries. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
 
 export const COOK_NOTE = "Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.";
 

@@ -103,7 +103,7 @@ test("Gear goes on the list unless the household already has it", () => {
   assert.ok(keys.includes("lighters") && keys.includes("axe"));
   // The 2-year-old is too young for a straw, so Brett gets a single.
   assert.equal(hh.lines.find((l) => l.key === "straw1").qty, 1);
-  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true, bladder: true, diverter: true } });
+  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true, bladder: true, diverter: true, timer: true } });
   assert.ok(!owned.lines.some((l) => l.group === "gear" || l.key === "scale"));
 });
 
@@ -127,7 +127,7 @@ test("PDF definition covers the whole report and avoids missing glyphs", () => {
   const hh = planHousehold({ months: 6, people: [brett, { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }] });
   const doc = buildPdf(hh, { date: "November 23, 2026" });
   const text = JSON.stringify(doc.content);
-  for (const heading of ["Daily amounts", "Cooking for everyone", "Shopping list", "Fire and water", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
+  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "Shopping list", "Fire and water", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
     assert.ok(text.includes(heading), heading);
   }
   assert.ok(!/[⅓⅔]/.test(text));
@@ -142,6 +142,7 @@ test("Water: Brett uses about 1.3 gallons a day, so a waterBOB lasts about 11 we
   const hh = planHousehold({ months: 6, people: [big] });
   assert.equal(Math.round(hh.gear.bladderDays), 76);
   assert.ok(hh.lines.some((l) => l.key === "diverter" && l.store === "Home Depot"));
+  assert.ok(hh.lines.some((l) => l.key === "timer" && l.price > 0));
 });
 
 test("Young children's milk water isn't counted twice", () => {
