@@ -17,7 +17,7 @@
 // reportHtml() draws them into the hidden .lt-print box that only shows when printing, and
 // js/report-pdf.js turns the same blocks into a PDF with pdfmake (vendor/pdfmake).
 
-import { PAGE } from "./data/plan.js";
+import { PAGE, CURRENTS } from "./data/plan.js";
 import { HOUSES } from "./data/houses.js";
 import { RING_COLORS, DEFAULT_RINGS } from "./data/places.js";
 import { esc } from "./js/geo.js";
@@ -115,6 +115,8 @@ export function renderMap(page = PAGE, context = {}, data = { houses: HOUSES, co
             <div class="ltm-seg">${seg}</div>
           </div>
 
+          ${renderCurrentsControls()}
+
           <details class="ltm-more">
             <summary>More filters and map layers</summary>
             <div class="ltm-more-body">
@@ -175,6 +177,31 @@ export function renderMap(page = PAGE, context = {}, data = { houses: HOUSES, co
       </details>
     </section>
   `;
+}
+
+// The Tidal currents control. js/map.js loads the data the first time it's used.
+export function renderCurrentsControls(words = CURRENTS) {
+  const modes = words.modes.map(([v, label]) => `
+      <label class="ltm-seg-item"><input type="radio" name="ltm-cur" value="${v}"${v === "off" ? " checked" : ""}><span>${esc(label)}</span></label>`).join("");
+  return `
+          <div class="ltm-group ltm-cur" role="group" aria-labelledby="ltm-cur-label">
+            <span id="ltm-cur-label" class="ltm-label">${esc(words.label)}</span>
+            <div class="ltm-seg ltm-seg-3">${modes}</div>
+            <div class="ltm-tide" data-tide hidden>
+              <div class="ltm-tide-head">
+                <label for="ltm-tide-hour" class="ltm-tide-label">${esc(words.tideLabel)}</label>
+                <output for="ltm-tide-hour" class="ltm-tide-out" data-tide-out aria-live="polite"></output>
+              </div>
+              <div class="ltm-tide-row">
+                <button type="button" class="btn btn-quiet ltm-tide-btn" data-tide-step="-1" aria-label="An hour earlier">‹</button>
+                <input type="range" id="ltm-tide-hour" min="0" max="11" step="1" value="0" data-tide-hour>
+                <button type="button" class="btn btn-quiet ltm-tide-btn" data-tide-step="1" aria-label="An hour later">›</button>
+                <button type="button" class="btn btn-quiet ltm-tide-play" data-tide-play aria-pressed="false">Play</button>
+              </div>
+            </div>
+            <label class="ltm-check"><input type="checkbox" data-flats> ${esc(words.flatsLabel)}</label>
+            <p class="ltm-hint" data-cur-status>${esc(words.hint)}</p>
+          </div>`;
 }
 
 // Loads the scoped Leaflet styles and style.css from this folder the first time the plan opens.
@@ -300,12 +327,32 @@ function readmePages() {
   try { return JSON.parse(document.getElementById("rmpages")?.textContent || "[]"); } catch { return []; }
 }
 
+// The currents data and the printed currents map, as a data: URL (pdfmake needs one). Optional:
+// if they don't load, the report leaves the currents section out.
+async function loadReportCurrents() {
+  try {
+    const [data, blob] = await Promise.all([
+      fetch(new URL("./data/currents.json", import.meta.url)).then((r) => (r.ok ? r.json() : null)),
+      fetch(new URL("./data/currents-print.png", import.meta.url)).then((r) => (r.ok ? r.blob() : null)),
+    ]);
+    const image = blob ? await new Promise((resolve) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = () => resolve("");
+      fr.readAsDataURL(blob);
+    }) : "";
+    return { currents: data, currentsImage: image };
+  } catch {
+    return { currents: null, currentsImage: "" };
+  }
+}
+
 let report = null; // { day, blocks }
 async function reportBlocks() {
   const day = todayIso();
   if (report?.day === day) return report.blocks;
-  const [{ buildReport }, geo] = await Promise.all([import("./js/report.js"), loadGeo()]);
-  const blocks = buildReport({ geo, today: day, dateText: todayText(), readme: readmePages() });
+  const [{ buildReport }, geo, cur] = await Promise.all([import("./js/report.js"), loadGeo(), loadReportCurrents()]);
+  const blocks = buildReport({ geo, today: day, dateText: todayText(), readme: readmePages(), ...cur });
   report = { day, blocks };
   return blocks;
 }

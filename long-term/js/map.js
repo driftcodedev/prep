@@ -12,6 +12,8 @@ import {
   changesText,
 } from "./geo.js";
 import { popupHtml, cardHtml } from "./popup.js";
+import { createCurrents, tideLabel, CURRENT_BANDS, FLATS_COLOR } from "./currents.js";
+import { CURRENTS } from "../data/plan.js";
 
 const HEIGHT_KEY = "prep-lt-map-height";
 const ICONS = {
@@ -97,21 +99,35 @@ export function createMap(root, { L, geo }) {
     ringLayers.forEach((layer, i) => {
       const c = ringColors[i];
       if (!c) { if (map.hasLayer(layer)) map.removeLayer(layer); return; }
-      layer.setStyle({ color: c, weight: 0.6, opacity: 0.7, fillColor: c, fillOpacity: 0.32 });
+      // Lighter while the currents are shown, so their colors don't blend with the rings'.
+      const quiet = currents && currents.mode !== "off";
+      layer.setStyle({ color: c, weight: 0.6, opacity: quiet ? 0.45 : 0.7, fillColor: c, fillOpacity: quiet ? 0.12 : 0.32 });
       if (!map.hasLayer(layer)) layer.addTo(map);
     });
-    const rings = legend.length
+    ringKey = legend.length
       ? legend.map((l) => `<li><span class="ltm-key-swatch" style="background:${esc(l.color)}"></span>${l.from}–${l.to} mi</li>`).join("")
       : '<li class="muted">No distance rings picked</li>';
+    renderLegend();
+    root.querySelectorAll("[data-ring]").forEach((b) => b.setAttribute("aria-pressed", String(state.picked.has(Number(b.dataset.ring)))));
+  }
+
+  let ringKey = "";
+  function renderLegend() {
+    const mode = currents?.mode || "off";
+    const bands = mode === "off" ? "" : `
+      <li class="ltm-key-cur"><span class="ltm-key-title">${mode === "peak" ? "Strongest current" : "Current now (arrows)"}, knots:</span>
+        ${CURRENT_BANDS.map((b) => `<span class="ltm-key-band"><span class="ltm-key-swatch" style="background:${esc(mode === "peak" ? b.color : b.arrow)}"></span>${esc(b.label)}</span>`).join("")}
+      </li>`;
+    const flats = currents?.flats ? `<li><span class="ltm-key-swatch" style="background:${FLATS_COLOR}"></span>Dries at low tide</li>` : "";
     legendEl.innerHTML = `
       <ul class="ltm-key" aria-label="Map key">
-        ${rings}
+        ${ringKey}
         <li><span class="ltm-key-pin ltm-pin-offgrid-solar">${ICONS["offgrid-solar"]}</span>Off-grid solar</li>
         <li><span class="ltm-key-pin ltm-pin-backup">${ICONS.backup}</span>Backup power</li>
         <li><span class="ltm-key-pin ltm-pin-none"></span>No backup listed</li>
         <li><span class="ltm-key-pin ltm-pin-none is-approx"></span>Approximate pin</li>
+        ${bands}${flats}
       </ul>`;
-    root.querySelectorAll("[data-ring]").forEach((b) => b.setAttribute("aria-pressed", String(state.picked.has(Number(b.dataset.ring)))));
   }
 
   // The bay itself, and the line where it ends.
@@ -170,9 +186,10 @@ export function createMap(root, { L, geo }) {
     const shore = shoreMiles(lat, lng);
     const ring = ringOf(shore);
     const where = shore === 0 ? "This spot is on the water of Cobscook Bay." : `This spot is ${milesText(shore)} from the bay${ring <= 10 ? ` (the ${ring - 1}–${ring} mi ring)` : ", past the 10-mile ring"}.`;
+    const tide = currents ? currents.describe(lat, lng) : [];
     L.popup({ className: "ltm-popup" })
       .setLatLng(e.latlng)
-      .setContent(`<p class="ltm-measure">${esc(where)}<br>${esc(milesText(milesBetween({ lat, lon: lng }, DENNYSVILLE)))} from Dennysville in a straight line.</p>`)
+      .setContent(`<p class="ltm-measure">${esc(where)}<br>${esc(milesText(milesBetween({ lat, lon: lng }, DENNYSVILLE)))} from Dennysville in a straight line.</p>${tide.length ? `<p class="ltm-measure ltm-measure-cur">${tide.map(esc).join("<br>")}</p>` : ""}`)
       .openOn(map);
   });
 
@@ -219,8 +236,89 @@ export function createMap(root, { L, geo }) {
       return;
     }
     const show = e.target.closest("[data-show]");
-    if (show) showHouse(show.dataset.show);
+    if (show) { showHouse(show.dataset.show); return; }
+    const step = e.target.closest("[data-tide-step]");
+    if (step) { stopPlay(); setTideStep((tideStep + Number(step.dataset.tideStep) + 12) % 12); return; }
+    if (e.target.closest("[data-tide-play]")) togglePlay();
   });
+
+  // ---------- tidal currents and flats ----------
+  // The data (about 250 KB) and pictures load the first time either control is used.
+  let currents = null;
+  let currentsLoading = null;
+  let destroyed = false;
+  let tideStep = 0;
+  let playTimer = null;
+  const curStatus = $("[data-cur-status]");
+  const tideBox = $("[data-tide]");
+  const tideRange = $("[data-tide-hour]");
+  const tideOut = $("[data-tide-out]");
+  const playBtn = $("[data-tide-play]");
+
+  function loadCurrents() {
+    if (currents) return Promise.resolve(currents);
+    if (!currentsLoading) {
+      if (curStatus) curStatus.textContent = CURRENTS.loading;
+      currentsLoading = fetch(new URL("../data/currents.json", import.meta.url))
+        .then((r) => { if (!r.ok) throw new Error(`currents.json: ${r.status}`); return r.json(); })
+        .then((data) => {
+          if (destroyed) return null;
+          currents = createCurrents(map, L, {
+            data,
+            peakUrl: new URL("../data/currents-peak.png", import.meta.url).href,
+            flatsUrl: new URL("../data/currents-flats.png", import.meta.url).href,
+          });
+          if (curStatus) curStatus.textContent = CURRENTS.hint;
+          return currents;
+        })
+        .catch((err) => {
+          console.error("Currents failed to load:", err);
+          currentsLoading = null;
+          if (curStatus) curStatus.textContent = CURRENTS.failed;
+          return null;
+        });
+    }
+    return currentsLoading;
+  }
+
+  async function setCurrentsMode(mode) {
+    if (mode !== "hour") stopPlay();
+    if (tideBox) tideBox.hidden = mode !== "hour";
+    if (mode === "off" && !currents) return;
+    const c = await loadCurrents();
+    if (!c) return;
+    c.setMode(mode);
+    if (mode === "hour") setTideStep(tideStep);
+    drawRings();
+  }
+
+  function setTideStep(k) {
+    tideStep = k;
+    if (tideRange) tideRange.value = String(k);
+    if (!currents) return;
+    const p = currents.order[k];
+    currents.setPattern(p);
+    if (tideOut) tideOut.textContent = `${tideLabel(p, currents.data)} at Eastport`;
+  }
+
+  function stopPlay() {
+    if (playTimer) clearInterval(playTimer);
+    playTimer = null;
+    if (playBtn) { playBtn.textContent = "Play"; playBtn.setAttribute("aria-pressed", "false"); }
+  }
+  function togglePlay() {
+    if (playTimer) { stopPlay(); return; }
+    playTimer = setInterval(() => setTideStep((tideStep + 1) % 12), 1100);
+    if (playBtn) { playBtn.textContent = "Pause"; playBtn.setAttribute("aria-pressed", "true"); }
+  }
+
+  async function setFlats(on) {
+    if (!on && !currents) return;
+    const c = await loadCurrents();
+    if (!c) return;
+    c.setFlats(on);
+    renderLegend();
+  }
 
   on(root, "change", (e) => {
     const t = e.target;
@@ -230,12 +328,19 @@ export function createMap(root, { L, geo }) {
     else if (t.matches("[data-inside]")) state.insideRings = t.checked;
     else if (t.matches("[data-hide-approx]")) state.hideApprox = t.checked;
     else if (t.matches("[data-sort]")) state.sort = t.value;
+    else if (t.name === "ltm-cur") { setCurrentsMode(t.value); return; }
+    else if (t.matches("[data-tide-hour]")) { setTideStep(Number(t.value)); return; }
+    else if (t.matches("[data-flats]")) { setFlats(t.checked); return; }
     else if (t.dataset.layer) {
       const layer = { towns, water, spots }[t.dataset.layer];
       t.checked ? layer.addTo(map) : map.removeLayer(layer);
       return;
     } else return;
     applyFilters();
+  });
+
+  on(root, "input", (e) => {
+    if (e.target.matches("[data-tide-hour]")) { stopPlay(); setTideStep(Number(e.target.value)); }
   });
 
   // Keep the label checkboxes in step with the map's own layer menu.
@@ -322,6 +427,10 @@ export function createMap(root, { L, geo }) {
   return {
     map,
     destroy() {
+      destroyed = true;
+      stopPlay();
+      if (currents) currents.destroy();
+      currents = null;
       setFull(false);
       ro.disconnect();
       for (const off of cleanups) off();

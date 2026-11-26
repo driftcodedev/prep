@@ -58,6 +58,25 @@
 #lt-root .ltm-fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 0.35rem; }
 #lt-root .ltm-fieldset legend { padding: 0; margin-bottom: 0.3rem; font-weight: 700; font-size: 0.9rem; }
 #lt-root .ltm-fieldset label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; min-height: 2rem; }
+
+/* Tidal currents: mode switch, tide-hour slider, flats checkbox (js/currents.js draws the layers). */
+#lt-root .ltm-check { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; font-size: 0.95rem; min-height: 2rem; }
+#lt-root .ltm-tide { margin-top: 0.55rem; padding: 0.55rem 0.7rem 0.6rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--card); }
+#lt-root .ltm-tide[hidden] { display: none; }
+#lt-root .ltm-tide-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.5rem; flex-wrap: wrap; }
+#lt-root .ltm-tide-label { font-size: 0.85rem; font-weight: 700; color: var(--ink-2); }
+#lt-root .ltm-tide-out { font-weight: 700; color: var(--lid-dark); }
+#lt-root .ltm-tide-row { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.35rem; }
+#lt-root .ltm-tide-row input[type="range"] { flex: 1; min-width: 0; accent-color: var(--lid); height: 2rem; }
+#lt-root .ltm-tide-btn { min-width: 2.4rem; min-height: 2.4rem; padding: 0 0.5rem; font-size: 1.2rem; line-height: 1; }
+#lt-root .ltm-tide-play { min-height: 2.4rem; padding: 0 0.8rem; }
+#lt-root .ltm-cur-canvas { position: absolute; left: 0; top: 0; pointer-events: none; }
+#lt-root .ltm-key-cur { flex-wrap: wrap; }
+#lt-root .ltm-key-title { font-weight: 700; }
+#lt-root .ltm-key-band { display: inline-flex; align-items: center; gap: 0.25rem; margin-right: 0.45rem; }
+#lt-root .ltm-key-cur .ltm-key-swatch { opacity: 1; }
+#lt-root .ltm-measure-cur { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--line); font-size: 13.5px; }
+#lt-root .ltm-stage.is-full .ltm-tide { padding: 0.4rem 0.5rem; }
 #lt-root .ltm-fieldset input { width: 1.15rem; height: 1.15rem; accent-color: var(--lid); }
 #lt-root .ltm-field select, #lt-root .ltm-sort select {
   font: inherit; font-size: 0.95rem; padding: 0.45rem 0.6rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink);
@@ -418,6 +437,7 @@
 #lt-root .ltp-fig { margin: 2pt 0 10pt; break-inside: avoid; text-align: center; }
 #lt-root .ltp-keep { break-inside: avoid; }
 #lt-root .ltp-fig svg { width: 100%; height: auto; max-height: 7in; }
+#lt-root .ltp-fig img { display: block; width: 100%; max-width: 7in; height: auto; margin: 0 auto; }
 #lt-root .ltp-fig figcaption { font-size: 8pt; color: var(--ink-2); margin-top: 3pt; }
 
 #lt-root .ltp-rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12pt 16pt; margin: 4pt 0 10pt; }

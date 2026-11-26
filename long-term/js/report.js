@@ -14,10 +14,11 @@
 //   svg     { svg, width, caption }          width in points on a 612 pt wide page
 //   rings   { items: [{ title, svg, sub, legend: [{ color, name, value }] }] }
 //   card    { title, sub, rows: [[label, value]], bullets[], table }
+//   img     { src, width, alt, caption }       src: a data: URL (pdfmake needs one)
 
 import { HOUSES, HOUSES_CHECKED, HOUSES_CHANGES } from "../data/houses.js";
 import { TOWNS, RING_COLORS, DENNYSVILLE } from "../data/places.js";
-import { PAGE } from "../data/plan.js";
+import { PAGE, CURRENTS } from "../data/plan.js";
 import * as POWER from "../data/power.js";
 import { SEASONS, SPECIES, FISH_CHECKED } from "../data/fishing.js";
 import { FISH_PAGE, PROFILES, BASIS, METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES } from "../data/fishing-notes.js";
@@ -29,6 +30,7 @@ import { listedText } from "./popup.js";
 import {
   seasonShares, seasonTotal, peopleFed, ownIndex, donutSlices, calendarOrder, measureText, pct, round2, commas,
 } from "./fishing.js";
+import { tideLabel } from "./currents.js";
 
 // README pages (from the README button) that belong in the paper copy, in this order.
 // Pages about using the website itself stay out.
@@ -207,8 +209,9 @@ export function ringSvg(slices, big, small) {
 
 // ---------- the report ----------
 
-// opts: { geo (data/geo.json), today ("YYYY-MM-DD"), dateText, readme ([{ id, title, html }]) }
-export function buildReport({ geo, today, dateText, readme = [] }) {
+// opts: { geo (data/geo.json), today ("YYYY-MM-DD"), dateText, readme ([{ id, title, html }]),
+//         currents (data/currents.json), currentsImage (data: URL of data/currents-print.png) }
+export function buildReport({ geo, today, dateText, readme = [], currents = null, currentsImage = "" }) {
   const pages = README_IN_REPORT.map((id) => readme.find((pg) => pg.id === id)).filter(Boolean);
   const pageOf = (id) => pages.find((pg) => pg.id === id);
   const blocks = [];
@@ -257,6 +260,7 @@ export function buildReport({ geo, today, dateText, readme = [] }) {
     rows: [["Band color", ...RING_COLORS.map((c) => ({ text: "", fill: tint(c, 0.42) }))]],
     size: "s",
   });
+  if (currents) blocks.push(...currentsBlocks(currents, currentsImage));
   blocks.push(h3("Towns around the bay"));
   blocks.push({
     t: "table",
@@ -401,6 +405,32 @@ export function buildReport({ geo, today, dateText, readme = [] }) {
   return blocks;
 }
 
+// The currents section: the printed map, then typical and fastest current and slack times by place.
+export function currentsBlocks(data, image = "", words = CURRENTS) {
+  const out = [h3(words.reportHeading), p(words.reportIntro)];
+  if (image) out.push({ t: "img", src: image, width: 520, alt: "Map of the strongest tidal currents and the flats that dry at low tide in Cobscook Bay" });
+  const short = (pt) => tideLabel(pt, data).replace(/ tide$/, "").replace(/^High$/, "high tide").replace(/^Low$/, "low tide");
+  const rows = words.reportAreas
+    .map((name) => (data.areas || []).find((a) => a.name === name))
+    .filter(Boolean)
+    .map((a) => [
+      a.name.replace(/: your (.*)$/, " (your $1)").replace(/ \(Cobscook Falls\)/, ""),
+      a.typical < 0.1 ? "under 0.1" : a.typical.toFixed(1),
+      a.fastest.toFixed(1),
+      `${short(a.slack[0])} · ${short(a.slack[1])}`,
+    ]);
+  out.push({
+    t: "table",
+    head: ["Place", "Typical peak (knots)", "Fastest spot (knots)", "Slackest (hours from Eastport high or low)"],
+    rows,
+    widths: ["*", 66, 66, 170],
+    align: ["left", "right", "right", "left"],
+    size: "s",
+  });
+  out.push({ t: "note", runs: `Average tide; spring tides run about 15% faster. Typical = the middle value within 1.2 km of the place. ${data.source}.` });
+  return out;
+}
+
 function backupText(h) {
   const s = h.solar;
   const bits = [];
@@ -516,6 +546,7 @@ function blockHtml(bk) {
       case "ul": case "ol": return `<${bk.t} class="ltp-list">${bk.items.map((it) => `<li>${runsHtml(it)}</li>`).join("")}</${bk.t}>`;
       case "table": return tableHtml(bk);
       case "svg": return `<figure class="ltp-fig">${bk.svg}${bk.caption ? `<figcaption>${esc(bk.caption)}</figcaption>` : ""}</figure>`;
+      case "img": return `<figure class="ltp-fig"><img src="${esc(bk.src)}" alt="${esc(bk.alt || "")}">${bk.caption ? `<figcaption>${esc(bk.caption)}</figcaption>` : ""}</figure>`;
       case "rings": return `<div class="ltp-rings">${bk.items.map((it) => `<div class="ltp-ring"><h4>${esc(it.title)}</h4>${it.svg}<p class="ltp-note">${esc(it.sub)}</p><ul>${it.legend.map((l) => `<li><span class="ltp-sw" style="background:${esc(l.color)}"></span><b>${esc(l.name)}</b> ${esc(l.value)}</li>`).join("")}</ul></div>`).join("")}</div>`;
       case "card":
         return `<section class="ltp-card"><h4>${esc(bk.title)}</h4><p class="ltp-card-sub">${esc(bk.sub)}</p><dl>${bk.rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>${bk.bullets.length ? `<ul class="ltp-list">${bk.bullets.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}${bk.table ? tableHtml(bk.table) : ""}</section>`;

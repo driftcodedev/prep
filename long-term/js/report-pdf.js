@@ -185,6 +185,7 @@ export function reportPdf(blocks, { date = "" } = {}) {
         content.push({ svg: bk.svg, width: bk.width || WIDTH, alignment: "center", margin: [0, 2, 0, 3] });
         if (bk.caption) content.push({ text: t(bk.caption), color: C.ink2, fontSize: 8, alignment: "center", margin: [0, 0, 0, 8] });
         break;
+      case "img": content.push({ image: bk.src, width: bk.width || WIDTH, alignment: "center", margin: [0, 2, 0, 8] }); break;
       case "rings": content.push(...rings(bk)); break;
       case "card": content.push(card(bk)); break;
       default: break;
