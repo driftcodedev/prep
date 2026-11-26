@@ -160,6 +160,30 @@ export function daysBetween(fromIso, toIso) {
   return Math.round((Date.parse(toIso) - Date.parse(fromIso)) / 86400000);
 }
 
+// A listing that went live in the last 14 days gets a "New" badge.
+export const NEW_DAYS = 14;
+export function isNew(h, today, days = NEW_DAYS) {
+  if (!h.listed || h.status === "expired") return false;
+  const d = daysBetween(h.listed, today);
+  return d >= 0 && d <= days;
+}
+
+// The line under the map saying what the weekly check changed. changes: HOUSES_CHANGES.
+export function changesText(changes) {
+  if (!changes || !changes.previous) return "";
+  const added = changes.added || [];
+  const removed = changes.removed || [];
+  const since = `since the last check on ${niceDate(changes.previous)}`;
+  if (!added.length && !removed.length) return `No new or removed listings ${since}.`;
+  const bits = [];
+  if (added.length) bits.push(`${added.length} new listing${added.length === 1 ? "" : "s"} added`);
+  if (removed.length) bits.push(`${removed.length} removed`);
+  let text = `${bits.join(", ")} ${since}.`;
+  text = text[0].toUpperCase() + text.slice(1);
+  if (removed.length) text += ` Removed: ${removed.map((r) => `${r.address}, ${r.town} (${r.reason})`).join("; ")}.`;
+  return text;
+}
+
 export function durationText(days) {
   if (days < 1) return "today";
   if (days < 45) return `${days} day${days === 1 ? "" : "s"}`;

@@ -3,12 +3,13 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { render } from "../app.js";
 import { PAGE } from "../data/plan.js";
-import { HOUSES, HOUSES_CHECKED } from "../data/houses.js";
+import { HOUSES, HOUSES_CHECKED, HOUSES_CHANGES } from "../data/houses.js";
 import { RING_COLORS, DEFAULT_RINGS, TOWNS, WATER_NAMES, MAP_VIEW, DENNYSVILLE } from "../data/places.js";
 import * as POWER from "../data/power.js";
 import {
   makeShoreDistance, inPolygon, milesBetween, ringOf, ringStyles, filterHouses, sortHouses,
   shortMoney, money, durationText, daysBetween, niceDate, milesText, shoreText, tileView, lifespanRows, statusGroup,
+  isNew, changesText,
 } from "../js/geo.js";
 import { popupHtml, cardHtml, listedText } from "../js/popup.js";
 
@@ -213,4 +214,39 @@ test("list dates show time on the market", () => {
   const h = { listed: "2025-11-08", status: "active" };
   assert.equal(listedText(h, "2026-11-26"), "Listed Nov 8, 2025 · on the market 383 days (about 13 months)");
   assert.equal(listedText({ status: "active" }, "2026-11-26"), "List date not checked");
+});
+
+// ---------- weekly check ----------
+
+test("listings from the last 14 days get a New badge", () => {
+  const h = { ...HOUSES[1], listed: "2026-11-20", status: "active" };
+  assert.equal(isNew(h, "2026-11-26"), true);
+  assert.equal(isNew({ ...h, listed: "2026-11-01" }, "2026-11-26"), false);
+  assert.equal(isNew({ ...h, status: "expired" }, "2026-11-26"), false);
+  assert.equal(isNew({ ...h, listed: undefined }, "2026-11-26"), false);
+  assert.match(cardHtml(h, { shore: 1, dennysville: 2 }, "2026-11-26"), /ltm-badge-new/);
+  assert.doesNotMatch(cardHtml({ ...h, listed: "2026-01-01" }, { shore: 1, dennysville: 2 }, "2026-11-26"), /ltm-badge-new/);
+});
+
+test("the line under the map says what the weekly check changed", () => {
+  assert.equal(changesText({ previous: null, added: [], removed: [] }), "");
+  assert.equal(changesText({ previous: "2026-11-26", added: [], removed: [] }), "No new or removed listings since the last check on Nov 26, 2026.");
+  assert.equal(
+    changesText({ previous: "2026-11-26", added: ["a", "b"], removed: [{ address: "1 Main Street", town: "Lubec", price: 100000, reason: "sold" }] }),
+    "2 new listings added, 1 removed since the last check on Nov 26, 2026. Removed: 1 Main Street, Lubec (sold).",
+  );
+  assert.equal(changesText({ previous: "2026-11-26", added: [], removed: [{ address: "2 Elm", town: "Perry", reason: "taken off the market" }] }),
+    "1 removed since the last check on Nov 26, 2026. Removed: 2 Elm, Perry (taken off the market).");
+});
+
+test("the weekly change record matches the house list", () => {
+  const ids = new Set(HOUSES.map((h) => h.id));
+  assert.equal(ids.size, HOUSES.length, "house ids are unique");
+  for (const id of HOUSES_CHANGES.added) assert.ok(ids.has(id), `added id ${id} is in HOUSES`);
+  for (const r of HOUSES_CHANGES.removed) {
+    assert.ok(r.address && r.town && r.reason, "removed houses say what and why");
+    assert.ok(!HOUSES.some((h) => h.address === r.address && h.town === r.town), `${r.address} was removed but is still listed`);
+  }
+  if (HOUSES_CHANGES.previous) assert.ok(HOUSES_CHANGES.previous < HOUSES_CHECKED);
+  assert.match(HOUSES_CHECKED, /^\d{4}-\d{2}-\d{2}$/);
 });

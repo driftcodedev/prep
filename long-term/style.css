@@ -184,6 +184,9 @@
 #lt-root .ltm-badge-offgrid-solar { background: var(--solar); color: #fff; }
 #lt-root .ltm-badge-backup { background: var(--backup-tint); color: #7a4c00; }
 #lt-root .ltm-badge-none { background: #eef1f2; color: var(--ink-2); }
+#lt-root .ltm-badge-new { background: #1f5f99; color: #fff; }
+#lt-root .ltm-card-badges { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.3rem; }
+#lt-root .ltm-changes { margin: 0.25rem 0 0; font-size: 0.9rem; color: var(--ink-2); }
 #lt-root .ltm-status-active { background: var(--lid-tint); color: var(--lid-dark); }
 #lt-root .ltm-status-under-contract, #lt-root .ltm-status-pending { background: #f2ecdc; color: #6b5414; }
 #lt-root .ltm-status-expired { background: #efe7f7; color: #5b3a8c; }

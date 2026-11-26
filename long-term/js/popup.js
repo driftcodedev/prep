@@ -2,8 +2,10 @@
 
 import {
   esc, money, shortMoney, niceDate, daysBetween, durationText, milesText, shoreText, precisionOf,
-  STATUS_LABEL, POWER_LABEL, lifespanRows, tileView,
+  STATUS_LABEL, POWER_LABEL, lifespanRows, tileView, isNew,
 } from "./geo.js";
+
+const newBadge = (h, today) => (isNew(h, today) ? ' <span class="ltm-badge ltm-badge-new">New</span>' : "");
 
 const fill = (url, t) => url.replace("{z}", t.z).replace("{x}", t.x).replace("{y}", t.y);
 
@@ -80,7 +82,7 @@ export function popupHtml(h, info, ctx) {
   return `
     <article class="ltm-pop">
       ${photoHtml(h, ctx.tileUrl)}
-      <p class="ltm-pop-kicker"><span class="ltm-badge ltm-badge-${esc(h.power)}">${esc(POWER_LABEL[h.power])}</span> <span class="ltm-status ltm-status-${esc(h.status)}">${esc(STATUS_LABEL[h.status])}</span></p>
+      <p class="ltm-pop-kicker"><span class="ltm-badge ltm-badge-${esc(h.power)}">${esc(POWER_LABEL[h.power])}</span> <span class="ltm-status ltm-status-${esc(h.status)}">${esc(STATUS_LABEL[h.status])}</span>${newBadge(h, ctx.today)}</p>
       <h3 class="ltm-pop-title">${esc(h.address)}, ${esc(h.town)}</h3>
       <p class="ltm-pop-price">${esc(money(h.price))}</p>
       <p class="ltm-pop-facts">${esc(factsRow(h))}</p>
@@ -107,7 +109,7 @@ export function cardHtml(h, info, today) {
     <li class="ltm-card ltm-card-${esc(h.power)}" data-id="${esc(h.id)}">
       <div class="ltm-card-top">
         <span class="ltm-card-price">${esc(shortMoney(h.price))}</span>
-        <span class="ltm-badge ltm-badge-${esc(h.power)}">${esc(POWER_LABEL[h.power])}</span>
+        <span class="ltm-card-badges"><span class="ltm-badge ltm-badge-${esc(h.power)}">${esc(POWER_LABEL[h.power])}</span>${newBadge(h, today)}</span>
       </div>
       <h4 class="ltm-card-title">${esc(h.address)}, ${esc(h.town)}</h4>
       <p class="ltm-card-facts">${esc(factsRow(h))}</p>

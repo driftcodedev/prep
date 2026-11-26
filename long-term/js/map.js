@@ -2,13 +2,14 @@
 // Browser only; app.js loads it after the password is entered. Everything it adds to window or
 // document is removed again by destroy().
 
-import { HOUSES, HOUSES_CHECKED } from "../data/houses.js";
+import { HOUSES, HOUSES_CHECKED, HOUSES_CHANGES } from "../data/houses.js";
 import {
   MAP_VIEW, DENNYSVILLE, RING_COLORS, DEFAULT_RINGS, TOWNS, WATER_NAMES, SPOTS, BASE_MAPS, PHOTO_TILES,
 } from "../data/places.js";
 import * as POWER from "../data/power.js";
 import {
   esc, makeShoreDistance, milesBetween, ringOf, ringStyles, filterHouses, sortHouses, milesText, niceDate,
+  changesText,
 } from "./geo.js";
 import { popupHtml, cardHtml } from "./popup.js";
 
@@ -32,6 +33,9 @@ export function createMap(root, { L, geo }) {
   const countEl = $("[data-count]");
   const legendEl = $("[data-legend]");
   const today = localToday();
+  const changesEl = $("[data-changes]");
+  const changes = changesText(HOUSES_CHANGES);
+  if (changesEl && changes) { changesEl.textContent = changes; changesEl.hidden = false; }
   const cleanups = [];
   const on = (target, type, fn, opts) => { target.addEventListener(type, fn, opts); cleanups.push(() => target.removeEventListener(type, fn, opts)); };
 

@@ -21,6 +21,16 @@
 
 export const HOUSES_CHECKED = "2026-11-26";
 
+// What the last weekly check changed, shown under the map.
+//   previous  date of the check before this one (null until there is one)
+//   added     ids of houses new to the list
+//   removed   houses taken off it: { address, town, price, reason }, reason in plain words such as
+//             "sold", "taken off the market" or "listing expired"
+// Weekly rules: remove a house once it has sold or its listing is withdrawn or expired. Keep houses
+// under contract or pending (not sold yet). Keep an off-grid solar house whose listing expired unsold
+// with status "expired", since the owners may still sell.
+export const HOUSES_CHANGES = { previous: null, added: [], removed: [] };
+
 export const HOUSES = [
   {
     id: "perry-44-cobscook-drive",

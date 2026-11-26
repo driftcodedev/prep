@@ -9,7 +9,7 @@ const script = read("../readme.js");
 const embedded = index.match(/<script type="application\/json" id="rmpages">([\s\S]*?)<\/script>/)?.[1];
 
 // Readers' edits are saved under these ids, so once published they must stay.
-const PUBLISHED = ["about", "short-term", "amounts", "prices", "long-term", "code", "gas-pump"];
+const PUBLISHED = ["about", "short-term", "amounts", "prices", "long-term", "code", "gas-pump", "why-cobscook", "species-extinction"];
 
 test("index.html holds the current README pages (run `npm run readme` if this fails)", () => {
   assert.ok(embedded, "index.html has no rmpages block");

@@ -10,7 +10,7 @@ export const PAGE = {
   listHeading: "Houses for sale",
   notesHeading: "About this map",
   notes: [
-    "Houses: every single-family house the Maine MLS showed as for sale, under contract or pending in the towns around the bay, checked Nov 25–26, 2026, plus 44 Cobscook Drive, whose listing just expired unsold. Land-only lots are left out. Listings change every week, so check the listing page before you act.",
+    "Houses: every single-family house the Maine MLS shows as for sale, under contract or pending in the towns around the bay, plus 44 Cobscook Drive, whose listing expired unsold. Land-only lots are left out. The list is checked every Sunday: sold, withdrawn and expired listings come off, new ones go on, and listings from the last 14 days get a New badge. Check the listing page before you act.",
     "Pins: most come from the listing's own map point. Some sites only give the longitude to 2 decimals, so those pins can be a few hundred meters east or west of the house. Houses with a dashed pin had no map point; the pin sits at the village or road named in the details.",
     "Rings: measured across land from the shore of Cobscook Bay, using a detailed world coastline (GSHHS). The bay ends at a line from the south tip of Eastport to the Lubec shore. The coastline stops a little short of the tidal Dennys River, so Dennysville shows at the edge of the first ring even though the tide reaches it.",
     "Populations: 2020 US census and 2021 Canadian census. Edmunds and Trescott are counted together with four other townships.",

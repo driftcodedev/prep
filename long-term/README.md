@@ -90,6 +90,11 @@ of the bay, and every house for sale with its power setup.
   each house's map point, list date and power fields from its compass.com page. Houses with no map
   point get an `approx` note and a pin at the village or road. Keep `power: "offgrid-solar"` for
   houses whose MLS record says off grid with solar; don't guess.
+- **Weekly check:** a scheduled task refreshes `data/houses.js` every Sunday evening (Eastern). It
+  removes houses that sold or whose listing was withdrawn or expired (an off-grid solar house that
+  expired unsold stays, as `"expired"`), adds new listings within 10 miles, updates `HOUSES_CHECKED`,
+  and records what changed in `HOUSES_CHANGES`, which shows as a line under the map. Listings from the
+  last 14 days get a New badge (`isNew` in `js/geo.js`). The task commits only `long-term/`.
 - **Rings** come from `tools/build_geo.py`, which needs `pip install basemap basemap-data-hires shapely pyproj`.
   It measures across land from the bay's shore in UTM 19N and writes `data/geo.json`.
 - **Leaflet** loads only after the password (app.js imports it inside `mount`). Its CSS is scoped to

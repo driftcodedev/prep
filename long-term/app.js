@@ -103,6 +103,7 @@ export function render(page = PAGE, context = {}, data = { houses: HOUSES, color
 
       <div class="ltm-legend" data-legend></div>
       <p class="ltm-count" data-count aria-live="polite"></p>
+      <p class="ltm-changes" data-changes hidden></p>
 
       <div class="ltm-list-head">
         <h3 class="sub-title">${esc(page.listHeading)}</h3>
