@@ -229,6 +229,157 @@ export const PAGES = [
 `,
   },
   {
+    id: "solar-panels",
+    title: "Solar panels",
+    names: ["Solar", "Solar power", "Blackout ready", "Off grid solar", "Battery and inverter"],
+    html: `
+<p>All three off-grid houses on the map near Cobscook Bay have solar panels. This page explains how to tell whether a solar house keeps its power in a blackout, what it needs, whether it can be changed, and how long everything lasts. Checked 26 November 2026.</p>
+<h3>The short answer</h3>
+<ul>
+<li><b>The panels aren't the problem.</b> Panels make power whenever sun hits them. What shuts off in a blackout is the <b>inverter</b>, the box that turns panel power into the kind of power your outlets use.</li>
+<li><b>Most solar homes are "grid-tied".</b> Their inverter has to shut off when the grid goes down. With no battery, the house goes dark like every other house, even at noon.</li>
+<li><b>To run in a blackout</b>, a house needs a battery, an inverter that can run without the grid, and (if it's on the grid) a switch that cuts the house off from the power lines.</li>
+<li><b>A true off-grid house already works in a blackout.</b> It has no grid to lose, so it was built to make its own power. For the three houses here, the real questions are how big and how old the battery is, and how the system copes with a dark Maine winter.</li>
+</ul>
+<p><b>Two words that trip everyone up:</b> <b>kW</b> (kilowatts) is how much power at once, which decides how many things can run together. <b>kWh</b> (kilowatt-hours) is an amount of energy, which decides how long they can run. A battery's size is in kWh; a solar array's size is in kW.</p>
+<h3>Why some solar stops in a blackout</h3>
+<p>A grid-tied inverter follows the grid's rhythm. US safety rules (IEEE 1547 and UL 1741) make it stop within 2 seconds of the grid going down, so it can't push power back up the lines and hurt the workers fixing them. Tesla says a regular solar system with no battery doesn't work during an outage.</p>
+<p>A battery alone isn't proof either. Some batteries are set up only to cut power bills and aren't wired for backup. The state solar agency in Victoria, Australia, warns that solar with a battery doesn't automatically mean power in an outage.</p>
+<h3>The three kinds of solar setup</h3>
+<table>
+<tr><th>Kind</th><th>Works in a blackout?</th><th>How to spot it</th></tr>
+<tr><td>Grid-tied, no battery (most solar homes)</td><td>No. A few inverters have a small daytime-only outlet (see below).</td><td>A power line and power company meter, panels and an inverter, but no battery.</td></tr>
+<tr><td>Grid-tied with battery backup</td><td>Yes, if it was wired for backup.</td><td>A battery, a box that cuts the house off from the grid, and often a second breaker box for the circuits that stay on.</td></tr>
+<tr><td>Off grid</td><td>Yes. It's the only way it works.</td><td>No power line or power company meter. A battery bank, an inverter, a charge controller, and usually a generator.</td></tr>
+</table>
+<h3>How to tell if a house is blackout-ready</h3>
+<p><b>Look for these:</b></p>
+<ul>
+<li><b>A battery.</b> A cabinet on a wall or floor (for example a Tesla Powerwall or an Enphase IQ Battery), or a rack of batteries in a basement or utility room. Write down the brand, the size in kWh, the type (lithium or lead-acid) and the date on the label.</li>
+<li><b>A box that cuts the house off from the grid.</b> Tesla calls it a Backup Gateway or Backup Switch, and Enphase calls it an IQ System Controller. Others call it a transfer switch. A grid-tied house can't run in a blackout without one. An off-grid house doesn't need one, though it often has a transfer switch for its generator.</li>
+<li><b>A second breaker box</b>, often labeled "backup loads" or "critical loads". It holds the circuits that stay on in a blackout. If there's a battery but no second box, ask whether it backs up the whole house.</li>
+<li><b>The inverter's label.</b> Write down the make and model and look it up. Words like "hybrid", "battery inverter", "inverter/charger" or "off-grid" are good signs. An inverter that's only "grid-tied" can't run the house by itself.</li>
+<li><b>Off-grid parts:</b> a charge controller (a box between the panels and the batteries that keeps them from overcharging) and a generator with an hour meter.</li>
+</ul>
+<p><b>Ask for these papers:</b> the electrical permit and wiring drawing, the manuals, the installer's name and number, the login for the monitoring app, and the warranties, including whether they pass to a new owner.</p>
+<p><b>Ask these questions:</b></p>
+<ul>
+<li>How many panels, and how many kW in total?</li>
+<li>Battery brand, size in kWh, type and year? Inverter and charge controller models?</li>
+<li>When was it installed, and by whom? Is it owned or leased?</li>
+<li>Does it run, and can you control it, without internet? Tesla's Powerwall 3, for example, needs a reliable internet connection to keep its full 10-year warranty.</li>
+<li>Can it restart from solar alone if the battery ever runs flat? POWER magazine notes that if a battery shuts down completely during a long outage, the solar may have nothing to follow and can't restart by itself. One brand, sonnen, tries to restart 3 times and then stays off until the grid comes back.</li>
+<li>How many hours does the generator run in a typical winter?</li>
+</ul>
+<p><b>See it work.</b> Ask the owner or installer to show you, rather than doing it yourself.</p>
+<ul>
+<li><b>Grid-tied house:</b> switching off the main breaker acts like a blackout, and the house should switch to battery power. Some systems need the solar breakers turned off first, which is one reason to let the installer do it.</li>
+<li><b>Off-grid house:</b> with the generator off, the lights should stay on. Check the battery's charge on the monitoring screen, and read the generator's hour meter. Lots of hours means the solar and battery can't keep up on their own.</li>
+</ul>
+<h3>The three off-grid houses near Cobscook Bay</h3>
+<table>
+<tr><th>House</th><th>What the listing says</th><th>What to find out</th></tr>
+<tr><td>Perry, 44 Cobscook Drive ($590,000; listing expired unsold Nov 20, 2026)</td><td>Fully off grid, with owned solar and a standby generator. Roof and solar new in spring 2026. Heat: propane stove.</td><td>Battery brand, size and type; inverter model; panel kW; generator size and fuel. A brand-new system has nearly all of its battery and inverter life left.</td></tr>
+<tr><td>Charlotte, 1235 Ayers Junction Road ($525,000)</td><td>Off grid, with seller-owned solar and a battery ("energy storage device"). No power bill. Built 2022. Heat: wood stove.</td><td>Battery brand and size. No generator is listed. Without one, a long cloudy spell in winter can mean no power until the sun comes back.</td></tr>
+<tr><td>Pembroke, 72 Fifth Avenue ($159,000)</td><td>Off grid, with seller-owned solar and a drilled well with a solar pump. No battery or inverter listed. Heat: wood stove and propane.</td><td>What the solar runs besides the well pump. If it only runs the pump, the pump may work only when the sun is out, and anything else would need a battery, an inverter and more panels.</td></tr>
+</table>
+<h3>If it can't run in a blackout, can it be changed?</h3>
+<p>Yes, most grid-tied systems can. The options, from least to most work:</p>
+<ul>
+<li><b>A daytime-only outlet.</b> Some SMA inverters have a "Secure Power Supply" outlet that gives up to 2,000 watts while the sun is out, with no battery. You switch it on by hand, and it cuts out under clouds or if you plug in too much. Enphase offers something similar, "Sunlight Backup", for its IQ8 microinverters once an IQ System Controller 2 and a load controller are added; older Enphase models can't do it. Either way, nothing at night.</li>
+<li><b>Add a battery and keep the old inverter</b> (called "AC-coupled"). The new battery comes with its own inverter (Tesla's Powerwall 3 is one) and a box that cuts off the grid. Day and night power.</li>
+<li><b>Swap the inverter for a hybrid one and add a battery</b> (called "DC-coupled"). Worth it if the old inverter is near the end of its 10–15 years anyway.</li>
+<li><b>Rebuild as a full off-grid system:</b> a battery bank, an off-grid inverter, a charge controller and a generator. The most work.</li>
+</ul>
+<p><b>Cost:</b> EnergySage puts the average installed home battery at about $15,650. Adding one to an existing system usually costs more in labor than putting it in with new panels.</p>
+<p><b>Does it take an expert?</b> Yes. It isn't a do-it-yourself job. Panel wiring can carry several hundred volts and stays live whenever light hits the panels, even with the main breaker off. Plan on a licensed electrician or solar installer, an electrical permit, and, for a grid-tied house, the power company's approval. EnergySage notes that adding a battery takes significant electrical work. <b>Do it before you need it:</b> after a long grid failure, parts and installers will be hard or impossible to find.</p>
+<h3>What a house needs to run on solar in a blackout</h3>
+<table>
+<tr><th>Part</th><th>What it does</th></tr>
+<tr><td>Panels</td><td>Make power from sunlight (direct current, or DC).</td></tr>
+<tr><td>Battery</td><td>Stores daytime power for night and cloudy days.</td></tr>
+<tr><td>An inverter that runs without the grid</td><td>Turns panel and battery power into the alternating current (AC) your outlets use, and makes its own "grid" for the house. Called a hybrid, battery or off-grid inverter.</td></tr>
+<tr><td>Charge controller</td><td>Feeds panel power into the battery without overcharging it. Many hybrid inverters have one built in.</td></tr>
+<tr><td>Grid cut-off switch</td><td>Grid-tied houses only: separates the house from the power lines during a blackout (a gateway, system controller or transfer switch).</td></tr>
+<tr><td>Generator (strongly advised in Maine)</td><td>Charges the battery during long dark spells. It needs fuel, so it only buys time.</td></tr>
+<tr><td>Fuses, breakers and shut-offs</td><td>Protect the wiring and let you shut things off safely.</td></tr>
+</table>
+<h3>How long each part lasts</h3>
+<table>
+<tr><th>Part</th><th>Lasts about</th><th>Notes</th></tr>
+<tr><td>Panels</td><td>25–30 years or more</td><td>They lose about 0.5% of their output a year, so they make about 90% as much at year 20. Warranties are usually 25 years.</td></tr>
+<tr><td>String or hybrid inverter</td><td>10–15 years</td><td>Usually the first part to fail. Worn capacitors inside are a common cause.</td></tr>
+<tr><td>Microinverters (one under each panel)</td><td>Up to about 25 years</td><td>Warranties of 20–25 years, but they're fairly new, so that's not proven yet.</td></tr>
+<tr><td>Lithium iron phosphate battery (LFP or LiFePO4, the most common kind now)</td><td>10–15 years or more</td><td>Warranties are usually about 10 years.</td></tr>
+<tr><td>Other lithium batteries (NMC)</td><td>8–15 years</td><td>Sources differ.</td></tr>
+<tr><td>Lead-acid battery (found in older off-grid homes)</td><td>3–5 years</td><td>Cheaper, but needs replacing often.</td></tr>
+</table>
+<p>A worn-out battery isn't dead. "End of life" usually means it holds about 70% of what it did new. It keeps working, just for fewer hours.</p>
+<h3>How long the power would last</h3>
+<p><b>On one full battery, with no sun:</b></p>
+<table>
+<tr><th>What you run</th><th>Energy a day</th><th>One 13.5 kWh battery (one Powerwall) lasts</th></tr>
+<tr><td>A typical Maine home</td><td>About 18 kWh (550–560 kWh a month)</td><td>About 17 hours</td></tr>
+<tr><td>Just the essentials: lights, phone and radio (0.5 kWh), fridge (1.2), chest freezer (1) and well pump (1)</td><td>About 3.7 kWh</td><td>About 3½ days</td></tr>
+<tr><td>One 1,500-watt space heater</td><td>36 kWh if left on</td><td>About 9 hours</td></tr>
+</table>
+<p>The essentials figures are the ones the Long Term plan uses. Cold batteries hold less: most lithium batteries give only 70–80% of their capacity at 32°F, so keep them in a heated room.</p>
+<p><b>Charging back up in winter:</b> in Perry, each kW of panels makes about 2 kWh a day in winter, against about 6 in summer. So running just the essentials on an average winter day takes about 2 kW of panels (about five 400-watt panels). Plan for more, because a cloudy week or panels under snow make far less.</p>
+<p><b>Heat has to come from somewhere else.</b> Solar and a battery can't heat a Maine house through the winter; the space heater above would empty a battery overnight. All three houses heat with wood or propane, which is the right setup.</p>
+<p><b>Over the years:</b> panels keep working for decades. The battery and inverter are the weak links and will likely need replacing after 10–15 years, or 3–5 years for lead-acid. A system as new as Perry's has the most time left.</p>
+<h3>Maine winter problems</h3>
+<ul>
+<li><b>Snow on the panels:</b> clear it gently with a soft roof rake from the ground, without scratching the glass. Tesla suggests checking panels daily in bad weather. Don't climb on an icy roof.</li>
+<li><b>Cold batteries:</b> don't charge lithium batteries below freezing (32°F), which can damage them for good. Most have built-in protection that stops charging when they're too cold, but they can still give power down to about −4°F. Keep them in a heated space, or buy self-heating ones.</li>
+<li><b>Short days:</b> December and January give about a third of the power of summer.</li>
+</ul>
+<h3>Spares worth keeping for a long blackout</h3>
+<ul>
+<li>A spare charge controller and, if you can afford it, a spare inverter of the same model, since those fail first.</li>
+<li>Spare fuses that match the system.</li>
+<li>A soft-headed roof rake for snow.</li>
+<li>Generator oil, filters, spark plugs and stabilized fuel.</li>
+<li>Paper copies of every manual and the wiring drawing.</li>
+</ul>
+<h3>Sources</h3>
+<p><b>Why solar stops in a blackout</b></p>
+<ul>
+<li><a href="https://www.nrel.gov/docs/fy22osti/77782.pdf" target="_blank" rel="noopener">NREL (PDF)</a>: grid-tied inverters must stop within 2 seconds of an outage under IEEE 1547 and UL 1741.</li>
+<li><a href="https://www.tesla.com/en_au/support/energy/powerwall/own/best-practices-during-power-outages" target="_blank" rel="noopener">Tesla: best practices during power outages</a>: solar without a Powerwall doesn't work in an outage; check panels for snow.</li>
+<li><a href="https://www.solar.vic.gov.au/what-you-need-know-about-backup-power" target="_blank" rel="noopener">Solar Victoria: backup power</a>: solar with a battery doesn't automatically mean power in an outage.</li>
+<li><a href="https://tesla.com/support/energy/powerwall/learn/how-powerwall-works" target="_blank" rel="noopener">Tesla: how Powerwall works</a>: batteries can be set up with or without backup; 13.5 kWh; 10-year warranty.</li>
+</ul>
+<p><b>Checking and testing a system</b></p>
+<ul>
+<li><a href="https://support.tigoenergy.com/hc/en-us/articles/33772912796819" target="_blank" rel="noopener">Tigo: backup test</a> and <a href="https://energylibrary.tesla.com/docs/Public/More/Powershare/DeviceSetup/en-us/GUID-51A629D2-0659-4CF3-BEC1-A3AF3142FC86.html" target="_blank" rel="noopener">Tesla: off-grid test</a>: turning off the main breaker mimics an outage; turn the solar breakers off first on some systems.</li>
+<li><a href="https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-uk/Powerwall-3-Datasheet-EN.pdf" target="_blank" rel="noopener">Tesla Powerwall 3 datasheet (PDF)</a>: needs a reliable internet connection for the full 10-year warranty.</li>
+<li><a href="https://www.powermag.com/solar-storage-and-the-day-the-grid-goes-dark/" target="_blank" rel="noopener">POWER magazine: solar, storage and the day the grid goes dark</a>: a flat battery can leave solar unable to restart.</li>
+<li><a href="https://www.sonnenusa.com/blog/how-sonnen-helps-you-weather-power-outages" target="_blank" rel="noopener">sonnen: weathering power outages</a>: tries to restart 3 times, then stays off until the grid returns.</li>
+<li><a href="https://www.energy.gov/energysaver/articles/balance-system-equipment-required-renewable-energy-systems" target="_blank" rel="noopener">US Department of Energy: equipment for renewable energy systems</a>: charge controllers, battery inverters, disconnects and generators.</li>
+</ul>
+<p><b>Changing a system</b></p>
+<ul>
+<li><a href="https://www.sma-sunny.com/us/?p=116852" target="_blank" rel="noopener">SMA: Secure Power Supply</a>: a daytime-only outlet, up to 2,000 watts.</li>
+<li><a href="https://enphase.com/installers/microinverters/sunlight-backup" target="_blank" rel="noopener">Enphase: Sunlight Backup</a>: IQ8 microinverters with an IQ System Controller 2 and a load controller.</li>
+<li><a href="https://www.energysage.com/energy-storage/adding-battery-to-solar-energy-system-as-retrofit/" target="_blank" rel="noopener">EnergySage: adding a battery to existing solar</a>: AC- and DC-coupled options; extra labor.</li>
+<li><a href="https://www.energysage.com/local-data/energy-storage-cost/" target="_blank" rel="noopener">EnergySage: battery cost</a>: about $15,650 installed on average.</li>
+</ul>
+<p><b>How long parts last</b></p>
+<ul>
+<li><a href="https://nrel.gov/state-local-tribal/blog/posts/stat-faqs-part2-lifetime-of-pv-panels.html" target="_blank" rel="noopener">NREL: lifetime of PV panels</a>: about 0.5% a year; about 90% at year 20.</li>
+<li><a href="https://www.pv-magazine.com/2023/09/11/how-long-do-residential-solar-panels-last/" target="_blank" rel="noopener">pv magazine: how long panels last</a>: 25–30 years; 25-year warranties.</li>
+<li><a href="https://www.pv-magazine.com/2025/08/06/how-long-do-residential-solar-inverters-last-5/" target="_blank" rel="noopener">pv magazine: how long inverters last</a>: string inverters 10–15 years; microinverters about 25, not yet proven.</li>
+<li><a href="https://pv-magazine-usa.com/2025/08/06/how-long-do-residential-solar-batteries-last-3/" target="_blank" rel="noopener">pv magazine: how long batteries last</a> and <a href="https://aurorasolar.com/home-solar/blog/solar-101/how-long-do-solar-batteries-last" target="_blank" rel="noopener">Aurora Solar: how long batteries last</a>: LFP 15 years or more, NMC 10–15, lead-acid 3–5; about 70% left at the end of the warranty.</li>
+</ul>
+<p><b>Power use and winter</b></p>
+<ul>
+<li><a href="https://www.eia.gov/electricity/sales_revenue_price/pdf/table_5a.pdf" target="_blank" rel="noopener">US Energy Information Administration (PDF)</a>: Maine homes average 560 kWh a month. <a href="https://www.maine.gov/energy/electricity-prices" target="_blank" rel="noopener">Maine Governor's Energy Office</a>: an average bill uses 550 kWh.</li>
+<li><a href="https://profilesolar.com/locations/United-States/Perry/" target="_blank" rel="noopener">profileSOLAR: Perry, Maine</a> (NASA POWER data): about 2 kWh a day per kW of panels in winter, 6 in summer.</li>
+<li><a href="https://battlebornbatteries.com/blogs/articles/heated-lithium-batteries-providing-warmth-power-cold-weather" target="_blank" rel="noopener">Battle Born: heated lithium batteries</a> and <a href="https://www.renogy.com/blogs/buyers-guide/self-heating-vs-low-temperature-protection-lithium-battery" target="_blank" rel="noopener">Renogy: cold-weather lithium batteries</a>: don't charge below 32°F; power down to −4°F; 70–80% of capacity at 32°F.</li>
+</ul>
+`,
+  },
+  {
     id: "short-term",
     title: "Using the Short Term plan",
     names: ["Short Term", "Short Term plan", "How to use"],
