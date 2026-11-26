@@ -122,14 +122,50 @@ export const PAGES = [
     names: ["Special extinction", "Extinction", "Overfishing", "Population decline"],
     html: `
 <p>In a long grid-down, a lot of hungry people would hunt and fish the same places, with no game wardens and no limits. History shows what happens next: animals that seemed endless were wiped out within a few years. Checked 26 November 2026.</p>
+<h3>How fast would the US population drop?</h3>
+<p><b>Short answer: nobody has published a well-researched forecast.</b> The most thorough public studies describe what breaks and when, but none puts a number on deaths by month or year. This is what the best evidence does show.</p>
+<table>
+<tr><th>When</th><th>What kills people</th><th>Best real-world evidence</th></tr>
+<tr><td>First month</td><td>No pumped water, no dialysis or home medical machines, and heat or cold. About 557,000 Americans are on dialysis, and people who stop dialysis live about a week. Over 3 million people on Medicare rely on electric medical equipment at home.</td><td>Puerto Rico after Hurricane Maria (2017): power was out for months, but outside help came. There were 2,975 extra deaths in 6 months, 22% more than normal. A Harvard survey estimated about 4,600 in the first 3 months, mostly from interrupted medical care.</td></tr>
+<tr><td>1 to 6 months</td><td>Home food runs out, then starvation and cold. People can live about 1–2 months without food, but are too weak to work within days to two weeks.</td><td>The siege of Leningrad (1941–44): a city of about 2.5–3 million with almost no food, power or heat. About 800,000 civilians died, most in the first winter, up to 100,000 a month.</td></tr>
+<tr><td>1 year</td><td>Famine goes on unless farming restarts. Without fuel, fertilizer and pesticides, harvests shrink.</td><td>A 2024 study of a worldwide loss of power and industry estimated staple crop yields 15–37% lower in the first year (while stocks last) and 35–48% lower after that.</td></tr>
+<tr><td>5 years</td><td>Depends on how many people can farm, hunt and fish by hand.</td><td>No study.</td></tr>
+</table>
+<ul>
+<li><b>How long the grid could be down:</b> a FERC memo said the whole US grid could be down 18 months or longer. Lloyd's put outages after a huge solar storm at up to 1–2 years for 20–40 million Americans. The National Academy of Sciences said full recovery from a severe solar storm could take 4–10 years.</li>
+<li><b>The most thorough study</b> of a long, wide blackout is a 2011 report for the German parliament. It found that after just a few days, an area without power can no longer get people the basic goods and services they need, and called it a national disaster. It gives no death toll.</li>
+<li><b>What to take from it:</b> deaths would start within days among people whose health depends on electricity, then climb as food runs out over the first winter. Leningrad lost about 1 in 3 people, even with a trickle of food coming in and about 500,000 people evacuated. No evidence says whether a nationwide collapse would be closer to that or to 90%.</li>
+</ul>
+<h3>About the 90% figure</h3>
+<ul>
+<li><b>Who said it:</b> William Graham, chairman of the congressional EMP Commission, and Peter Pry, its chief of staff, in testimony to Congress on 12 October 2017. They warned that a nuclear EMP attack could shut down the US grid for an indefinite period, leading to the "death within a year of up to 90 percent of all Americans."</li>
+<li><b>What would cause it:</b> starvation, disease and the breakdown of order. Without power there's no pumped water, refrigeration, fuel or trucks to restock stores, and Pry has said supermarkets would empty in about 3 days.</li>
+<li><b>No model behind it.</b> A 2019 review of threats to the US grid (Weiss and Weiss, in the journal <i>Energy, Sustainability and Society</i>) repeats the figure, but says no published model shows how it was worked out, and the authors couldn't trace it to a primary source.</li>
+<li><b>Where it came from:</b> the Washington Examiner traced it to a 2008 hearing, where a congressman brought up the novel <i>One Second After</i>, in which 90% of people are dead after a year.</li>
+<li><b>Rural areas would likely do better</b> than cities, with food, firewood and water close by, but nobody has put a number on that either.</li>
+</ul>
+<h3>How fast would hunting run out?</h3>
+<p>Within days to weeks. There's far less wild meat than people think, compared with how much people eat.</p>
+<ul>
+<li><b>The whole country:</b> the US has roughly 30 million white-tailed deer. An average deer gives about 52 lb of boneless meat, at about 544 calories a pound. That's roughly 850 billion calories, about one day of food for 340 million Americans.</li>
+<li><b>Maine:</b> about 360,000 deer and, at the last state count, about 76,000 moose. All of them together would feed Maine's 1.4 million people for about 8 days.</li>
+<li><b>Washington County</b> (Cobscook Bay): eastern Maine has fewer than 5 deer per square mile. Even at 5, the county's deer would feed its 31,000 people for less than a week.</li>
+<li><b>How many people hunting can feed:</b> studies of hunting peoples find that even rich tropical forests can only feed about 1 person per square kilometer (about 2½ per square mile) by hunting without running out. Northern forests grow less game than that. Washington County already has about 12 people per square mile.</li>
+<li><b>Past that limit:</b> scientists call it the "empty forest". The trees are still there, but animals bigger than about 4 lb are virtually gone wherever people hunt hard.</li>
+<li><b>Wild meat is very lean.</b> Deer get about 80% of their calories from protein and moose over 90%. More than about 35% of calories from protein can make people sick and even kill them ("rabbit starvation"), so game alone can't keep people alive. They need fat or starch too.</li>
+</ul>
+<p>These sums are rough estimates made for this page; the numbers that go into them are sourced below. They count every animal, which no one could actually catch, and assume about 2,000 calories a day per person.</p>
 <h3>Ponds and lakes get fished out</h3>
 <ul>
 <li><b>A pond only grows so much fish.</b> Virginia's wildlife agency says an unfertilized pond can give about 40 lb of bluegill and 10 lb of bass per acre each year without running it down. A fertilized pond gives about 160 lb of bluegill and 35–40 lb of bass.</li>
 <li><b>That's very little food.</b> A rough sum: 50 lb of whole fish is about 17 lb of meat once the heads, bones and skin are off, or roughly 7,000 calories. That's about 3½ days of food for one adult, from a whole acre of pond for a whole year.</li>
+<li><b>Emptying it doesn't go far either.</b> Even a fertilized pond in the warm South holds only about 300–500 lb of fish per acre at a time. Catching every fish in that acre would feed one adult for about 3–5 weeks, once. Then nothing is left to breed.</li>
 <li><b>Bass are easy to catch.</b> In a new pond, Virginia's guide says to keep no bass for 2 years so they can grow and breed. A pond fished hard by hungry neighbors gets no break: once the breeding fish are taken, it can take years to come back.</li>
-<li><b>Lakes are the same, just slower.</b> A lake is bigger, but it's still closed, so nothing new swims in. In Maine they also freeze over for months.</li>
-<li><b>Deer, rabbits, ducks and grouse</b> near towns go the same way.</li>
+<li><b>Cold northern lakes grow far less.</b> A lake that keeps its lake trout can give only about 0.2–0.7 lb of them per acre a year, and more than about 0.4 lb usually means overfishing. Fished safely, a 1,000-acre trout lake would feed one adult for about 4 weeks a year. In Maine, lakes also freeze over for months.</li>
+<li><b>It happens in weeks.</b> Ontario's lake trout guidelines warn that when a new road reaches a small lake, the catch can go far past safe levels "in a matter of weeks." In northeastern Ontario only about 17% of the lake trout lakes surveyed were healthy, and fishing on most lakes with easy road access was above the safe level. That's with game wardens and limits in place.</li>
+<li><b>Even the ocean has limits.</b> Cod were once so common that Cape Cod was named for them. After decades of heavy fishing, Gulf of Maine cod fell to 3–4% of their target level, and NOAA still lists them as overfished. The bay refills far better than a pond, but it isn't bottomless.</li>
 </ul>
+<p>The pond and lake sums are rough estimates made for this page. They assume about a third of a small fish is meat, at about 95 calories per 100 g.</p>
 <h3>It has happened before</h3>
 <ul>
 <li><b>White-tailed deer</b> were nearly extinct in much of the eastern US about a century ago, mostly from hunting for meat and hides. Rhode Island set the first deer season back in 1646 to slow the decline. The last known deer in Georgia's mountains was killed in 1895.</li>
@@ -144,41 +180,51 @@ export const PAGES = [
 <li>Most were killed for their hides. A new tanning method from Europe made the hides worth money, and they were shipped off to make leather for factory belts and boot soles. The meat was often left to rot.</li>
 <li>Nobody knows exactly how many there were to start with. Estimates run from 30 million to 70 million.</li>
 </ul>
-<h3>How much would the population drop?</h3>
-<table>
-<tr><th>After the grid goes down</th><th>Expected drop</th></tr>
-<tr><td>6 months</td><td>No published estimate</td></tr>
-<tr><td>1 year</td><td>Up to 90% of Americans</td></tr>
-<tr><td>2 years</td><td>No published estimate</td></tr>
-<tr><td>5 years</td><td>No published estimate</td></tr>
-<tr><td>10 years</td><td>No published estimate</td></tr>
-</table>
-<p>The one-year figure is the only one anyone has published. The other rows are left blank rather than guessed.</p>
-<h3>About the 90% figure</h3>
-<ul>
-<li><b>Who said it:</b> William Graham, chairman of the congressional EMP Commission, and Peter Pry, its chief of staff, in testimony to Congress on 12 October 2017. They warned that a nuclear EMP attack could shut down the US grid for an indefinite period, leading to the "death within a year of up to 90 percent of all Americans."</li>
-<li><b>What would cause it:</b> starvation, disease and the breakdown of order. Without power there's no pumped water, refrigeration, fuel or trucks to restock stores, and Pry has said supermarkets would empty in about 3 days.</li>
-<li><b>It's disputed.</b> A 2019 review in the journal <i>Energy, Sustainability and Society</i> found no published model showing how the number was worked out, and couldn't trace it to a primary source.</li>
-<li><b>Where it came from:</b> the Washington Examiner traced it to a 2008 hearing, where a congressman brought up the novel <i>One Second After</i>, in which 90% of people are dead after a year.</li>
-<li><b>Rural areas would likely do better</b> than cities, with food, firewood and water close by, but nobody has put a number on that either.</li>
-</ul>
 <h3>Sources</h3>
+<p><b>Population</b></p>
 <ul>
-<li><a href="https://dwr.virginia.gov/fishing/private-pond-management/managing-fish-populations" target="_blank" rel="noopener">Virginia DWR: managing pond fish</a> and <a href="https://dwr.virginia.gov/?p=7174" target="_blank" rel="noopener">unfertilized ponds</a>: pounds of fish per acre; no bass kept for 2 years.</li>
-<li>The calories sum is a rough estimate made for this page, not from a source. It assumes about a third of a small fish is meat, at about 95 calories per 100 g.</li>
+<li><a href="https://link.springer.com/article/10.1186/s13705-019-0199-y" target="_blank" rel="noopener">Weiss and Weiss, 2019, <i>Energy, Sustainability and Society</i>: An assessment of threats to the American power grid</a>: no published model behind the 90% figure; death without water in 3–4 days; 1–2 months without food; FERC's 18 months; Lloyd's 1–2 years; the National Academy's 4–10 years.</li>
+<li><a href="https://publikationen.bibliothek.kit.edu/1000103292" target="_blank" rel="noopener">Office of Technology Assessment at the German Bundestag: What happens during a blackout</a> and <a href="https://tab-beim-bundestag.de/english/2316.php" target="_blank" rel="noopener">summary</a>: supplies fail after a few days; a national disaster.</li>
+<li><a href="https://gwtoday.gwu.edu/node/9876" target="_blank" rel="noopener">George Washington University: 2,975 excess deaths linked to Hurricane Maria</a> and <a href="https://dash.harvard.edu/bitstream/1/37309252/1/nejmsa1803972.pdf" target="_blank" rel="noopener">Kishore et al., 2018, New England Journal of Medicine (PDF)</a>: about 4,600 in 3 months, mostly interrupted care.</li>
+<li><a href="https://www.history.com/articles/the-siege-of-leningrad" target="_blank" rel="noopener">History.com: the siege of Leningrad</a> and <a href="https://encyclopedia.com/history/encyclopedias-almanacs-transcripts-and-maps/leningrad-siege" target="_blank" rel="noopener">Encyclopedia.com: Leningrad, siege of</a>: 800,000 civilians; up to 100,000 a month; most deaths in the first winter; 500,000 evacuated.</li>
+<li><a href="https://www.kidneyfund.org/sites/default/files/media/documents/USA%202024.pdf" target="_blank" rel="noopener">American Kidney Fund (PDF)</a>: 556,548 Americans on dialysis. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3848402" target="_blank" rel="noopener">O'Connor et al., 2013</a> and <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11284357/" target="_blank" rel="noopener">So and Li, 2024</a>: about a week after stopping dialysis.</li>
+<li><a href="https://empowerprogram.hhs.gov/about.html" target="_blank" rel="noopener">HHS emPOWER Program</a>: over 3 million Medicare beneficiaries rely on electricity-dependent medical equipment.</li>
+<li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10784200/" target="_blank" rel="noopener">Moersdorf et al., 2024, <i>Global Challenges</i></a>: crop yields after a global loss of industry.</li>
+<li><a href="https://www.washingtonexaminer.com/?p=1562696" target="_blank" rel="noopener">Washington Examiner, 12 October 2017</a>: the Graham and Pry testimony.</li>
+<li><a href="https://www.washingtonexaminer.com/?p=2419079" target="_blank" rel="noopener">Washington Examiner: the EMP commission</a>: where the 9-in-10 figure came from.</li>
+<li><a href="https://news.yahoo.com/could-u-wiped-north-korean-092053984.html" target="_blank" rel="noopener">Yahoo News: Could U.S. be wiped out by North Korean EMP attack?</a>: supermarkets empty in about 3 days.</li>
+</ul>
+<p><b>Hunting</b></p>
+<ul>
+<li><a href="https://www.americanhunter.org/content/are-whitetail-populations-destined-to-decline" target="_blank" rel="noopener">American Hunter</a>: Quality Deer Management Association estimate of about 30 million whitetails.</li>
+<li><a href="https://dam.assets.ohio.gov/image/upload/ohiodnr.gov/documents/wildlife/wild-ohio-harvest-community/Venison%20Yield.pdf" target="_blank" rel="noopener">Ohio Division of Wildlife: venison yield (PDF)</a>: 115 deer averaged 52.19 lb of boneless meat.</li>
+<li>USDA nutrient data: <a href="https://www.uhhospitals.org/health-information/health-and-wellness-library/nutrition-facts/article/nutritionfacts-v1/game-meat-deer-raw-1-lb" target="_blank" rel="noopener">raw deer, 544 calories a pound</a>; <a href="https://getfoodfacts.com/food/game-meat-moose-raw-174344" target="_blank" rel="noopener">raw moose, 102 calories per 100 g, 93% from protein</a>.</li>
+<li><a href="https://www.bangordailynews.com/2024/08/15/outdoors/maine-deer-healthy-herd-antlerless-permits-xoasq1i29i" target="_blank" rel="noopener">Bangor Daily News, 2024</a>: Maine's deer biologist estimates 360,000 deer.</li>
+<li><a href="https://www.maine.gov/IFW/fish-wildlife/wildlife/species-information/mammals/moose.html" target="_blank" rel="noopener">Maine IF&amp;W: moose</a>: about 76,000 in 2012. <a href="https://www.maine.gov/ifw/news-events/single-release.html?id=664111" target="_blank" rel="noopener">Maine IF&amp;W, 2015</a>: an 850-lb field-dressed moose gives over 450 lb of meat (the sum above uses 350 lb on average, since many are cows and calves).</li>
+<li><a href="https://lldc.mainelegislature.org/Open/Rpts/sk403_m37_2007.pdf" target="_blank" rel="noopener">Maine IF&amp;W northern and eastern deer report, 2007 (PDF)</a>: fewer than 5 deer per square mile in much of eastern Maine. Land area of Washington County (about 2,560 square miles): 2020 US census.</li>
+<li><a href="https://www.frontiersin.org/articles/10.3389/fevo.2019.00412/text" target="_blank" rel="noopener">Read et al., 2019, Frontiers in Ecology and Evolution</a> and <a href="https://openknowledge.worldbank.org/entities/publication/7f696278-9f2f-5d6d-8000-0e2850f38cfb/full" target="_blank" rel="noopener">Bennett and Robinson, 2000, World Bank</a>: hunting is sustainable only below about 1 person per square kilometer.</li>
+<li><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5645145" target="_blank" rel="noopener">Peres et al., 2017, PLoS One</a>: the "empty forest", with animals over 2 kg virtually gone.</li>
+<li><a href="https://www.unboundmedicine.com/medline/citation/16779921/full_citation" target="_blank" rel="noopener">Bilsborough and Mann, 2006</a>: dangers above 35% of calories from protein.</li>
 <li><a href="https://www.yahoo.com/news/rise-fall-rise-again-white-124806849.html" target="_blank" rel="noopener">The rise and fall, and rise again, of white-tailed deer</a>: nearly extinct a century ago.</li>
 <li><a href="https://www.themeateater.com/hunt/whitetail-deer/how-the-whitetail-nearly-went-extinct" target="_blank" rel="noopener">MeatEater: How the whitetail nearly went extinct</a>: Rhode Island's 1646 season.</li>
 <li><a href="https://www.gameandfishmag.com/hunting/deer/how-we-saved-whitetails/" target="_blank" rel="noopener">Game &amp; Fish: How we saved whitetails</a>: Georgia, 1895.</li>
 <li><a href="https://www.history.com/articles/turkeys-great-depression-extinction" target="_blank" rel="noopener">History.com: wild turkeys and the Great Depression</a>: turkeys; 541 bison in 1889.</li>
 <li><a href="https://fws.gov/story/2014-08/many-few-none" target="_blank" rel="noopener">US Fish and Wildlife Service: From many, to few, to none</a> and <a href="https://johnjames.audubon.org/node/4236" target="_blank" rel="noopener">Audubon: Billions to none</a>: passenger pigeons.</li>
+</ul>
+<p><b>Fish</b></p>
+<ul>
+<li><a href="https://dwr.virginia.gov/fishing/private-pond-management/managing-fish-populations" target="_blank" rel="noopener">Virginia DWR: managing pond fish</a> and <a href="https://dwr.virginia.gov/?p=7174" target="_blank" rel="noopener">unfertilized ponds</a>: pounds of fish per acre; no bass kept for 2 years.</li>
+<li><a href="https://seafwa.org/sites/default/files/journal-articles/SCHMITTOU-311.pdf" target="_blank" rel="noopener">Schmittou, Southeastern Association of Fish and Wildlife Agencies (PDF)</a>: fertilized Southeast ponds hold 300–500 lb per acre; unfertilized ponds give anglers under 50 lb per acre a year.</li>
+<li><a href="https://www.lrl.mn.gov/docs/pre2003/other/010268.pdf" target="_blank" rel="noopener">Minnesota lake trout report (PDF)</a>: self-sustaining yields of 0.25–0.75 kg per hectare a year; over 0.4 lb per acre likely overfished.</li>
+<li><a href="https://bac-lac.wayback.archive-it.org/web/20061218192230/http://www.mnr.gov.on.ca/MNR/EBR/lake_trout/tool_kit.pdf" target="_blank" rel="noopener">Ontario MNR: lake trout regulatory guidelines (PDF)</a>: overharvest "in a matter of weeks" after new access. <a href="https://www.ontario.ca/files/2025-07/264857.pdf" target="_blank" rel="noopener">Ontario northeast lake trout assessment (PDF)</a>: 16.9% healthy. <a href="https://doi.org/10.1139/f08-205" target="_blank" rel="noopener">Kaufman et al., 2009</a>: road access and angling pressure.</li>
+<li><a href="https://www.fisheries.noaa.gov/species/atlantic-cod" target="_blank" rel="noopener">NOAA Fisheries: Atlantic cod</a>: overfished; Cape Cod named for the fish. <a href="https://www.nationalfisherman.com/mid-atlantic/opinion-rebuild-cod-stock-with-low-quotas" target="_blank" rel="noopener">National Fisherman</a>: Gulf of Maine cod at 3–4% of target.</li>
 <li><a href="https://www.maine.gov/dmr/fisheries/sea-run-fisheries/sea-run-species/atlantic-salmon" target="_blank" rel="noopener">Maine DMR: Atlantic salmon</a> and <a href="https://www.fisheries.noaa.gov/species/atlantic-salmon-protected/spotlight" target="_blank" rel="noopener">NOAA Fisheries: protected Atlantic salmon</a>.</li>
+</ul>
+<p><b>History</b></p>
+<ul>
 <li><a href="https://www.ebsco.com/research-starters/history/great-american-buffalo-slaughter" target="_blank" rel="noopener">EBSCO: Great American Buffalo Slaughter</a> and <a href="https://www.ebsco.com/research-starters/social-sciences-and-humanities/bison-slaughter-impact" target="_blank" rel="noopener">Bison slaughter impact</a>: 30 million to a few thousand, about 1871–1883; the Kansas hunters.</li>
 <li><a href="https://phys.org/news/2007-07-american-buffalo-slaughter-fueled-international.html" target="_blank" rel="noopener">Phys.org: American buffalo slaughter fueled by international trade</a>: 30 million in a decade; the European tanning method.</li>
 <li><a href="https://www.thecollector.com/american-bison-hunted-near-extinction/" target="_blank" rel="noopener">TheCollector: why bison were hunted to near extinction</a>: hides for boot soles and belts.</li>
-<li><a href="https://www.washingtonexaminer.com/?p=1562696" target="_blank" rel="noopener">Washington Examiner, 12 October 2017</a>: the Graham and Pry testimony.</li>
-<li><a href="https://www.washingtonexaminer.com/?p=2419079" target="_blank" rel="noopener">Washington Examiner: the EMP commission</a>: where the 9-in-10 figure came from.</li>
-<li><a href="https://news.yahoo.com/could-u-wiped-north-korean-092053984.html" target="_blank" rel="noopener">Yahoo News: Could U.S. be wiped out by North Korean EMP attack?</a>: supermarkets empty in about 3 days.</li>
-<li><a href="https://energsustainsoc.biomedcentral.com/articles/10.1186/s13705-019-0199-y" target="_blank" rel="noopener">Energy, Sustainability and Society, 2019</a>: no published model behind the 90% figure.</li>
 </ul>
 `,
   },
