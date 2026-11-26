@@ -98,6 +98,49 @@ export const PAGES = [
 `,
   },
   {
+    id: "gas-pump",
+    title: "Pumping gas out of a car",
+    names: ["Gas pump", "GasTapper", "Siphon", "Getting gas from a car"],
+    html: `
+<p>The <b>GasTapper Standard</b>, made by FlowJoe, is a small electric pump in a carrying case. It moves gas out of a car's tank into gas cans, or from cans into a generator or another car. Checked 25 November 2026.</p>
+<table>
+<tr><th>Price</th><td>$68.99 to $109.95 (see Where to buy below).</td></tr>
+<tr><th>Ratings</th><td>4.4 out of 5 stars from about 1,200 ratings on Amazon. The share of one-star ratings couldn't be checked.</td></tr>
+<tr><th>Power</th><td>Electric, 12 volts. A 15-foot cord plugs into a car's lighter socket, so the car you're emptying can run it. It has a fuse and an on/off switch on the cord. It also runs from a portable 12-volt battery, but not from a car battery charger.</td></tr>
+<tr><th>Speed</th><td>Up to 30 gallons an hour, about half a gallon a minute. One tester moved 3.2 gallons in just over 6 minutes; a buyer says about 10 minutes per 5-gallon can.</td></tr>
+<tr><th>In the case</th><td>Two 8-foot hoses, a thinner 6-foot line, the power cord and a filter, in a fume-proof case with a handle. About 4½ lb.</td></tr>
+<tr><th>Warranty</th><td>1 year from the maker.</td></tr>
+</table>
+<h3>Which cars it works on</h3>
+<p>There's no count of the cars it works on and no success rate. The maker says it works on most cars, trucks, tractors and boats, and suggests testing your own car first.</p>
+<ul>
+<li>Most newer cars have a valve or screen in the filler neck that stops a hose. The kit's stiffer hoses are made to push past it, but not every car lets them through.</li>
+<li>One buyer couldn't get any hose through the bends to the tank of a 2002 Toyota Tacoma, though it worked on their car.</li>
+<li>A one-star review says it's useless on a lot of vehicles.</li>
+</ul>
+<p><b>Test it on your own car now</b>, while gas stations are open, so you know whether it works before you need it.</p>
+<h3>What reviewers say</h3>
+<ul>
+<li><b>Good:</b> it pumps cleanly with no mess, the hoses are long, and it runs from any car's lighter socket.</li>
+<li><b>Not so good:</b> it's slow, the case is hard to close with everything packed in, and the hoses can't reach the tank on some vehicles.</li>
+</ul>
+<h3>Using it safely</h3>
+<ul>
+<li>Work outdoors, with the pump switched off and unplugged while you set it up.</li>
+<li>Set the pump on the ground, never on or in a car. Flowing fuel builds up static that can spark a fire.</li>
+<li>Drain it before you put it away; the manual shows how. Gas left sitting in fuel parts can gum them up.</li>
+</ul>
+<h3>Where to buy</h3>
+<ul>
+<li><a href="https://www.ebay.com/sch/i.html?_nkw=gastapper&amp;_sop=12" target="_blank" rel="noopener">eBay</a>: new from $68.99 with free delivery, the cheapest found.</li>
+<li><a href="https://flowjoe.com/products/standard" target="_blank" rel="noopener">FlowJoe, the maker</a>: $98.95 on sale, normally $109.95.</li>
+<li><a href="https://www.amazon.com/dp/B00QSPU0NS" target="_blank" rel="noopener">Amazon</a>: the price didn't load when checked.</li>
+</ul>
+<h3>Is it worth it?</h3>
+<p>It's well rated and does the job slowly and cleanly. The big question is whether its hose gets into your car's tank. If you buy one, test it on your car as soon as it arrives, while you can still return it.</p>
+`,
+  },
+  {
     id: "code",
     title: "Where the code is",
     names: ["Code", "For developers", "Repo"],
