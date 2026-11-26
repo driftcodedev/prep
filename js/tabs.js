@@ -1,9 +1,9 @@
 // Short Term / Long Term tabs. Long Term is behind a light password lock: the page keeps only
-// a SHA-256 fingerprint of the password, and once unlocked a device stays unlocked until
-// someone presses "Lock this tab". This keeps casual visitors out; it isn't real security.
+// a SHA-256 fingerprint of the password. Nothing is remembered: the tab locks again on every
+// page load and whenever you switch away from it. This keeps casual visitors out; it isn't
+// real security.
 
 const PASSWORD_SHA256 = "2044fbdb55f9238637ff4adbdd07a491f8225a62b4db057bca43b73de9b3abad";
-const UNLOCK_KEY = "prep-long-term-unlocked";
 const LONG_HASH = "#long-term";
 
 const $ = (sel) => document.querySelector(sel);
@@ -14,23 +14,10 @@ const input = $("#lt-password");
 const error = $("#lt-error");
 const longTab = $("#tab-long");
 
-let unlockedHere = false; // fallback when browser storage is unavailable
+let unlocked = false; // lives only as long as this page view
 
-function isUnlocked() {
-  try {
-    return localStorage.getItem(UNLOCK_KEY) === PASSWORD_SHA256 || unlockedHere;
-  } catch {
-    return unlockedHere;
-  }
-}
-
-function setUnlocked(on) {
-  unlockedHere = on;
-  try {
-    if (on) localStorage.setItem(UNLOCK_KEY, PASSWORD_SHA256);
-    else localStorage.removeItem(UNLOCK_KEY);
-  } catch { /* storage blocked: stays unlocked for this visit only */ }
-}
+// Earlier versions remembered the unlock on the device; forget that.
+try { localStorage.removeItem("prep-long-term-unlocked"); } catch { /* storage blocked */ }
 
 async function sha256(text) {
   const bytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text));
@@ -38,13 +25,20 @@ async function sha256(text) {
 }
 
 function renderLock() {
-  const open = isUnlocked();
-  gate.hidden = open;
-  space.hidden = !open;
-  longTab.classList.toggle("is-locked", !open);
+  gate.hidden = unlocked;
+  space.hidden = !unlocked;
+  longTab.classList.toggle("is-locked", !unlocked);
+}
+
+function lock() {
+  unlocked = false;
+  input.value = "";
+  error.hidden = true;
+  renderLock();
 }
 
 function select(tab, { focus = false } = {}) {
+  if (tab !== longTab) lock(); // leaving Long Term locks it
   for (const t of tabs) {
     const on = t === tab;
     t.setAttribute("aria-selected", String(on));
@@ -56,7 +50,7 @@ function select(tab, { focus = false } = {}) {
   if (focus) tab.focus();
   if (tab === longTab) {
     renderLock();
-    if (!isUnlocked()) input.focus({ preventScroll: true });
+    if (!unlocked) input.focus({ preventScroll: true });
   }
 }
 
@@ -79,7 +73,7 @@ gate.addEventListener("submit", async (e) => {
   // Phone keyboards often capitalize the first letter, so case and stray spaces don't matter.
   const guess = input.value.trim().toLowerCase();
   if (guess && (await sha256(guess)) === PASSWORD_SHA256) {
-    setUnlocked(true);
+    unlocked = true;
     input.value = "";
     error.hidden = true;
     renderLock();
@@ -93,12 +87,14 @@ gate.addEventListener("submit", async (e) => {
 input.addEventListener("input", () => { error.hidden = true; });
 
 $("#lt-lock").addEventListener("click", () => {
-  setUnlocked(false);
-  renderLock();
+  lock();
   input.focus();
 });
 
 window.addEventListener("hashchange", () => select(location.hash === LONG_HASH ? longTab : tabs[0]));
+
+// Coming back with the browser's Back button can restore the page as it was; lock it anyway.
+window.addEventListener("pageshow", (e) => { if (e.persisted) lock(); });
 
 renderLock();
 if (location.hash === LONG_HASH) select(longTab);
