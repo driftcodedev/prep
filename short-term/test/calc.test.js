@@ -125,6 +125,20 @@ test("Walmart plan needs no Costco and keeps the same food amounts", () => {
   for (const l of [...c.lines, ...w.lines]) assert.ok(l.url.startsWith("https://") && l.price > 0, l.key);
 });
 
+test("Every food and vitamin on the list says how long it keeps", () => {
+  const baby = { name: "Baby", sex: "female", age: 0.6, feeding: "both", heightIn: 26, weightLb: 17, activity: "light", flags: {} };
+  const toddler = { name: "Toddler", sex: "male", age: 1, heightIn: 31, weightLb: 24, activity: "light", flags: {} };
+  const kid = { name: "Kid", sex: "female", age: 8, heightIn: 50, weightLb: 56, activity: "light", flags: {} };
+  for (const store of ["costco", "walmart"]) {
+    const hh = planHousehold({ months: 6, people: [brett, kid, toddler, baby], store });
+    const food = hh.lines.filter((l) => l.group === "food");
+    const keys = food.map((l) => l.key);
+    for (const k of ["rice", "beans", "oats", "pb", "oil", "salt", "whole", "formula", "cereal", "dropsD", "multiKids", "vitC"]) assert.ok(keys.includes(k), `${store} has ${k}`);
+    for (const l of food) assert.ok(l.keeps && l.keeps.length > 5, `${store} ${l.key} has no keep time`);
+    for (const l of hh.lines.filter((l) => l.group !== "food")) assert.equal(l.keeps, undefined, l.key);
+  }
+});
+
 test("Drinking water: ½ gallon for adults, less for small children", () => {
   assert.equal(waterCups(brett), 8);
   assert.equal(waterCups({ sex: "male", age: 1, flags: {} }), 4);

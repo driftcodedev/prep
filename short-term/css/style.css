@@ -308,6 +308,7 @@ table.data { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 .data thead th.num { white-space: normal; }
 .data td small { display: block; color: var(--ink-2); font-size: 0.8rem; }
 .shop td:nth-child(2) { color: var(--ink-2); }
+.shop th small.keeps { display: block; margin-top: 0.15rem; font-weight: 400; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
 /* Same column widths in every store table so they line up down the page. */
 table.shop { table-layout: fixed; min-width: 38rem; }
 .shop th:nth-child(1) { width: 27%; }

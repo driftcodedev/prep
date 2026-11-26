@@ -1,6 +1,6 @@
 // Calculation engine. Pure functions only, so it runs the same in the browser and in tests.
 import {
-  FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET, productsFor,
+  FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET, productsFor, KEEPS,
   BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE, BLADDER_GALLONS, COOK_WATER, INFANT,
   POT_SIZES, POT_FILL,
 } from "./data.js";
@@ -658,7 +658,7 @@ function shoppingFor(ctx, products) {
   const addLine = (key, qty, amountText, group, extra = {}) => {
     if (qty <= 0) return;
     const prod = { ...products[key], ...extra };
-    lines.push({ key, ...prod, group, qty, amountText, cost: qty * prod.price });
+    lines.push({ key, ...prod, keeps: KEEPS[key], group, qty, amountText, cost: qty * prod.price });
   };
   const lbText = (g) => `${Math.round(g / 453.6)} lb`;
 

@@ -2,7 +2,7 @@ import { ACTIVITY, PRICES_CHECKED, STORE_PLANS } from "./data.js";
 import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
-  storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
+  storeGroups, shoppingLead, compareText, shoppingNotes, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, GEAR_INTRO,
 } from "./content.js";
 
@@ -269,7 +269,7 @@ function onePotBlock(hh) {
 function shopTable(lines) {
   const body = lines.map((l) => `
       <tr>
-        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a></th>
+        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${l.keeps ? `<small class="keeps">Keeps ${esc(l.keeps)}</small>` : ""}</th>
         <td>${esc(l.pack)}</td>
         <td class="num">${l.qty}</td>
         <td>${esc(l.amountText)}</td>
@@ -293,6 +293,10 @@ function shoppingSection(hh) {
     <p class="shop-compare">${esc(compareText(hh))} <button type="button" class="btn-link" data-switch-store>${hh.store === "costco" ? "Show the Walmart list" : "Show the Costco list"}</button></p>
     ${tables}
     <ul class="notes">${shoppingNotes(hh).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+    <h3 class="sub-title">How long it keeps</h3>
+    <p class="keeps-lead">${esc(KEEPS_LEAD)}</p>
+    ${leadList(keepsNotes(hh))}
+    <p class="sources">Shelf-life sources: ${KEEPS_SOURCES.map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>`).join(", ")}.</p>
   </section>`;
 }
 

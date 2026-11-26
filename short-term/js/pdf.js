@@ -2,7 +2,7 @@
 import { PRICES_CHECKED } from "./data.js";
 import {
   money, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
-  storeGroups, shoppingLead, compareText, shoppingNotes, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
+  storeGroups, shoppingLead, compareText, shoppingNotes, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEOS, GEAR_INTRO,
 } from "./content.js";
 
@@ -137,7 +137,10 @@ function shopping(hh) {
     out.push(dataTable(
       ["Item", "Buy", "How many", "Covers", "Cost"],
       g.lines.map((l) => [
-        { text: t(l.item), link: l.url, color: C.lid, bold: true, decoration: "underline" },
+        { stack: [
+          { text: t(l.item), link: l.url, color: C.lid, bold: true, decoration: "underline" },
+          l.keeps ? { text: t(`Keeps ${l.keeps}`), fontSize: 7, color: C.ink2, margin: [0, 1, 0, 0] } : "",
+        ] },
         { text: t(l.pack), color: C.ink2 },
         { text: String(l.qty), alignment: "right" },
         { text: t(l.amountText) },
@@ -148,6 +151,13 @@ function shopping(hh) {
     ));
   }
   out.push(bullets(shoppingNotes(hh), { margin: [0, 8, 0, 0], color: C.ink2 }));
+  out.push(
+    { stack: [{ text: "How long it keeps", style: "h3", margin: [0, 8, 0, 3] }, para(KEEPS_LEAD)], unbreakable: true, headlineLevel: 1 },
+    leadBullets(keepsNotes(hh)),
+    para([{ text: "Shelf-life sources: ", bold: true }, ...KEEPS_SOURCES.flatMap(([label, url], i) => [
+      { text: t(label), link: url, color: C.lid, decoration: "underline" }, i < KEEPS_SOURCES.length - 1 ? ", " : ".",
+    ])], { fontSize: 8.5 }),
+  );
   return out;
 }
 

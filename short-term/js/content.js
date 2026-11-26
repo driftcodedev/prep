@@ -500,6 +500,49 @@ export function shoppingNotes(hh) {
   return notes;
 }
 
+// How long the food keeps: the "Keeps ..." line under each item comes from KEEPS in data.js.
+export const KEEPS_LEAD = "If you shop now and the grid goes down a year or two later, some of this will need replacing first. Rice and beans sealed in mylar keep for decades, so you buy them once. Most of the rest keeps about a year. Each item above shows how long it keeps unopened in a cool, dry place.";
+
+export function keepsNotes(hh) {
+  const has = (k) => hh.lines.some((l) => l.key === k);
+  const yearly = [["pb", "peanut butter"], ["oil", "oil"], ["oats", "oats"], ["milk", "nonfat dry milk"], ["whole", "Nido"]]
+    .filter(([k]) => has(k)).map(([, n]) => n);
+  const fats = [["pb", "peanut butter"], ["oil", "oil"], ["oats", "oats"], ["whole", "whole dry milk"]]
+    .filter(([k]) => has(k)).map(([, n]) => n);
+  const listText = (xs) => (xs.length > 1 ? `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}` : xs[0] || "");
+  const baby = has("formula") || has("cereal") || has("dropsD") || has("drops");
+  const notes = [];
+  if (yearly.length) notes.push({ lead: "Do one refresh a year", text: `Replace the ${listText([...yearly, "vitamins"])}. The easiest way is to use them in everyday cooking and buy new ones, so nothing goes to waste.` });
+  notes.push({ lead: "Check the dates when you buy", text: "Store stock can already be months old. One Sam's Club buyer got Nido that expired about 4 months after buying it." });
+  notes.push({ lead: "Dates are mostly about quality", text: "Past its date, most of this food slowly gets worse rather than going bad overnight. Here's when each kind actually spoils." });
+  notes.push({ lead: "Rice and beans", text: "Kept dry and sealed, they don't spoil. Very old beans are still safe to eat, but they take longer to cook soft." });
+  if (fats.length) notes.push({ lead: listText(fats).replace(/^./, (c) => c.toUpperCase()), text: "Their fats slowly turn rancid. Smell before using: a stale, sharp or bitter smell means it has gone bad, so replace it. Fats can't be kept for years in mylar the way rice and beans can." });
+  if (has("milk")) notes.push({ lead: "Nonfat dry milk", text: "It has almost no fat, so heat is what ruins it. Kept cool it lasts years; in a hot spot it can go stale in months." });
+  notes.push({ lead: "Vitamins and salt", text: "Vitamins don't spoil; they slowly get weaker after about 2 years. Salt never goes bad; only the added iodine fades." });
+  if (baby) notes.push({ lead: "Baby food is the exception", text: "Never use infant formula past its date, and use an opened container within a month. Go by the printed date for infant cereal and vitamin drops too." });
+  if (has("oats") || has("milk")) notes.push({ lead: "To shrink the yearly list", text: "Oats and nonfat dry milk can be sealed in mylar too: BYU found oats good for up to 30 years and nonfat dry milk about 20. The list only buys bags and buckets for the rice and beans, so get extra if you do this." });
+  notes.push({ lead: "Keep it cool, dry and dark", text: "A closet works. Avoid the attic, a hot car or anywhere near a radiator: heat shortens every time above." });
+  return notes;
+}
+
+export const KEEPS_SOURCES = [
+  ["BYU food storage research", "https://magazine.byu.edu/article/ask-an-expert-new-tips-for-old-food"],
+  ["Church News on fats", "https://www.thechurchnews.com/2008/1/19/23232160/home-food-storage-lasts-30-years-or-more/"],
+  ["Utah State on storing rice", "https://extension.usu.edu/preserve-the-harvest/research/storing-white-rice.php"],
+  ["Ohio State on dry beans", "https://ohioline.osu.edu/factsheet/HYG-5401"],
+  ["National Peanut Board", "https://nationalpeanutboard.org/news/how-long-will-that-peanut-butter-last"],
+  ["Skippy", "https://www.peanutbutter.com/?p=1588"],
+  ["Kansas State pantry chart", "https://bookstore.ksre.ksu.edu/download/safe-food-storage-the-cupboard_MF3131"],
+  ["New Mexico State storage guide", "https://pubs.nmsu.edu/_e/E118/"],
+  ["Utah State on dry milk", "https://issuu.com/usuextension/docs/food_storage_booklet2_49bc3ab844f0dc/s/10352747"],
+  ["Nestlé NIDO", "https://www.goodnes.com/nido/faq/"],
+  ["Sam's Club Nido review", "https://www.samsclub.com/reviews/product/2800015439?page=9"],
+  ["Nature Made on vitamins", "https://www.naturemade.com/blogs/health-articles/do-multivitamins-expire"],
+  ["Morton salt", "https://www.mortonsalt.com/article/morton-salt-expiration-guide"],
+  ["Formula shelf life", "https://scienceinsights.org/how-long-does-unopened-baby-formula-last-powder-vs-liquid/"],
+  ["FDA on infant formula", "https://www.fda.gov/food/buy-store-serve-safe-food/handling-infant-formula-safely-what-you-need-know"],
+];
+
 // ---------- cooking, weigh-ins, storage, method ----------
 
 export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water and the pot: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
@@ -525,7 +568,7 @@ export const CARE = [
   { lead: "Water and fuel", text: "Cooking for everyone, above, shows how much water your household uses each day. Keep the lid on every pot to save water and firewood." },
   { lead: "Vitamins every day", text: "Rice and beans have no vitamin C, and scurvy can start after about four weeks without it. Keep the vitamin C bottle as a backup." },
   { lead: "Keep your muscle", text: "Push-ups, squats and lunges two or three times a week help anyone who is losing weight hold onto muscle." },
-  { lead: "Storage", text: "Rice and beans sealed in mylar with an oxygen absorber keep for decades. Oil, peanut butter, oats, dry milk and vitamins keep about a year, so replace them yearly." },
+  { lead: "Storage", text: "Rice and beans sealed in mylar with an oxygen absorber keep for decades. Oil, peanut butter, oats, dry milk and vitamins keep about a year, so replace them yearly. The shopping list shows how long each item keeps." },
   { lead: "Print this page", text: "A phone or laptop won't help once the batteries die. Print a copy or save the PDF and print it later." },
 ];
 

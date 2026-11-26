@@ -280,6 +280,30 @@ export function productsFor(plan = "costco") {
   return out;
 }
 
+// How long each food and vitamin keeps unopened in a cool, dry place, shown under its name on the
+// shopping list as "Keeps ...". It's about when it actually goes bad, not best-by quality.
+// keepsNotes() in content.js explains each one and lists the sources (checked 25–26 November 2026).
+const VITAMINS_KEEP = "about 2 years, then slowly gets weaker";
+export const KEEPS = {
+  rice: "10–30+ years sealed in mylar; about 2 in the store bag",
+  beans: "up to 30 years sealed in mylar; 1+ in the store bag",
+  oats: "6–12 months in the box",
+  pb: "6–18 months unopened; go by the date on the lid",
+  oil: "6–12 months unopened",
+  salt: "forever; the added iodine fades after about 5 years",
+  milk: "3 months somewhere hot, 3–5 years somewhere cool",
+  whole: "about 15 months from when it's made; check the date",
+  formula: "12–18 months from when it's made; never use it past the date",
+  cereal: "until the date on the box",
+  multiMen: VITAMINS_KEEP,
+  multiWomen: VITAMINS_KEEP,
+  multiWomen50: VITAMINS_KEEP,
+  multiKids: VITAMINS_KEEP,
+  vitC: VITAMINS_KEEP,
+  drops: "until the date on the bottle",
+  dropsD: "until the date on the bottle",
+};
+
 // Gear lifespans.
 export const BIC_LIGHTS = 3000;          // BIC: "up to 3,000 lights" per Classic lighter
 export const LIGHTS_PER_FIRE = 10;       // allow about 10 seconds of flame to get kindling going
