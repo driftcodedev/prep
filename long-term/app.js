@@ -5,22 +5,50 @@
 // locks (switching tabs, the Lock button, or reloading). Each unlock calls mount() again, so
 // mount() must draw from scratch. See README.md in this folder.
 //
-// The page is the Cobscook Bay map. render() draws the controls, list and notes as plain HTML (the
-// tests run it in Node); mount() then loads Leaflet and js/map.js to bring the map to life.
+// The tab has two views, picked with the Map / Fishing switch at the top:
+//   Map      the Cobscook Bay map. renderMap() draws the controls, list and notes as plain HTML
+//            (the tests run it in Node); the first time the map is shown, mount() loads Leaflet
+//            and js/map.js to bring it to life.
+//   Fishing  what the bay could feed you, season by season (js/fishing.js).
+// The last view picked is remembered in this browser (localStorage "prep-lt-view").
 
 import { PAGE } from "./data/plan.js";
 import { HOUSES } from "./data/houses.js";
 import { RING_COLORS, DEFAULT_RINGS } from "./data/places.js";
 import { esc } from "./js/geo.js";
+import { renderFishing } from "./js/fishing.js";
 
 export { esc };
+
+export const VIEWS = [
+  ["map", "Map", "Houses for sale and distance rings"],
+  ["fish", "Fishing", "What the bay feeds you, by season"],
+];
+const VIEW_KEY = "prep-lt-view";
+const ICONS = {
+  map: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+  fish: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 7-6 11-4.5 2 .8 3.5 2.3 4.5 4.5-1 2.2-2.5 3.7-4.5 4.5C10 18 6 16.5 3 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M18.5 12 22 8.5v7L18.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13.5" cy="11" r="1.1" fill="currentColor"/></svg>',
+};
+
+// The Map / Fishing switch, then both views (the Fishing one hidden until picked).
+export function render(page = PAGE, context = {}, data = undefined) {
+  const tabs = VIEWS.map(([id, label, sub], i) => `
+      <button type="button" role="tab" class="lt-view-tab" id="lt-tab-${id}" data-view="${id}" aria-controls="lt-panel-${id}" aria-selected="${i === 0}"${i === 0 ? "" : ' tabindex="-1"'}>
+        ${ICONS[id]}<span class="lt-view-text"><span class="lt-view-label">${esc(label)}</span><span class="lt-view-sub">${esc(sub)}</span></span>
+      </button>`).join("");
+  return `
+    <div class="lt-views" role="tablist" aria-label="Long-term plan views">${tabs}</div>
+    <div class="lt-panel" id="lt-panel-map" role="tabpanel" aria-labelledby="lt-tab-map" data-panel="map">${renderMap(page, context, data)}</div>
+    <div class="lt-panel" id="lt-panel-fish" role="tabpanel" aria-labelledby="lt-tab-fish" data-panel="fish" hidden>${renderFishing()}</div>
+  `;
+}
 
 const PRICE_CHOICES = [150000, 250000, 400000, 600000, 1000000];
 
 // Data in, HTML out. Kept apart from mount() so the tests can run it without a browser.
 // context.household is the household from the Short Term tab, or null (see README.md); the map
 // doesn't use it.
-export function render(page = PAGE, context = {}, data = { houses: HOUSES, colors: RING_COLORS, rings: DEFAULT_RINGS }) {
+export function renderMap(page = PAGE, context = {}, data = { houses: HOUSES, colors: RING_COLORS, rings: DEFAULT_RINGS }) {
   const { houses, colors, rings } = data;
   const counts = {
     all: houses.length,
@@ -141,12 +169,20 @@ function loadCss(href, key) {
   });
 }
 
-let view = null; // the live map while the plan is on screen
+let view = null;     // the live map, once it has been shown
+let fishing = null;  // the live Fishing view, once it has been shown
+let mapStarted = false;
+let cleanup = [];
 
-export async function mount(root, context = {}) {
-  view = null;
-  await Promise.all([loadCss("./vendor/leaflet/leaflet.css", "leaflet"), loadCss("./style.css", "style")]);
-  root.innerHTML = render(PAGE, context);
+function readView() {
+  try { return localStorage.getItem(VIEW_KEY) === "fish" ? "fish" : "map"; } catch { return "map"; }
+}
+function saveView(v) {
+  try { localStorage.setItem(VIEW_KEY, v); } catch { /* private mode */ }
+}
+
+async function startMap(root) {
+  mapStarted = true;
   try {
     const [L, { createMap }, geo] = await Promise.all([
       import("./vendor/leaflet/leaflet.esm.min.js"),
@@ -156,8 +192,8 @@ export async function mount(root, context = {}) {
         return r.json();
       }),
     ]);
-    if (!root.isConnected) return;
-    view = createMap(root, { L, geo });
+    if (!root.isConnected || !mapStarted) return;
+    view = createMap(root.querySelector('[data-panel="map"]'), { L, geo });
   } catch (err) {
     console.error("Cobscook map failed to load:", err);
     const msg = root.querySelector("[data-loading]");
@@ -165,8 +201,53 @@ export async function mount(root, context = {}) {
   }
 }
 
+async function showView(root, id, { focus = false } = {}) {
+  for (const tab of root.querySelectorAll(".lt-view-tab")) {
+    const on = tab.dataset.view === id;
+    tab.setAttribute("aria-selected", String(on));
+    tab.tabIndex = on ? 0 : -1;
+    if (on && focus) tab.focus();
+  }
+  for (const panel of root.querySelectorAll("[data-panel]")) panel.hidden = panel.dataset.panel !== id;
+  saveView(id);
+  if (id === "map" && !mapStarted) await startMap(root);
+  if (id === "fish" && !fishing) {
+    const { createFishing } = await import("./js/fishing.js");
+    if (root.isConnected) fishing = createFishing(root.querySelector('[data-panel="fish"]'));
+  }
+}
+
+export async function mount(root, context = {}) {
+  view = null; fishing = null; mapStarted = false;
+  await Promise.all([loadCss("./vendor/leaflet/leaflet.css", "leaflet"), loadCss("./style.css", "style")]);
+  root.innerHTML = render(PAGE, context);
+
+  const tablist = root.querySelector(".lt-views");
+  const onClick = (e) => {
+    const tab = e.target.closest(".lt-view-tab");
+    if (tab) showView(root, tab.dataset.view);
+  };
+  const onKey = (e) => {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    const ids = VIEWS.map(([id]) => id);
+    const now = ids.indexOf(document.activeElement?.dataset.view);
+    if (now < 0) return;
+    e.preventDefault();
+    const next = e.key === "Home" ? 0 : e.key === "End" ? ids.length - 1 : (now + (e.key === "ArrowRight" ? 1 : -1) + ids.length) % ids.length;
+    showView(root, ids[next], { focus: true });
+  };
+  tablist.addEventListener("click", onClick);
+  tablist.addEventListener("keydown", onKey);
+  cleanup = [() => tablist.removeEventListener("click", onClick), () => tablist.removeEventListener("keydown", onKey)];
+
+  await showView(root, readView());
+}
+
 export function unmount(root) {
   // Stops listeners, leaves full screen and removes the map. The frame empties #lt-root after this.
+  for (const fn of cleanup) fn();
+  cleanup = [];
   if (view) view.destroy();
-  view = null;
+  if (fishing) fishing.destroy();
+  view = null; fishing = null; mapStarted = false;
 }

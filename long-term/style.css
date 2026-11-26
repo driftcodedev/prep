@@ -244,3 +244,112 @@
 @media (prefers-reduced-motion: reduce) {
   #lt-root .leaflet-zoom-anim .leaflet-zoom-animated { transition: none; }
 }
+
+/* ---------- Map / Fishing switch ---------- */
+
+#lt-root .lt-views { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0 0 1.25rem; }
+#lt-root .lt-view-tab {
+  display: flex; align-items: center; gap: 0.6rem; min-height: 3.6rem; padding: 0.55rem 0.75rem;
+  font: inherit; text-align: left; color: var(--lid); background: var(--card);
+  border: 1.5px solid var(--lid); border-radius: var(--radius); cursor: pointer;
+}
+#lt-root .lt-view-tab svg { width: 1.7rem; height: 1.7rem; flex: none; }
+#lt-root .lt-view-text { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+#lt-root .lt-view-label { font-family: var(--display); font-size: 1.35rem; font-weight: 700; letter-spacing: 0.01em; }
+#lt-root .lt-view-sub { font-size: 0.78rem; color: var(--ink-2); }
+#lt-root .lt-view-tab[aria-selected="true"] { background: var(--lid); color: #fff; }
+#lt-root .lt-view-tab[aria-selected="true"] .lt-view-sub { color: #dbe9ef; }
+#lt-root .lt-view-tab:focus-visible { outline: 3px solid var(--lid-dark); outline-offset: 2px; }
+#lt-root .lt-panel[hidden] { display: none; }
+
+/* ---------- Fishing view ---------- */
+
+#lt-root .ltf-intro { margin: 0 0 1rem; max-width: 62ch; }
+#lt-root .ltf-draft { display: inline-block; margin-left: 0.25rem; padding: 0 0.4rem; border-radius: 999px; background: var(--bean-tint); color: var(--bean); font-size: 0.8rem; font-weight: 700; }
+#lt-root .ltf-controls { display: grid; gap: 0.85rem; }
+#lt-root .ltf-seg-2 { grid-template-columns: repeat(2, 1fr); }
+#lt-root .ltf-explain { margin: 0.9rem 0 0.6rem; font-size: 0.9rem; color: var(--ink-2); max-width: 62ch; }
+
+#lt-root .ltf-swatch { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 2px; flex: none; vertical-align: -0.05rem; margin-right: 0.35rem; }
+
+/* season rings */
+#lt-root .ltf-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+@media (min-width: 760px) { #lt-root .ltf-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+#lt-root .ltf-card { position: relative; display: flex; flex-direction: column; align-items: stretch; padding: 0.6rem 0.6rem 0.7rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); }
+#lt-root .ltf-card.is-on { border-color: var(--lid); box-shadow: 0 0 0 2px var(--lid) inset; }
+#lt-root .ltf-card-title { margin: 0; font-family: var(--display); font-size: 1.25rem; line-height: 1.1; text-align: center; }
+#lt-root .ltf-card-title button { font: inherit; color: var(--ink); background: none; border: 0; padding: 0; cursor: pointer; }
+#lt-root .ltf-card-title button::after { content: ""; position: absolute; inset: 0; border-radius: var(--radius); }
+#lt-root .ltf-card-title button:focus-visible { outline: none; }
+#lt-root .ltf-card:has(button:focus-visible) { outline: 3px solid var(--lid); outline-offset: 2px; }
+#lt-root .ltf-donut { display: block; width: 100%; max-width: 9.5rem; margin: 0.3rem auto 0; }
+#lt-root .ltf-donut-big { font-family: var(--display); font-size: 22px; font-weight: 700; fill: var(--ink); }
+#lt-root .ltf-donut-small { font-size: 9px; fill: var(--ink-2); }
+#lt-root .ltf-people { margin: 0.25rem 0 0.4rem; text-align: center; font-size: 0.82rem; color: var(--ink-2); }
+#lt-root .ltf-people b { color: var(--ink); }
+#lt-root .ltf-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.2rem; font-size: 0.74rem; line-height: 1.25; }
+#lt-root .ltf-legend li { display: grid; grid-template-columns: auto 1fr; column-gap: 0.1rem; }
+#lt-root .ltf-legend .ltf-swatch { grid-row: span 2; margin-top: 0.15rem; }
+#lt-root .ltf-leg-name { font-weight: 700; overflow-wrap: anywhere; }
+#lt-root .ltf-leg-val { color: var(--ink-2); }
+#lt-root .ltf-leg-val b { color: var(--ink); }
+
+/* calendar */
+#lt-root .ltf-cal-wrap { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); }
+#lt-root .ltf-cal { width: 100%; table-layout: fixed; border-collapse: separate; border-spacing: 2px; font-size: 0.78rem; }
+#lt-root .ltf-cal thead th:first-child { width: 31%; }
+#lt-root .ltf-cal caption { caption-side: bottom; padding: 0.4rem 0.5rem 0.5rem; text-align: left; font-size: 0.78rem; color: var(--ink-2); }
+#lt-root .ltf-cal th { font-weight: 700; text-align: left; }
+#lt-root .ltf-cal thead th { padding: 0.25rem 0.1rem; text-align: center; vertical-align: bottom; }
+#lt-root .ltf-cal thead th:first-child { text-align: left; padding-left: 0.4rem; }
+#lt-root .ltf-cal thead button { font: inherit; font-size: 0.72rem; font-weight: 700; color: var(--lid); background: none; border: 0; border-radius: 4px; padding: 0.25rem 0.15rem; cursor: pointer; line-height: 1.15; }
+#lt-root .ltf-cal thead th.is-on button { background: var(--lid); color: #fff; }
+#lt-root .ltf-cal tbody th { padding: 0.2rem 0.3rem 0.2rem 0.4rem; font-weight: 600; font-size: 0.74rem; line-height: 1.15; overflow-wrap: anywhere; }
+#lt-root .ltf-cal tbody th .ltf-swatch { width: 0.55rem; height: 0.55rem; margin-right: 0.25rem; }
+#lt-root .ltf-cell { height: 1.8rem; font-size: 0.74rem; text-align: center; font-variant-numeric: tabular-nums; border-radius: 3px; color: var(--ink); background: color-mix(in srgb, var(--lid) var(--mix), var(--card)); }
+#lt-root .ltf-cell.is-dark { color: #fff; font-weight: 700; }
+#lt-root .ltf-cell.is-best { box-shadow: 0 0 0 2px var(--bean) inset; }
+#lt-root .ltf-cell.is-on { outline: 2px solid var(--ink); outline-offset: -1px; }
+
+/* season detail */
+#lt-root .ltf-detail { margin-top: 1.25rem; padding-top: 0.25rem; scroll-margin-top: 1rem; }
+#lt-root .ltf-stabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.25rem; }
+#lt-root .ltf-stab { min-height: 2.4rem; padding: 0.2rem; font: inherit; font-size: 0.78rem; font-weight: 700; color: var(--lid); background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); cursor: pointer; }
+#lt-root .ltf-stab[aria-pressed="true"] { background: var(--lid); border-color: var(--lid); color: #fff; }
+#lt-root .ltf-detail-title { margin: 0.9rem 0 0.25rem; }
+#lt-root .ltf-detail-lead { margin: 0 0 0.75rem; }
+#lt-root .ltf-h4 { margin: 1rem 0 0.4rem; font-size: 0.95rem; }
+#lt-root .ltf-hint { margin: 0 0 0.4rem; font-size: 0.82rem; color: var(--ink-2); }
+#lt-root .ltf-trips { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 0.45rem; }
+#lt-root .ltf-trip { display: grid; gap: 0.1rem; padding: 0.55rem 0.65rem; background: var(--card); border: 1.5px solid var(--line); border-left: 4px solid var(--lid); border-radius: var(--radius); }
+#lt-root .ltf-trip-name { font-weight: 700; }
+#lt-root .ltf-trip-num { font-size: 0.92rem; }
+#lt-root .ltf-trip-sub { font-size: 0.78rem; color: var(--ink-2); }
+
+#lt-root .ltf-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
+#lt-root .ltf-row { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); }
+#lt-root .ltf-row[open] { border-color: var(--lid); }
+#lt-root .ltf-row > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name val" "bar bar"; gap: 0.25rem 0.6rem; align-items: center; padding: 0.45rem 0.6rem; cursor: pointer; list-style: none; }
+#lt-root .ltf-row > summary::-webkit-details-marker { display: none; }
+@media (min-width: 640px) { #lt-root .ltf-row > summary { grid-template-columns: 13rem 1fr 14.5rem; grid-template-areas: "name bar val"; } }
+#lt-root .ltf-row-name { grid-area: name; font-weight: 700; font-size: 0.92rem; }
+#lt-root .ltf-row-bar { grid-area: bar; height: 0.6rem; background: color-mix(in srgb, var(--line) 45%, var(--card)); border-radius: 999px; overflow: hidden; }
+#lt-root .ltf-row-bar span { display: block; height: 100%; border-radius: 999px; min-width: 2px; }
+#lt-root .ltf-row-val { grid-area: val; font-size: 0.85rem; color: var(--ink-2); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+#lt-root .ltf-row-val b { color: var(--ink); }
+#lt-root .ltf-basis { display: inline-block; min-width: 1.2rem; padding: 0 0.25rem; border-radius: 3px; font-size: 0.7rem; font-weight: 700; text-align: center; vertical-align: 0.08rem; }
+#lt-root .ltf-basis-M { background: #e3f3ea; color: #1d6b43; }
+#lt-root .ltf-basis-A { background: var(--lid-tint); color: var(--lid-dark); }
+#lt-root .ltf-basis-G { background: #fbf0dc; color: #8a5a0b; }
+#lt-root .ltf-profile { margin: 0; padding: 0.1rem 0.6rem 0.6rem; display: grid; gap: 0.3rem; font-size: 0.88rem; }
+#lt-root .ltf-profile div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.5rem; }
+#lt-root .ltf-profile dt { color: var(--ink-2); }
+#lt-root .ltf-profile dd { margin: 0; }
+@media (max-width: 420px) { #lt-root .ltf-profile div { grid-template-columns: 1fr; gap: 0; } #lt-root .ltf-profile dt { font-size: 0.78rem; } }
+#lt-root .ltf-gone { margin: 0.6rem 0 0; font-size: 0.85rem; color: var(--ink-2); }
+#lt-root .ltf-basis-list { list-style: none; padding: 0; display: grid; gap: 0.3rem; }
+#lt-root .ltf .ltm-notes { margin-top: 0.75rem; }
+#lt-root .ltf .ltm-notes ol { margin: 0.6rem 0 0; padding-left: 1.2rem; font-size: 0.92rem; color: var(--ink-2); }
+#lt-root .ltf .ltm-notes ol li + li { margin-top: 0.45rem; }
+#lt-root .ltf-table { margin-top: 0.6rem; font-size: 0.88rem; }
+@media (min-width: 640px) { #lt-root .ltf-cal { font-size: 0.85rem; } #lt-root .ltf-cal thead th:first-child { width: 14rem; } #lt-root .ltf-cal tbody th, #lt-root .ltf-cell, #lt-root .ltf-cal thead button { font-size: 0.85rem; } }
