@@ -10,6 +10,234 @@
      classes  .section-title .sub-title .muted .btn .btn-quiet .btn-link .field .field-label
               .field-hint .data (tables) .table-scroll .block
 
-   Example:
-   #lt-root .lt-note { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 1rem; }
+   Map colors: off-grid solar green, backup power amber, everything else slate. Leaflet's own
+   styles are in vendor/leaflet/leaflet.css, also scoped to #lt-root.
 */
+
+#lt-root .ltm { --solar: #1d7a4c; --solar-tint: #e3f3ea; --backup: #b5740d; --backup-tint: #fbf0dc; --plain: #3d4f5c; --danger: #c0392b; }
+
+#lt-root .ltm-intro { margin: 0 0 1rem; max-width: 62ch; }
+
+/* ---------- controls ---------- */
+
+#lt-root .ltm-stage { display: flex; flex-direction: column; gap: 0.75rem; }
+#lt-root .ltm-controls { display: flex; flex-direction: column; gap: 0.85rem; }
+#lt-root .ltm-group-head { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; flex-wrap: wrap; }
+#lt-root .ltm-label { font-weight: 700; font-size: 0.95rem; }
+#lt-root .ltm-quick { display: flex; gap: 0.9rem; font-size: 0.9rem; }
+#lt-root .ltm-quick .btn-link { padding: 0.25rem 0; font-weight: 700; color: var(--lid); }
+#lt-root .ltm-hint { margin: 0.35rem 0 0; font-size: 0.85rem; color: var(--ink-2); }
+
+#lt-root .ltm-chips { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.35rem; margin-top: 0.45rem; }
+#lt-root .ltm-chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem;
+  min-height: 2.5rem; padding: 0.3rem 0.25rem; white-space: nowrap;
+  font: inherit; font-size: 0.85rem; font-weight: 700; color: var(--ink);
+  background: var(--card); border: 1.5px solid var(--line); border-radius: 999px; cursor: pointer;
+}
+#lt-root .ltm-chip .ltm-swatch { width: 0.7rem; height: 0.7rem; border-radius: 50%; border: 2px solid var(--c); flex: none; }
+#lt-root .ltm-chip[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 16%, white); }
+#lt-root .ltm-chip[aria-pressed="true"] .ltm-swatch { background: var(--c); }
+#lt-root .ltm-chip:focus-visible { outline: 3px solid var(--lid); outline-offset: 2px; }
+
+#lt-root .ltm-seg { display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 0.45rem; border: 1.5px solid var(--lid); border-radius: var(--radius); overflow: hidden; }
+#lt-root .ltm-seg-item { position: relative; display: flex; }
+#lt-root .ltm-seg-item + .ltm-seg-item { border-left: 1.5px solid var(--lid); }
+#lt-root .ltm-seg-item input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+#lt-root .ltm-seg-item span {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  min-height: 2.9rem; padding: 0.35rem 0.3rem; font-size: 0.85rem; font-weight: 700; line-height: 1.2; color: var(--lid); background: var(--card);
+}
+#lt-root .ltm-seg-item span b { font-size: 0.8rem; font-weight: 700; opacity: 0.8; }
+#lt-root .ltm-seg-item input:checked + span { background: var(--lid); color: #fff; }
+#lt-root .ltm-seg-item input:focus-visible + span { outline: 3px solid var(--lid-dark); outline-offset: -3px; }
+
+#lt-root .ltm-more { border: 1.5px solid var(--line); border-radius: var(--radius); background: var(--card); }
+#lt-root .ltm-more > summary { padding: 0.6rem 0.8rem; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
+#lt-root .ltm-more-body { display: grid; gap: 0.8rem; padding: 0 0.8rem 0.9rem; }
+#lt-root .ltm-fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: 0.35rem; }
+#lt-root .ltm-fieldset legend { padding: 0; margin-bottom: 0.3rem; font-weight: 700; font-size: 0.9rem; }
+#lt-root .ltm-fieldset label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.95rem; min-height: 2rem; }
+#lt-root .ltm-fieldset input { width: 1.15rem; height: 1.15rem; accent-color: var(--lid); }
+#lt-root .ltm-field select, #lt-root .ltm-sort select {
+  font: inherit; font-size: 0.95rem; padding: 0.45rem 0.6rem; border: 1.5px solid var(--line); border-radius: var(--radius); background: #fff; color: var(--ink);
+}
+
+/* ---------- map box ---------- */
+
+#lt-root .ltm-mapwrap {
+  position: relative; height: 64vh; min-height: 300px; isolation: isolate; /* keeps Leaflet's layers under the README pop-up */
+  border: 1.5px solid var(--line); border-radius: var(--radius); overflow: hidden; background: #dfe8ec;
+}
+#lt-root .ltm-map { position: absolute; inset: 0; font-family: var(--body); }
+#lt-root .ltm-map-loading { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--ink-2); }
+#lt-root .ltm-resize {
+  display: flex; align-items: center; justify-content: center; width: 100%; height: 1.6rem; margin-top: -0.5rem;
+  padding: 0; border: 0; background: transparent; cursor: ns-resize; touch-action: none;
+}
+#lt-root .ltm-resize span { width: 3.5rem; height: 0.35rem; border-radius: 999px; background: var(--line); box-shadow: 0 0.5rem 0 -0.05rem var(--line); transform: translateY(-0.25rem); }
+#lt-root .ltm-resize:hover span, #lt-root .ltm-resize:focus-visible span { background: var(--lid); box-shadow: 0 0.5rem 0 -0.05rem var(--lid); }
+
+/* Full screen: the filters on top, the map filling the rest. */
+#lt-root .ltm-stage.is-full {
+  position: fixed; inset: 0; z-index: 2000; margin: 0; padding: 0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
+  background: var(--paper); gap: 0.5rem;
+}
+#lt-root .ltm-stage.is-full .ltm-controls { flex: none; max-height: 40vh; overflow-y: auto; gap: 0.5rem; }
+#lt-root .ltm-stage.is-full .ltm-hint { display: none; }
+#lt-root .ltm-stage.is-full .ltm-chips { display: flex; overflow-x: auto; padding-bottom: 0.15rem; }
+#lt-root .ltm-stage.is-full .ltm-chip { flex: none; min-height: 2.2rem; padding: 0.2rem 0.65rem; }
+#lt-root .ltm-stage.is-full .ltm-seg-item span { min-height: 2.3rem; }
+#lt-root .ltm-stage.is-full .ltm-mapwrap { flex: 1; height: auto !important; min-height: 0; }
+#lt-root .ltm-stage.is-full .ltm-resize { display: none; }
+
+/* Map buttons added next to the zoom buttons. */
+#lt-root .ltm-mapbtns a { font-size: 1.15rem; line-height: 30px; color: var(--ink); }
+#lt-root .leaflet-container a.leaflet-popup-close-button { width: 28px; height: 28px; font-size: 22px; }
+
+/* ---------- labels on the map ---------- */
+
+#lt-root .ltm-tl { position: absolute; transform: translate(-50%, -50%); white-space: nowrap; text-align: center; line-height: 1.15; pointer-events: none; }
+#lt-root .ltm-label-town .ltm-town-name {
+  display: block; font-weight: 700; font-size: 13px; color: #1c2a29;
+  text-shadow: 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
+}
+#lt-root .ltm-label-town .ltm-town-pop {
+  display: block; font-size: 11px; font-weight: 700; color: var(--bean);
+  text-shadow: 0 0 2px #fff, 0 0 3px #fff, 0 0 6px #fff;
+}
+#lt-root .ltm-label-village .ltm-town-name { font-size: 11px; font-weight: 400; color: #34413f; }
+#lt-root .ltm-label-water .ltm-tl {
+  font-style: italic; font-size: 12px; font-weight: 700; color: #12557f; letter-spacing: 0.02em;
+  text-shadow: 0 0 2px #fff, 0 0 4px #fff, 0 0 7px #fff;
+}
+#lt-root .ltm-water-t0 .ltm-tl { font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; color: #0d4467; }
+#lt-root .ltm-label-water.is-outside .ltm-tl { color: #4f6f86; font-weight: 400; }
+/* Zoomed out it gets crowded: populations and bay names from zoom 11, villages from 12, small coves from 13. */
+#lt-root .ltm-mapwrap:not(.ltm-z11) .ltm-town-pop,
+#lt-root .ltm-mapwrap:not(.ltm-z11) .ltm-water-t1,
+#lt-root .ltm-mapwrap:not(.ltm-z12) .ltm-label-village,
+#lt-root .ltm-mapwrap:not(.ltm-z13) .ltm-water-t2 { display: none; }
+#lt-root .ltm-mapwrap:not(.ltm-z11) .ltm-label-town .ltm-town-name { font-size: 12px; }
+
+#lt-root .ltm-spot { display: grid; place-items: center; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); font-weight: 700; font-size: 14px; color: #fff; }
+#lt-root .ltm-spot-danger { background: var(--danger); }
+#lt-root .ltm-spot-park { background: #2f6f3e; font-size: 11px; }
+#lt-root .ltm-spot-plan { background: #fff; color: #d18b00; border-color: #d18b00; font-size: 15px; }
+
+/* ---------- house pins ---------- */
+
+#lt-root .ltm-pin { display: grid; place-items: center; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4); cursor: pointer; }
+#lt-root .ltm-pin svg { width: 68%; height: 68%; }
+#lt-root .ltm-pin-offgrid-solar { background: var(--solar); color: #ffe27a; border-width: 2.5px; }
+#lt-root .ltm-pin-backup { background: var(--backup); color: #fff; }
+#lt-root .ltm-pin-none { background: var(--plain); }
+#lt-root .ltm-pin-under-contract, #lt-root .ltm-pin-pending { opacity: 0.72; }
+#lt-root .ltm-pin-expired { box-shadow: 0 0 0 2px #fff, 0 0 0 4.5px #7a4fb5, 0 2px 6px rgba(0, 0, 0, 0.4); }
+#lt-root .ltm-pin.is-approx { border-style: dashed; border-color: #fff; background-clip: padding-box; opacity: 0.6; }
+#lt-root .ltm-pin:focus-visible { outline: 3px solid var(--lid); outline-offset: 2px; }
+
+/* ---------- popups ---------- */
+
+#lt-root .ltm-popup .leaflet-popup-content-wrapper { border-radius: var(--radius); }
+#lt-root .ltm-popup .leaflet-popup-content { margin: 12px 12px 10px; font-family: var(--body); font-size: 14px; line-height: 1.45; color: var(--ink); max-height: min(62vh, 520px); overflow-y: auto; }
+#lt-root .ltm-pop p { margin: 0.3rem 0; }
+#lt-root .ltm-pop-kicker { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+#lt-root .ltm-pop-title { margin: 0.2rem 0 0; font-size: 1.05rem; line-height: 1.25; }
+#lt-root .ltm-pop-price { font-size: 1.15rem; font-weight: 700; }
+#lt-root .ltm-pop-dist { font-weight: 700; color: var(--lid-dark); }
+#lt-root .ltm-pop-approx, #lt-root .ltm-pop-note { padding: 0.4rem 0.5rem; background: var(--bean-tint); border-radius: var(--radius); font-size: 13px; }
+#lt-root .ltm-pop-listed, #lt-root .ltm-pop-meta { font-size: 13px; color: var(--ink-2); }
+#lt-root .ltm-history, #lt-root .ltm-facts { margin: 0.3rem 0; padding-left: 1.1rem; font-size: 13px; }
+#lt-root .ltm-pop-links { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-top: 0.6rem !important; }
+#lt-root .ltm-btn-small { padding: 0.4rem 0.8rem; font-size: 0.9rem; }
+#lt-root .ltm-pop a.btn { color: #fff; text-decoration: none; }
+#lt-root .ltm-link { font-weight: 700; }
+#lt-root .ltm-measure { margin: 0; font-size: 14px; }
+
+#lt-root .ltm-photo { margin: 0 0 0.4rem; }
+#lt-root .ltm-photo-box { position: relative; height: 150px; overflow: hidden; border-radius: var(--radius); background: #cfd8dc; }
+#lt-root .ltm-photo-tiles { position: absolute; top: 0; left: 50%; width: 264px; height: 150px; margin-left: -132px; }
+#lt-root .ltm-photo-tiles img { position: absolute; width: 256px; height: 256px; max-width: none; }
+#lt-root .ltm-photo-dot, #lt-root .ltm-photo-ring { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 50%; }
+#lt-root .ltm-photo-dot { width: 14px; height: 14px; background: #e53935; border: 2.5px solid #fff; box-shadow: 0 0 4px rgba(0, 0, 0, 0.6); }
+#lt-root .ltm-photo-ring { width: 64px; height: 64px; border: 2.5px dashed #fff; box-shadow: 0 0 4px rgba(0, 0, 0, 0.6); }
+#lt-root .ltm-photo figcaption { margin-top: 0.2rem; font-size: 12px; color: var(--ink-2); }
+
+#lt-root .ltm-solar { margin-top: 0.6rem; padding: 0.6rem; background: var(--solar-tint); border-radius: var(--radius); }
+#lt-root .ltm-solar h4 { margin: 0 0 0.4rem; font-size: 0.95rem; color: var(--solar); }
+#lt-root .ltm-dl { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.6rem; margin: 0; font-size: 13px; }
+#lt-root .ltm-dl dt { font-weight: 700; }
+#lt-root .ltm-dl dd { margin: 0; }
+#lt-root .ltm-na { color: var(--bean); font-style: italic; }
+#lt-root .ltm-life { width: 100%; margin-top: 0.5rem; border-collapse: collapse; font-size: 12.5px; }
+#lt-root .ltm-life caption { text-align: left; font-weight: 700; font-size: 13px; padding-bottom: 0.2rem; }
+#lt-root .ltm-life th, #lt-root .ltm-life td { padding: 0.2rem 0.3rem; border-top: 1px solid rgba(29, 122, 76, 0.25); text-align: left; vertical-align: top; }
+#lt-root .ltm-life thead th { border-top: 0; color: var(--ink-2); font-weight: 700; }
+#lt-root .ltm-ask { margin-top: 0.5rem; font-size: 13px; }
+#lt-root .ltm-ask summary { font-weight: 700; cursor: pointer; }
+#lt-root .ltm-ask ul { margin: 0.3rem 0 0; padding-left: 1.1rem; }
+
+/* ---------- badges ---------- */
+
+#lt-root .ltm-badge, #lt-root .ltm-status { display: inline-block; padding: 0.1rem 0.45rem; border-radius: 999px; font-size: 12px; font-weight: 700; line-height: 1.5; white-space: nowrap; }
+#lt-root .ltm-badge-offgrid-solar { background: var(--solar); color: #fff; }
+#lt-root .ltm-badge-backup { background: var(--backup-tint); color: #7a4c00; }
+#lt-root .ltm-badge-none { background: #eef1f2; color: var(--ink-2); }
+#lt-root .ltm-status-active { background: var(--lid-tint); color: var(--lid-dark); }
+#lt-root .ltm-status-under-contract, #lt-root .ltm-status-pending { background: #f2ecdc; color: #6b5414; }
+#lt-root .ltm-status-expired { background: #efe7f7; color: #5b3a8c; }
+
+/* ---------- key, count and list ---------- */
+
+#lt-root .ltm-legend { margin-top: 0.6rem; }
+#lt-root .ltm-key { display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem; margin: 0; padding: 0; list-style: none; font-size: 0.85rem; }
+#lt-root .ltm-key li { display: inline-flex; align-items: center; gap: 0.35rem; }
+#lt-root .ltm-key-swatch { width: 1rem; height: 0.75rem; border-radius: 3px; opacity: 0.75; }
+#lt-root .ltm-key-pin { display: inline-grid; place-items: center; width: 1.05rem; height: 1.05rem; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2); }
+#lt-root .ltm-key-pin svg { width: 70%; height: 70%; }
+#lt-root .ltm-key-pin.ltm-pin-offgrid-solar { background: var(--solar); color: #ffe27a; }
+#lt-root .ltm-key-pin.ltm-pin-backup { background: var(--backup); color: #fff; }
+#lt-root .ltm-key-pin.ltm-pin-none { background: var(--plain); width: 0.8rem; height: 0.8rem; }
+#lt-root .ltm-key-pin.is-approx { border-style: dashed; opacity: 0.6; }
+#lt-root .ltm-count { margin: 0.5rem 0 0; font-weight: 700; }
+
+#lt-root .ltm-list-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem; }
+#lt-root .ltm-list-head .sub-title { margin: 0; }
+#lt-root .ltm-sort { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.9rem; }
+#lt-root .ltm-list { display: grid; gap: 0.7rem; margin: 0.8rem 0 0; padding: 0; list-style: none; }
+#lt-root .ltm-card { padding: 0.8rem 0.9rem; background: var(--card); border: 1.5px solid var(--line); border-left: 5px solid var(--plain); border-radius: var(--radius); }
+#lt-root .ltm-card-offgrid-solar { border-left-color: var(--solar); background: linear-gradient(90deg, var(--solar-tint), var(--card) 60%); }
+#lt-root .ltm-card-backup { border-left-color: var(--backup); }
+#lt-root .ltm-card p { margin: 0.2rem 0; font-size: 0.9rem; }
+#lt-root .ltm-card-top { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+#lt-root .ltm-card-price { font-family: var(--display); font-weight: 800; font-size: 1.5rem; line-height: 1; color: var(--lid-dark); }
+#lt-root .ltm-card-title { margin: 0.35rem 0 0.1rem; font-size: 1rem; line-height: 1.3; }
+#lt-root .ltm-card-dist { font-weight: 700; color: var(--lid-dark); }
+#lt-root .ltm-card-listed { color: var(--ink-2); }
+#lt-root .ltm-card-actions { display: flex; align-items: center; gap: 1rem; margin-top: 0.5rem; }
+#lt-root .ltm-empty { padding: 1rem; }
+
+#lt-root .ltm-notes { margin-top: 1.5rem; padding: 0.7rem 0.9rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); }
+#lt-root .ltm-notes summary { font-weight: 700; cursor: pointer; }
+#lt-root .ltm-notes ul { margin: 0.6rem 0 0; padding-left: 1.1rem; font-size: 0.92rem; color: var(--ink-2); }
+#lt-root .ltm-notes li + li { margin-top: 0.45rem; }
+
+@media (min-width: 40rem) {
+  #lt-root .ltm-chips { display: flex; flex-wrap: wrap; }
+  #lt-root .ltm-chip { padding: 0.3rem 0.8rem; }
+  #lt-root .ltm-more-body { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (min-width: 52rem) {
+  #lt-root .ltm-list { grid-template-columns: repeat(2, 1fr); }
+  #lt-root .ltm-mapwrap { height: 70vh; }
+}
+
+@media (min-width: 72rem) {
+  #lt-root .ltm-list { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #lt-root .leaflet-zoom-anim .leaflet-zoom-animated { transition: none; }
+}

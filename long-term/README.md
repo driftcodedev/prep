@@ -18,7 +18,16 @@ short-term/           the finished Short Term plan                  don't edit
 long-term/            YOUR FOLDER
   app.js              entry point: render(), mount(), unmount()
   style.css           styles; every rule starts with #lt-root
-  data/plan.js        words, amounts, prices and links
+  data/plan.js        page words (heading, intro, notes)
+  data/houses.js      houses for sale near Cobscook Bay, with sources
+  data/places.js      towns and populations, bay names, spots, ring colors, base maps
+  data/power.js       solar output per kW, part lifespans, questions for agents
+  data/geo.json       bay outline and 1-mile rings (built by tools/build_geo.py)
+  js/geo.js           pure helpers: distances, ring colors, filters, formatting
+  js/popup.js         HTML for house popups and list cards
+  js/map.js           the live Leaflet map (browser only)
+  vendor/leaflet/     Leaflet 1.9.4 (minified ESM, CSS scoped to #lt-root, LICENSE)
+  tools/build_geo.py  rebuilds data/geo.json (Python; not used by the site)
   test/app.test.js    tests (node:test)
   README.md           this guide
 package.json          npm test runs both plans' tests
@@ -69,6 +78,24 @@ Values from the form are strings. Convert them before doing math.
 You may import, read-only, from `../short-term/js/calc.js` (for example `planHousehold`, `planPerson`, `cupsText`) and `../short-term/js/data.js`. Don't edit those files. Cover anything you import with a test in `long-term/test/`, so you find out if the Short Term side changes. Never import `../short-term/js/app.js`: it runs the Short Term page as soon as it loads.
 
 `planHousehold` and `planPerson` expect numbers (`heightIn`, `weightLb`, `age` in years), not the form's strings. `toPerson()` in `short-term/js/app.js` shows the conversion; copy it into `long-term/` rather than importing it.
+
+## The Cobscook Bay map
+
+The tab is a map of everything within 10 miles of Cobscook Bay: 1-mile distance rings you can turn on
+and off (each picked distance gets its own color), town labels with populations, names for the parts
+of the bay, and every house for sale with its power setup.
+
+- **Houses** live in `data/houses.js`. The header explains each field. To refresh them: list the
+  current single-family listings per town on century21.com (it shows the Maine MLS feed), then take
+  each house's map point, list date and power fields from its compass.com page. Houses with no map
+  point get an `approx` note and a pin at the village or road. Keep `power: "offgrid-solar"` for
+  houses whose MLS record says off grid with solar; don't guess.
+- **Rings** come from `tools/build_geo.py`, which needs `pip install basemap basemap-data-hires shapely pyproj`.
+  It measures across land from the bay's shore in UTM 19N and writes `data/geo.json`.
+- **Leaflet** loads only after the password (app.js imports it inside `mount`). Its CSS is scoped to
+  `#lt-root` so it can't touch the Short Term tab.
+- Map tiles come from CARTO (map) and Esri (satellite, terrain, and the photo in each popup). They
+  need a connection; the rings, pins and labels are drawn from this folder.
 
 ## Look and wording
 
