@@ -5,7 +5,9 @@
 
 export const MAP_CHECKED = "2026-11-26";
 
-// Where the map opens, and how far it can be panned.
+// Where the map starts before it fits the 10-mile area. The farthest it zooms out, and how far it pans,
+// are set in js/map.js from the 10-mile ring, so the whole area always just fits the screen.
+// bounds: the box every house and label must fall inside (checked by the tests).
 export const MAP_VIEW = {
   center: [44.905, -67.12],
   zoom: 10,
@@ -96,9 +98,11 @@ export const SPOTS = [
 
 // Base maps. All are free to view with credit shown on the map.
 export const BASE_MAPS = [
-  { name: "Map", url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-    subdomains: "abcd", maxZoom: 19,
-    credit: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>' },
+  // CARTO's free map tiles started needing an API key in Nov 2026 (they showed "API KEY REQUIRED"),
+  // so the street map uses OpenStreetMap's own tiles, which need no key, only the credit line.
+  { name: "Map", url: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    maxZoom: 19,
+    credit: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' },
   { name: "Satellite", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     maxZoom: 19, credit: "Imagery &copy; Esri, Maxar, Earthstar Geographics" },
   { name: "Terrain", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",

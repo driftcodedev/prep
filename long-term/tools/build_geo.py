@@ -5,7 +5,9 @@ Not run by the site. Run it by hand only when the shapes need rebuilding:
     python3 long-term/tools/build_geo.py
 
 Coastline: GSHHS full resolution (via basemap-data-hires). Distances are measured in UTM zone 19N
-(EPSG:32619) from the shore of Cobscook Bay, and the rings cover land only.
+(EPSG:32619) from the shore of Cobscook Bay. Each ring is a full closed band over land and water
+("geometry", drawn on the live map); "land" is the same band cut to land, for the paper map, which has
+no background map to show the coast.
 The bay is closed off at its mouth by a straight line from the south tip of Eastport (Moose Island)
 to the Lubec shore, so Friar Roads and Lubec Narrows count as outside the bay.
 """
@@ -67,19 +69,21 @@ def main():
     bay = cobscook(water)
     bay_m, land_m = transform(fwd, bay), transform(fwd, land)
 
-    rings, inner = [], None
+    rings, inner = [], bay_m
     for miles in range(1, 11):
-        reach = bay_m.buffer(miles * MILE, resolution=24).intersection(land_m)
-        ring = reach if inner is None else reach.difference(inner)
+        reach = bay_m.buffer(miles * MILE, resolution=24)
+        band = reach.difference(inner)
         inner = reach
-        ring = ring.simplify(35, preserve_topology=True).buffer(0)
-        rings.append({"miles": miles, "sqmi": round(ring.area / MILE**2, 1),
-                      "geometry": mapping(rounded(transform(inv, ring)))})
-        print(f"ring {miles - 1}-{miles} mi: {ring.area / MILE**2:.1f} sq mi")
+        band_land = band.intersection(land_m).simplify(35, preserve_topology=True).buffer(0)
+        band = band.simplify(35, preserve_topology=True).buffer(0)
+        rings.append({"miles": miles, "sqmi": round(band.area / MILE**2, 1), "landSqmi": round(band_land.area / MILE**2, 1),
+                      "geometry": mapping(rounded(transform(inv, band))),
+                      "land": mapping(rounded(transform(inv, band_land)))})
+        print(f"ring {miles - 1}-{miles} mi: {band.area / MILE**2:.1f} sq mi, {band_land.area / MILE**2:.1f} of it land")
 
     bay_simple = transform(inv, bay_m.simplify(20, preserve_topology=True))
     data = {
-        "source": "GSHHS full-resolution coastline (basemap-data-hires); distances in UTM 19N from the Cobscook Bay shore; rings cover land only.",
+        "source": "GSHHS full-resolution coastline (basemap-data-hires); distances in UTM 19N from the Cobscook Bay shore; each ring is a full band over land and water (geometry), with a land-only copy (land) for the paper map.",
         "mouth": [MOUTH_A, MOUTH_B],
         "bay": mapping(rounded(bay_simple)),
         "baySqmi": round(bay_m.area / MILE**2, 1),

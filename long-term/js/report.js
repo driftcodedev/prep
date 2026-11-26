@@ -138,8 +138,13 @@ export function mapSvg(geo, items, { width = 720, towns = TOWNS, colors = RING_C
   const path = (g) => geomPolys(g).map((poly) => poly.map((ring) => "M" + ring.map(([lon, lat]) => `${f(X(lon))},${f(Y(lat))}`).join("L") + "Z").join("")).join("");
   const font = 'font-family="Roboto, Helvetica, Arial, sans-serif"';
 
-  const bands = [...geo.rings].reverse().map((r) =>
-    `<path d="${path(r.geometry)}" fill="${tint(colors[r.miles - 1], 0.42)}" fill-rule="evenodd" stroke="${colors[r.miles - 1]}" stroke-width="0.4"/>`).join("");
+  // Each band is a closed ring over land and water; water inside it is pale and land is stronger,
+  // so the coastline still shows on paper, where there's no background map.
+  const bands = [...geo.rings].reverse().map((r) => {
+    const c = colors[r.miles - 1];
+    return `<path d="${path(r.geometry)}" fill="${tint(c, 0.14)}" fill-rule="evenodd" stroke="${c}" stroke-width="0.4"/>`
+      + (r.land ? `<path d="${path(r.land)}" fill="${tint(c, 0.42)}" fill-rule="evenodd"/>` : "");
+  }).join("");
   const bay = `<path d="${path(geo.bay)}" fill="${COLORS.water}" fill-rule="evenodd" stroke="${COLORS.lid}" stroke-width="0.8"/>`;
 
   const inside = (lat, lon) => lon >= minLon && lon <= maxLon && lat >= minLat && lat <= maxLat;
@@ -245,7 +250,7 @@ export function buildReport({ geo, today, dateText, readme = [], currents = null
   const backup = houses.filter((x) => x.h.power === "backup");
 
   blocks.push(part("The Cobscook Bay map"));
-  blocks.push(p("Colored bands show land within 1 to 10 miles of the bay's shore, measured across land. The bay is pale blue. Dots are houses for sale: green for off-grid solar, amber for backup power, small gray for the rest. Numbered houses match the house list."));
+  blocks.push(p("Colored rings show distance from the bay's shore, 1 to 10 miles, straight across land and water: land is the stronger color and water the paler one. The bay is pale blue. Dots are houses for sale: green for off-grid solar, amber for backup power, small gray for the rest. Numbered houses match the house list."));
   const map = mapSvg(geo, houses.map((x) => ({ lat: x.h.lat, lon: x.h.lon, power: x.h.power, num: x.h.power === "none" ? 0 : x.num })));
   const [, mw, mh] = /viewBox="0 0 ([\d.]+) ([\d.]+)"/.exec(map).map(Number);
   blocks.push({

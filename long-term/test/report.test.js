@@ -52,7 +52,7 @@ test("the fishing part has a ring per season, every species, and a table for eac
 test("the map shows the bands, the bay, every house, and numbers for houses with power", () => {
   const svg = blocks.find((b) => b.t === "svg").svg;
   assert.match(svg, /^<svg xmlns="http:\/\/www.w3.org\/2000\/svg" viewBox="0 0 720 \d+"/);
-  assert.equal((svg.match(/<path d="M[^"]*" fill="#[0-9a-f]{6}" fill-rule="evenodd"/g) || []).length, geo.rings.length + 1);
+  assert.equal((svg.match(/<path d="M[^"]*" fill="#[0-9a-f]{6}" fill-rule="evenodd"/g) || []).length, 2 * geo.rings.length + 1);
   assert.equal((svg.match(/stroke="#ffffff" stroke-width="(0.6|1.2)"\/>/g) || []).length, HOUSES.length);
   const powered = HOUSES.filter((h) => h.power !== "none").length;
   assert.equal((svg.match(/font-size="9" font-weight="bold" fill="#(?!ffffff)/g) || []).length, powered);

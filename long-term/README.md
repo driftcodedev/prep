@@ -110,10 +110,15 @@ of the bay, and every house for sale with its power setup.
   and records what changed in `HOUSES_CHANGES`, which shows as a line under the map. Listings from the
   last 14 days get a New badge (`isNew` in `js/geo.js`). The task commits only `long-term/`.
 - **Rings** come from `tools/build_geo.py`, which needs `pip install basemap basemap-data-hires shapely pyproj`.
-  It measures across land from the bay's shore in UTM 19N and writes `data/geo.json`.
+  It measures straight-line distance from the bay's shore in UTM 19N and writes `data/geo.json`. Each
+  ring is a full closed band over land and water (`geometry`, drawn on the live map), with a land-only
+  copy (`land`, `landSqmi`) that the paper map draws stronger, so the coast shows without a base map.
+- **Zoom:** the map zooms out only as far as the whole 10-mile ring, worked out from the map's size
+  (again after full screen or the resize handle), and can't be panned far past it.
 - **Leaflet** loads only after the password (app.js imports it inside `mount`). Its CSS is scoped to
   `#lt-root` so it can't touch the Short Term tab.
-- Map tiles come from CARTO (map) and Esri (satellite, terrain, and the photo in each popup). They
+- Map tiles come from OpenStreetMap (map) and Esri (satellite, terrain, and the photo in each popup).
+  CARTO's free tiles, used before, started showing "API KEY REQUIRED" in Nov 2026. They
   need a connection; the rings, pins and labels are drawn from this folder.
 
 ### Tidal currents and flats

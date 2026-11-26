@@ -63,13 +63,16 @@ export function createMap(root, { L, geo }) {
   try { savedHeight = Number(localStorage.getItem(HEIGHT_KEY)) || null; } catch { /* storage blocked */ }
   if (savedHeight) wrap.style.height = `${Math.max(260, Math.min(savedHeight, window.innerHeight * 0.92))}px`;
 
+  // The whole 10-mile area: the outside of the 10-mile ring.
+  const wholeArea = L.geoJSON({ type: "FeatureCollection", features: geo.rings.map((r) => ({ type: "Feature", geometry: r.geometry })) }).getBounds();
+
   const map = L.map($("[data-map]"), {
     center: MAP_VIEW.center,
     zoom: MAP_VIEW.zoom,
     minZoom: MAP_VIEW.minZoom,
     maxZoom: MAP_VIEW.maxZoom,
-    maxBounds: MAP_VIEW.bounds,
-    maxBoundsViscosity: 0.8,
+    maxBounds: wholeArea.pad(0.08),
+    maxBoundsViscosity: 1,
     zoomSnap: 0.5,
     worldCopyJump: false,
   });
@@ -81,10 +84,13 @@ export function createMap(root, { L, geo }) {
   }
   bases.Map.addTo(map);
 
-  // Open on the whole 10-mile area, whatever the screen size.
-  const wholeArea = L.geoJSON({ type: "FeatureCollection", features: geo.rings.map((r) => ({ type: "Feature", geometry: r.geometry })) }).getBounds();
+  // Open on the whole 10-mile area, whatever the screen size, and don't let it zoom out past that.
+  // The limit is worked out again whenever the map changes size (full screen, the resize handle).
   const showWholeArea = () => map.fitBounds(wholeArea, { padding: [8, 8] });
+  const limitZoomOut = () => map.setMinZoom(map.getBoundsZoom(wholeArea, false, L.point(16, 16)));
+  limitZoomOut();
   showWholeArea();
+  map.on("resize", limitZoomOut);
 
   map.createPane("ltmRings").style.zIndex = 350;
   map.createPane("ltmBay").style.zIndex = 360;

@@ -47,7 +47,14 @@ test("geo.json has the bay and ten 1-mile rings", () => {
     assert.equal(r.miles, i + 1);
     assert.ok(["Polygon", "MultiPolygon"].includes(r.geometry.type));
     assert.ok(r.sqmi > 20, `ring ${r.miles} looks too small`);
+    assert.ok(["Polygon", "MultiPolygon"].includes(r.land.type), `ring ${r.miles} has no land copy`);
+    assert.ok(r.landSqmi > 20 && r.landSqmi < r.sqmi, `ring ${r.miles} land share`);
   });
+  // From 3 miles out the bands are single closed loops around the bay: one outline and one hole.
+  for (const r of geo.rings.slice(2)) {
+    assert.equal(r.geometry.type, "Polygon", `ring ${r.miles}`);
+    assert.equal(r.geometry.coordinates.length, 2, `ring ${r.miles} should be one closed loop`);
+  }
 });
 
 test("shore distances match the Python (shapely) measurements", () => {
