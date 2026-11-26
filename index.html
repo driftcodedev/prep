@@ -20,6 +20,16 @@
     </defs>
   </svg>
 
+  <nav class="plan-tabs" aria-label="Plans">
+    <div class="wrap">
+      <div class="tab-list" role="tablist">
+        <button type="button" role="tab" id="tab-short" aria-controls="panel-short" aria-selected="true">Short Term</button>
+        <button type="button" role="tab" id="tab-long" aria-controls="panel-long" aria-selected="false" tabindex="-1">Long Term<svg class="tab-lock" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button>
+      </div>
+    </div>
+  </nav>
+
+  <div id="panel-short" role="tabpanel" aria-labelledby="tab-short">
   <header class="masthead">
     <div class="wrap">
       <h1 class="wordmark">prep</h1>
@@ -110,7 +120,37 @@
   <footer class="wrap footer">
     <p>Built for one family's preparedness plan and shared with friends. These are estimates, not medical advice. Prices checked <span id="prices-date"></span>; they change, so confirm at checkout.</p>
   </footer>
+  </div>
+
+  <div id="panel-long" role="tabpanel" aria-labelledby="tab-long" hidden>
+    <header class="masthead">
+      <div class="wrap">
+        <p class="wordmark" aria-hidden="true">prep</p>
+        <h1 class="lede">The long-term plan</h1>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <form id="lt-gate" class="lt-gate" novalidate>
+        <h2 class="section-title">This tab is locked</h2>
+        <p class="muted">Enter the password to open the long-term plan.</p>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input id="lt-password" type="password" autocomplete="current-password" autocapitalize="none" spellcheck="false" required>
+        </label>
+        <p id="lt-error" class="lt-error" role="alert" hidden>Wrong password. Check the spelling and try again.</p>
+        <button type="submit" class="btn">Unlock</button>
+      </form>
+
+      <section id="lt-space" class="lt-space" aria-labelledby="lt-title" hidden>
+        <h2 id="lt-title" class="section-title" tabindex="-1">Workspace</h2>
+        <p class="muted">Nothing here yet. This is the workspace for the long-term plan.</p>
+        <button type="button" id="lt-lock" class="btn btn-quiet">Lock this tab</button>
+      </section>
+    </main>
+  </div>
 
   <script type="module" src="js/app.js"></script>
+  <script type="module" src="js/tabs.js"></script>
 </body>
 </html>
