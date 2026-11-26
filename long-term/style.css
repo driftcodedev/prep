@@ -353,3 +353,88 @@
 #lt-root .ltf .ltm-notes ol li + li { margin-top: 0.45rem; }
 #lt-root .ltf-table { margin-top: 0.6rem; font-size: 0.88rem; }
 @media (min-width: 640px) { #lt-root .ltf-cal { font-size: 0.85rem; } #lt-root .ltf-cal thead th:first-child { width: 14rem; } #lt-root .ltf-cal tbody th, #lt-root .ltf-cell, #lt-root .ltf-cal thead button { font-size: 0.85rem; } }
+
+/* ---------- Paper copy: Print the full report / Download PDF ---------- */
+/* The buttons reuse the Short Term classes (.report-actions, .report-foot, .pdf-status). The report
+   itself (js/report.js) sits in .lt-print, hidden on screen and the only thing shown when printing. */
+#lt-root .lt-paper-top { display: flex; justify-content: flex-end; margin: -0.5rem 0 1rem; }
+#lt-root .lt-paper-top .report-actions { justify-content: flex-end; }
+#lt-root .lt-paper-foot .report-actions { justify-content: flex-start; }
+#lt-root .lt-print { display: none; }
+
+@page ltreport {
+  margin: 0.5in 0.5in 0.6in;
+  @bottom-left { content: "prep · The long-term plan"; font: 8pt "Atkinson Hyperlegible", sans-serif; color: #4a5957; }
+  @bottom-right { content: "Page " counter(page) " of " counter(pages); font: 8pt "Atkinson Hyperlegible", sans-serif; color: #4a5957; }
+}
+
+@media print {
+  body:has(#lt-root.lt-has-print) #panel-long .masthead { display: none !important; }
+  #lt-root.lt-has-print > :not(.lt-print) { display: none !important; }
+  #lt-root.lt-has-print > .lt-print { display: block; }
+}
+
+#lt-root .lt-print {
+  page: ltreport;
+  counter-reset: part;
+  font: 10pt/1.4 var(--body);
+  color: var(--ink);
+  background: #fff;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+#lt-root .lt-print a { color: var(--lid); }
+
+#lt-root .ltp-cover { break-after: page; }
+#lt-root .ltp-cover::before { content: "prep"; display: block; font: 800 46pt/1 var(--display); color: var(--lid); }
+#lt-root .ltp-title { font: 800 30pt/1.05 var(--display); margin: 6pt 0 2pt; }
+#lt-root .ltp-sub { font-size: 14pt; color: var(--ink-2); margin: 0 0 10pt; padding-bottom: 10pt; border-bottom: 3px solid var(--ink); }
+#lt-root .ltp-cover p { margin: 0 0 8pt; }
+#lt-root .ltp-cover p:nth-of-type(3) { font-weight: 700; background: var(--bean-tint); border-left: 4px solid var(--bean); padding: 7pt 9pt; margin: 4pt 0 22pt; }
+#lt-root .ltp-cover h3 { font: 800 18pt/1 var(--display); margin: 0 0 6pt; }
+#lt-root .ltp-cover ol { margin: 0; padding: 0; list-style: none; counter-reset: toc; }
+#lt-root .ltp-cover li { counter-increment: toc; font-size: 14pt; padding: 6pt 0; border-bottom: 1px solid var(--line); }
+#lt-root .ltp-cover li::before { content: counter(toc); display: inline-block; width: 22pt; font-weight: 700; color: var(--lid); }
+
+#lt-root .ltp-part { break-before: page; break-after: avoid; font: 800 24pt/1.05 var(--display); margin: 0 0 10pt; padding-bottom: 6pt; border-bottom: 3px solid var(--ink); }
+#lt-root .ltp-part::before { counter-increment: part; content: "Part " counter(part); display: block; font: 700 9pt var(--body); color: var(--lid); margin-bottom: 2pt; }
+#lt-root .ltp-h3 { font: 800 15pt/1.1 var(--display); margin: 14pt 0 4pt; break-after: avoid; }
+#lt-root .ltp-p { margin: 0 0 6pt; }
+#lt-root .ltp-note { margin: -2pt 0 8pt; font-size: 8.5pt; color: var(--ink-2); }
+#lt-root .ltp-list { margin: 0 0 8pt; padding-left: 14pt; }
+#lt-root .ltp-list li { margin: 0 0 2pt; }
+#lt-root .ltp-list li::marker { color: var(--lid); }
+
+#lt-root .ltp-table { width: 100%; border-collapse: collapse; margin: 2pt 0 10pt; font-size: 8.5pt; }
+#lt-root .ltp-table.ltp-s { font-size: 8pt; }
+#lt-root .ltp-table.ltp-xs { font-size: 7pt; }
+#lt-root .ltp-table thead { display: table-header-group; }
+#lt-root .ltp-table tr { break-inside: avoid; }
+#lt-root .ltp-table th, #lt-root .ltp-table td { text-align: left; vertical-align: top; padding: 2.5pt 4pt; border-bottom: 0.5pt solid var(--line); }
+#lt-root .ltp-table th:first-child, #lt-root .ltp-table td:first-child { padding-left: 0; }
+#lt-root .ltp-table thead th { color: var(--ink-2); border-bottom: 1pt solid var(--ink); font-size: 0.95em; }
+#lt-root .ltp-table td[style*="background"] { border-bottom: 1.2pt solid #fff; padding-left: 3pt; }
+
+#lt-root .ltp-fig { margin: 2pt 0 10pt; break-inside: avoid; text-align: center; }
+#lt-root .ltp-keep { break-inside: avoid; }
+#lt-root .ltp-fig svg { width: 100%; height: auto; max-height: 7in; }
+#lt-root .ltp-fig figcaption { font-size: 8pt; color: var(--ink-2); margin-top: 3pt; }
+
+#lt-root .ltp-rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12pt 16pt; margin: 4pt 0 10pt; }
+#lt-root .ltp-ring { break-inside: avoid; }
+#lt-root .ltp-ring h4 { font: 800 13pt/1 var(--display); margin: 0 0 3pt; text-align: center; }
+#lt-root .ltp-ring svg { display: block; width: 1.5in; height: 1.5in; margin: 0 auto; }
+#lt-root .ltp-ring .ltp-note { text-align: center; margin: 2pt 0 4pt; }
+#lt-root .ltp-ring ul { list-style: none; margin: 0; padding: 0; font-size: 7.5pt; }
+#lt-root .ltp-ring li { margin: 0 0 1.5pt; }
+#lt-root .ltp-sw { display: inline-block; width: 7pt; height: 7pt; border-radius: 1.5pt; margin-right: 4pt; vertical-align: -0.5pt; }
+
+#lt-root .ltp-card { border: 1.5px solid var(--ink); border-radius: var(--radius); padding: 8pt 10pt; margin: 4pt 0 12pt; break-inside: avoid; }
+#lt-root .ltp-card h4 { font: 800 15pt/1.1 var(--display); margin: 0; }
+#lt-root .ltp-card-sub { margin: 1pt 0 5pt; font-weight: 700; color: var(--lid); padding-bottom: 4pt; border-bottom: 1px dashed var(--line); }
+#lt-root .ltp-card dl { margin: 0; font-size: 8.5pt; }
+#lt-root .ltp-card dl div { display: grid; grid-template-columns: 6.5em 1fr; gap: 6pt; padding: 2pt 0; border-bottom: 0.5pt solid var(--line); }
+#lt-root .ltp-card dt { font-weight: 700; color: var(--ink-2); }
+#lt-root .ltp-card dd { margin: 0; overflow-wrap: anywhere; }
+#lt-root .ltp-card .ltp-list { font-size: 8.5pt; margin: 6pt 0 4pt; }
+#lt-root .ltp-card .ltp-table { margin-bottom: 0; }

@@ -11,6 +11,11 @@
 //            and js/map.js to bring it to life.
 //   Fishing  what the bay could feed you, season by season (js/fishing.js).
 // The last view picked is remembered in this browser (localStorage "prep-lt-view").
+//
+// Paper copy: "Print the full report" and "Download PDF" (top and bottom, like the Short Term tab)
+// give everything on the tab in one report: js/report.js builds it once, as a list of blocks;
+// reportHtml() draws them into the hidden .lt-print box that only shows when printing, and
+// js/report-pdf.js turns the same blocks into a PDF with pdfmake (vendor/pdfmake).
 
 import { PAGE } from "./data/plan.js";
 import { HOUSES } from "./data/houses.js";
@@ -38,9 +43,25 @@ export function render(page = PAGE, context = {}, data = undefined) {
       </button>`).join("");
   return `
     <div class="lt-views" role="tablist" aria-label="Long-term plan views">${tabs}</div>
+    <div class="lt-paper-top">${reportActions("top")}</div>
     <div class="lt-panel" id="lt-panel-map" role="tabpanel" aria-labelledby="lt-tab-map" data-panel="map">${renderMap(page, context, data)}</div>
     <div class="lt-panel" id="lt-panel-fish" role="tabpanel" aria-labelledby="lt-tab-fish" data-panel="fish" hidden>${renderFishing()}</div>
+    <div class="report-foot lt-paper-foot">
+      <p>Keep a paper copy. Print everything on this tab, or save it as a PDF to print later.</p>
+      ${reportActions("bottom")}
+    </div>
+    <div class="lt-print"></div>
   `;
+}
+
+// The same two buttons as the Short Term tab.
+export function reportActions(where) {
+  return `
+    <div class="report-actions" data-where="${where}">
+      <button type="button" class="btn" data-lt-print>Print the full report</button>
+      <button type="button" class="btn btn-quiet" data-lt-pdf>Download PDF</button>
+      <span class="pdf-status" role="status" aria-live="polite"></span>
+    </div>`;
 }
 
 const PRICE_CHOICES = [150000, 250000, 400000, 600000, 1000000];
@@ -181,16 +202,26 @@ function saveView(v) {
   try { localStorage.setItem(VIEW_KEY, v); } catch { /* private mode */ }
 }
 
+// The bay outline and distance rings, fetched once for the map and the paper copy.
+let geoJson = null;
+function loadGeo() {
+  if (!geoJson) {
+    geoJson = fetch(new URL("./data/geo.json", import.meta.url)).then((r) => {
+      if (!r.ok) throw new Error(`geo.json: ${r.status}`);
+      return r.json();
+    });
+    geoJson.catch(() => { geoJson = null; });
+  }
+  return geoJson;
+}
+
 async function startMap(root) {
   mapStarted = true;
   try {
     const [L, { createMap }, geo] = await Promise.all([
       import("./vendor/leaflet/leaflet.esm.min.js"),
       import("./js/map.js"),
-      fetch(new URL("./data/geo.json", import.meta.url)).then((r) => {
-        if (!r.ok) throw new Error(`geo.json: ${r.status}`);
-        return r.json();
-      }),
+      loadGeo(),
     ]);
     if (!root.isConnected || !mapStarted) return;
     view = createMap(root.querySelector('[data-panel="map"]'), { L, geo });
@@ -219,6 +250,7 @@ async function showView(root, id, { focus = false } = {}) {
 
 export async function mount(root, context = {}) {
   view = null; fishing = null; mapStarted = false;
+  root.classList.remove("lt-has-print");
   await Promise.all([loadCss("./vendor/leaflet/leaflet.css", "leaflet"), loadCss("./style.css", "style")]);
   root.innerHTML = render(PAGE, context);
 
@@ -240,7 +272,118 @@ export async function mount(root, context = {}) {
   tablist.addEventListener("keydown", onKey);
   cleanup = [() => tablist.removeEventListener("click", onClick), () => tablist.removeEventListener("keydown", onKey)];
 
+  const onPaper = (e) => {
+    const print = e.target.closest("[data-lt-print]");
+    const pdf = e.target.closest("[data-lt-pdf]");
+    if (print) printReport(root, print);
+    if (pdf) downloadPdf(root, pdf);
+  };
+  root.addEventListener("click", onPaper);
+  cleanup.push(() => root.removeEventListener("click", onPaper));
+
   await showView(root, readView());
+  // Have the printout ready for the browser's own Print (Ctrl+P) too.
+  const later = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+  later(() => { if (root.isConnected) buildPrint(root).catch(() => {}); });
+}
+
+// ---------- paper copy ----------
+
+function todayIso() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+const todayText = () => new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+
+// The README pages, as the site publishes them (shell/readme-pages.js, in index.html).
+function readmePages() {
+  try { return JSON.parse(document.getElementById("rmpages")?.textContent || "[]"); } catch { return []; }
+}
+
+let report = null; // { day, blocks }
+async function reportBlocks() {
+  const day = todayIso();
+  if (report?.day === day) return report.blocks;
+  const [{ buildReport }, geo] = await Promise.all([import("./js/report.js"), loadGeo()]);
+  const blocks = buildReport({ geo, today: day, dateText: todayText(), readme: readmePages() });
+  report = { day, blocks };
+  return blocks;
+}
+
+async function buildPrint(root) {
+  const box = root.querySelector(".lt-print");
+  if (!box) return;
+  const blocks = await reportBlocks();
+  if (box.dataset.day === report.day) return;
+  const { reportHtml } = await import("./js/report.js");
+  box.innerHTML = reportHtml(blocks);
+  box.dataset.day = report.day;
+  root.classList.add("lt-has-print");
+}
+
+function busy(button, text) {
+  const status = button.parentElement.querySelector(".pdf-status");
+  const label = button.textContent;
+  button.disabled = true;
+  button.textContent = text;
+  status.textContent = "";
+  return {
+    say: (msg) => { status.textContent = msg; },
+    done: () => { button.disabled = false; button.textContent = label; },
+  };
+}
+
+async function printReport(root, button) {
+  const b = busy(button, "Getting it ready…");
+  try {
+    await buildPrint(root);
+    b.done();
+    window.print();
+  } catch (err) {
+    console.error(err);
+    b.say("The report didn't load. Check your connection and try again.");
+    b.done();
+  }
+}
+
+let pdfLib = null;
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error(`Couldn't load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+async function loadPdfLib() {
+  if (!pdfLib) {
+    pdfLib = (async () => {
+      // The Short Term tab may have loaded the same pdfmake already.
+      if (!window.pdfMake?.createPdf) {
+        await loadScript(new URL("./vendor/pdfmake/pdfmake.min.js", import.meta.url).href);
+        await loadScript(new URL("./vendor/pdfmake/vfs_fonts.js", import.meta.url).href);
+      }
+      return window.pdfMake;
+    })();
+    pdfLib.catch(() => { pdfLib = null; });
+  }
+  return pdfLib;
+}
+
+async function downloadPdf(root, button) {
+  const b = busy(button, "Making the PDF…");
+  try {
+    const [pdfMake, { reportPdf }, blocks] = await Promise.all([loadPdfLib(), import("./js/report-pdf.js"), reportBlocks()]);
+    const doc = reportPdf(blocks, { date: todayText() });
+    await pdfMake.createPdf(doc).download(`prep-long-term-${todayIso()}.pdf`);
+    b.say("PDF downloaded.");
+  } catch (err) {
+    console.error(err);
+    b.say("The PDF didn't download. Use Print the full report and choose Save as PDF instead.");
+  } finally {
+    b.done();
+  }
 }
 
 export function unmount(root) {
@@ -250,4 +393,5 @@ export function unmount(root) {
   if (view) view.destroy();
   if (fishing) fishing.destroy();
   view = null; fishing = null; mapStarted = false;
+  root.classList.remove("lt-has-print");
 }

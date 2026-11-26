@@ -29,10 +29,14 @@ long-term/            YOUR FOLDER
   js/popup.js         HTML for house popups and list cards
   js/map.js           the live Leaflet map (browser only)
   js/fishing.js       the Fishing view: season rings, calendar, season detail
+  js/report.js        the paper copy: one list of blocks, and the printout HTML
+  js/report-pdf.js    the same blocks as a pdfmake PDF (Download PDF)
   vendor/leaflet/     Leaflet 1.9.4 (minified ESM, CSS scoped to #lt-root, LICENSE)
+  vendor/pdfmake/     pdfmake 0.3.15 and its Roboto fonts (same copy as the Short Term tab)
   tools/build_geo.py  rebuilds data/geo.json (Python; not used by the site)
   tools/fishing_model.py  the fishing model; rebuilds data/fishing.js
   test/app.test.js    tests (node:test)
+  test/report.test.js tests for the paper copy
   README.md           this guide
 package.json          npm test runs both plans' tests
 ```
@@ -126,6 +130,32 @@ is shown, so opening straight to Fishing doesn't download it.
   as a % of its own best season. "Show" switches between number caught, meat and calories. Below
   either, the season detail lists the best trips and every species, each opening to its notes.
   The choices are kept in `localStorage` (`prep-lt-fish`); the season starts on today's.
+
+## Paper copy: Print the full report / Download PDF
+
+The same two buttons as the Short Term tab sit under the Map / Fishing switch and at the bottom of
+the tab (the bottom one in a `.report-foot` with "Keep a paper copy"). Both give everything on the
+tab, whichever view is open: a cover with contents, then each part on new pages: Why Cobscook Bay,
+the map, houses for sale, Solar panels, fishing by season, Species extinction and Pumping gas out of
+a car. About 31 letter pages.
+
+- **One content list:** `buildReport()` in `js/report.js` returns plain blocks (headings,
+  paragraphs, tables, pictures, house cards). Change what's in the report there, and both outputs
+  follow. It's pure, so `test/report.test.js` runs it in Node.
+- **README pages** in the report are the ones in `README_IN_REPORT`, read from the JSON the site
+  publishes in `index.html` (`#rmpages`), so they match the README button. Pages about using the
+  website stay out. Edits a reader makes in their own browser aren't printed.
+- **Pictures** are plain SVG, drawn so both the browser and pdfmake can print them: `mapSvg()` (the
+  rings, bay, towns and every house from `data/geo.json`, with numbers that match the house list)
+  and `ringSvg()` (season rings drawn as filled arcs, not CSS).
+- **Print the full report:** `reportHtml()` fills the hidden `.lt-print` box. In print, only that
+  box shows (`#lt-root.lt-has-print`), the tab's masthead is hidden, and pages are numbered by an
+  `@page ltreport` rule that only applies to the box. The box is also filled a moment after the tab
+  opens, so the browser's own Print (Ctrl+P) gives the same report.
+- **Download PDF:** `reportPdf()` in `js/report-pdf.js` turns the blocks into a pdfmake document
+  that looks like the Short Term PDF (Roboto, thin table rules, a new page per part, page numbers).
+  pdfmake loads only when the button is pressed. Roboto has no ⅓ or ⅔, so they're written out.
+- A heading and a short table after it (26 rows or fewer) are kept on the same page.
 
 ## Look and wording
 
