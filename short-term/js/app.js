@@ -439,8 +439,9 @@ function loadScript(src) {
 async function loadPdfLib() {
   if (!pdfLib) {
     pdfLib = (async () => {
-      await loadScript("vendor/pdfmake/pdfmake.min.js");
-      await loadScript("vendor/pdfmake/vfs_fonts.js");
+      // Resolved from this file, so the page can live anywhere.
+      await loadScript(new URL("../vendor/pdfmake/pdfmake.min.js", import.meta.url).href);
+      await loadScript(new URL("../vendor/pdfmake/vfs_fonts.js", import.meta.url).href);
       return window.pdfMake;
     })();
     pdfLib.catch(() => { pdfLib = null; });

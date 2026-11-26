@@ -8,7 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="short-term/css/style.css">
+  <link rel="stylesheet" href="shell/shell.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 6h12l-1.2 13a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z' fill='%231F5F7A'/%3E%3Cpath d='M16 9h3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-3.5' fill='none' stroke='%231F5F7A' stroke-width='2'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -142,15 +143,15 @@
         <button type="submit" class="btn">Unlock</button>
       </form>
 
-      <section id="lt-space" class="lt-space" aria-labelledby="lt-title" hidden>
-        <h2 id="lt-title" class="section-title" tabindex="-1">Workspace</h2>
-        <p class="muted">Nothing here yet. This is the workspace for the long-term plan.</p>
-        <button type="button" id="lt-lock" class="btn btn-quiet">Lock this tab</button>
+      <section id="lt-space" class="lt-space" aria-label="Long-term plan" hidden>
+        <div class="lt-bar"><button type="button" id="lt-lock" class="btn btn-quiet">Lock this tab</button></div>
+        <!-- Everything inside #lt-root is drawn by long-term/app.js after the password is entered. -->
+        <div id="lt-root" tabindex="-1"></div>
       </section>
     </main>
   </div>
 
-  <script type="module" src="js/app.js"></script>
-  <script type="module" src="js/tabs.js"></script>
+  <script type="module" src="short-term/js/app.js"></script>
+  <script type="module" src="shell/tabs.js"></script>
 </body>
 </html>

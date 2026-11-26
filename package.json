@@ -4,6 +4,8 @@
   "type": "module",
   "description": "Grid-down food stockpile calculator: how much to store and how much each person eats per day.",
   "scripts": {
-    "test": "node --test test/*.test.js"
+    "test": "node --test short-term/test/*.test.js long-term/test/*.test.js",
+    "test:short": "node --test short-term/test/*.test.js",
+    "test:long": "node --test long-term/test/*.test.js"
   }
 }

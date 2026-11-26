@@ -1,7 +1,12 @@
-// Short Term / Long Term tabs. Long Term is behind a light password lock: the page keeps only
-// a SHA-256 fingerprint of the password. Nothing is remembered: the tab locks again on every
-// page load and whenever you switch away from it. This keeps casual visitors out; it isn't
-// real security.
+// The page frame: Short Term / Long Term tabs and the Long Term lock.
+//
+// Long Term is behind a light password lock: the page keeps only a SHA-256 fingerprint of the
+// password. Nothing is remembered: the tab locks again on every page load and whenever you
+// switch away from it. This keeps casual visitors out; it isn't real security.
+//
+// The Long Term plan itself lives in long-term/. Its code is only fetched after the password is
+// entered: this file imports long-term/app.js and calls mount(root, context) to draw it inside
+// #lt-root, then unmount(root) and clears #lt-root when the tab locks. See long-term/README.md.
 
 const PASSWORD_SHA256 = "2044fbdb55f9238637ff4adbdd07a491f8225a62b4db057bca43b73de9b3abad";
 const LONG_HASH = "#long-term";
@@ -13,8 +18,12 @@ const space = $("#lt-space");
 const input = $("#lt-password");
 const error = $("#lt-error");
 const longTab = $("#tab-long");
+const root = $("#lt-root");
+const HOUSEHOLD_KEY = "prep-household-v1"; // saved by the Short Term plan
 
 let unlocked = false; // lives only as long as this page view
+let mounted = null;    // the long-term module while it is on screen
+let opening = 0;       // bumps on every open and lock, so a slow load can't draw after a lock
 
 // Earlier versions remembered the unlock on the device; forget that.
 try { localStorage.removeItem("prep-long-term-unlocked"); } catch { /* storage blocked */ }
@@ -30,10 +39,47 @@ function renderLock() {
   longTab.classList.toggle("is-locked", !unlocked);
 }
 
+// What the long-term plan is handed: the household from the Short Term tab, read-only.
+function context() {
+  let household = null;
+  try { household = JSON.parse(localStorage.getItem(HOUSEHOLD_KEY)) || null; } catch { /* none saved */ }
+  return { household };
+}
+
+async function openWorkspace() {
+  const mine = ++opening;
+  root.textContent = "";
+  try {
+    const mod = await import("../long-term/app.js");
+    if (mine !== opening) return;
+    await mod.mount(root, context());
+    if (mine !== opening) { mod.unmount?.(root); root.textContent = ""; return; }
+    mounted = mod;
+  } catch (err) {
+    console.error("Long-term plan failed to load:", err);
+    if (mine !== opening) return;
+    root.innerHTML = '<p class="lt-load-error">The long-term plan didn\'t load. Reload the page and try again.</p>';
+  }
+  // Move focus to the plan's first heading, or the plan itself.
+  const heading = root.querySelector("h1, h2, h3");
+  if (heading && !heading.hasAttribute("tabindex")) heading.tabIndex = -1;
+  (heading || root).focus({ preventScroll: true });
+}
+
+function closeWorkspace() {
+  opening++;
+  if (mounted) {
+    try { mounted.unmount?.(root); } catch (err) { console.error(err); }
+    mounted = null;
+  }
+  root.textContent = "";
+}
+
 function lock() {
   unlocked = false;
   input.value = "";
   error.hidden = true;
+  closeWorkspace();
   renderLock();
 }
 
@@ -77,7 +123,7 @@ gate.addEventListener("submit", async (e) => {
     input.value = "";
     error.hidden = true;
     renderLock();
-    $("#lt-title").focus();
+    openWorkspace();
   } else {
     error.hidden = false;
     input.select();

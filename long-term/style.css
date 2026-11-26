@@ -1,0 +1,15 @@
+/* Long Term plan styles. Start every rule with #lt-root so nothing here can change the
+   Short Term tab.
+
+   The site's look is already loaded from short-term/css/style.css. Reuse it rather than
+   restyling:
+     colors   var(--paper) var(--card) var(--ink) var(--ink-2) var(--line)
+              var(--lid) var(--lid-dark) var(--lid-tint) var(--bean) var(--bean-tint)
+     fonts    var(--display) for big headings, var(--body) for everything else
+     corners  var(--radius)
+     classes  .section-title .sub-title .muted .btn .btn-quiet .btn-link .field .field-label
+              .field-hint .data (tables) .table-scroll .block
+
+   Example:
+   #lt-root .lt-note { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); padding: 1rem; }
+*/

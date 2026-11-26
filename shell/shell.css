@@ -1,0 +1,35 @@
+/* The page frame shared by both plans: the Short Term / Long Term tab bar and the Long Term
+   password lock. Colors, fonts, buttons and fields come from short-term/css/style.css,
+   which is the site's base look. */
+
+/* ---------- Tab bar ---------- */
+.plan-tabs { padding-top: 0.9rem; border-bottom: 1.5px solid var(--line); }
+.tab-list { display: flex; gap: 0.4rem; margin-bottom: -1.5px; }
+.tab-list [role="tab"] {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  min-height: 2.9rem; padding: 0.55rem 1.15rem;
+  border: 1.5px solid var(--line); border-radius: var(--radius) var(--radius) 0 0;
+  background: #e3e8e5; color: var(--ink-2);
+  font: inherit; font-weight: 700; font-size: 1.05rem; cursor: pointer;
+}
+.tab-list [role="tab"]:hover { color: var(--ink); }
+.tab-list [role="tab"][aria-selected="true"] {
+  background: var(--paper); color: var(--ink); border-bottom-color: var(--paper);
+}
+.tab-list [role="tab"]:focus-visible { outline-offset: -4px; }
+.tab-lock { display: none; width: 0.85em; height: 0.85em; fill: currentColor; }
+.tab-list .is-locked .tab-lock { display: inline-block; }
+
+/* ---------- Long Term: password lock and workspace frame ---------- */
+.lt-gate { max-width: 26rem; margin: 0.5rem 0 4rem; display: grid; gap: 0.9rem; justify-items: start; }
+.lt-gate .section-title, .lt-gate p { margin: 0; }
+.lt-gate .field { width: 100%; }
+.lt-error { color: var(--bean); font-weight: 700; }
+.lt-space { margin: 0.5rem 0 4rem; }
+.lt-bar { display: flex; justify-content: flex-end; margin-bottom: 0.5rem; }
+#lt-root:focus, #lt-root :is(h1, h2, h3):focus { outline: none; }
+.lt-load-error { color: var(--bean); font-weight: 700; }
+
+@media print {
+  .plan-tabs, .lt-bar { display: none !important; }
+}
