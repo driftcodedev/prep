@@ -1,0 +1,121 @@
+/* README button and pop-up, from readme-button-kit.html. */
+
+/* ==== PART 1. COLOURS the README uses, matched to the site's palette. ====
+   Set on #rmmodal rather than :root because the site already uses --ink and --card
+   (--card is the white card background here, but the README's border colour). Everything
+   the pop-up draws is inside #rmmodal, so these reach all of it and nothing else. */
+#rmmodal {
+  --ink:#1c2a29;    /* text: the site's ink */
+  --mut:#4a5957;    /* quiet text: the site's --ink-2 */
+  --grow:#1f5f7a;   /* accent: chosen page, hover: the site's bucket-lid blue (--lid) */
+  --broth:#ddeaf0;  /* pale accent fill: the site's --lid-tint */
+  --card:#c6cfcb;   /* borders: the site's --line */
+  --soft:#dfe5e2;   /* dividers: a lighter --line */
+  --grid:#b7c2bd;   /* table lines: a darker --line */
+}
+
+/* ==== PART 2. THE README BUTTON. It uses the site's .btn .btn-quiet look and sits beside
+   "Lock this tab" on the Long Term tab, so it only shows once the password is entered
+   (index.html, .lt-bar in shell/shell.css). ==== */
+
+/* ==== PART 3. THE POP-UP's look. Copy as is. ==== */
+/* ---- README pop-up (page_readme.py) ---- */
+#rmmodal { position:fixed; inset:0; background:rgba(16,20,24,.45); z-index:57;
+  display:flex; align-items:center; justify-content:center; padding:16px; }
+#rmmodal[hidden] { display:none; }
+.rmbox { position:relative; background:#fff; color:var(--ink); border-radius:10px; box-shadow:0 20px 60px rgba(0,0,0,.25);
+  display:flex; flex-direction:column; width:min(1080px,100%); height:min(800px,100%);
+  min-width:380px; min-height:300px; max-width:100%; max-height:100%; overflow:hidden; }
+.rmbox.max { width:100% !important; height:100% !important; }
+.rmhead { display:flex; align-items:center; gap:8px; padding:12px 16px; border-bottom:1px solid var(--card); flex:none; }
+.rmhead h2 { margin:0; font-size:17px; font-weight:600; flex:1; }
+.rmbtn { border:1px solid var(--card); background:#fff; color:var(--ink); border-radius:6px; font:inherit;
+  font-size:13px; padding:6px 11px; min-height:34px; cursor:pointer; white-space:nowrap; }
+.rmbtn:hover { border-color:var(--grow); color:var(--grow); }
+.rmbtn:disabled { opacity:.45; cursor:default; border-color:var(--card); color:var(--ink); }
+.rmbtn.on { background:var(--broth); border-color:#BFE0CC; color:var(--grow); }
+.rmbtn.warn { border-color:#E0B4A8; color:#9A3B22; }
+.rmbtn.x { border:0; font-size:22px; line-height:1; padding:2px 8px; color:var(--mut); }
+.rmsel { display:none; font:inherit; font-size:14px; min-height:36px; border:1px solid var(--card); border-radius:6px;
+  background:#fff; color:var(--ink); padding:0 8px; }
+.rmadd2 { display:none; }
+.rmmain { flex:1; display:flex; min-height:0; }
+.rmside { width:220px; flex:none; border-right:1px solid var(--soft); background:#F6F7F9; display:flex; flex-direction:column; min-height:0; }
+.rmsidehead { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--mut); padding:14px 16px 6px; }
+.rmnav { flex:1; overflow:auto; padding:0 8px; display:flex; flex-direction:column; gap:2px; }
+.rmpage { text-align:left; border:0; background:none; color:var(--ink); font:inherit; font-size:13.5px; line-height:1.35;
+  padding:8px 10px; border-radius:6px; cursor:pointer; overflow-wrap:anywhere; }
+.rmpage:hover { background:#ECEEF1; }
+.rmpage.on { background:var(--broth); color:var(--grow); font-weight:600; }
+.rmnav.dragging, .rmnav.dragging .rmpage { cursor:grabbing; user-select:none; -webkit-user-select:none; }
+.rmpage.dragging { opacity:.45; }
+.rmpage.dropbefore { box-shadow:inset 0 3px 0 var(--grow); border-radius:0 0 6px 6px; }
+.rmpage.dropafter { box-shadow:inset 0 -3px 0 var(--grow); border-radius:6px 6px 0 0; }
+.rmadd { margin:8px; border:1px dashed #B7BDC6; background:none; color:var(--ink); border-radius:6px; font:inherit;
+  font-size:13px; padding:8px 10px; min-height:36px; cursor:pointer; text-align:left; }
+.rmadd:hover { border-color:var(--grow); color:var(--grow); }
+.rmpane { flex:1; min-width:0; min-height:0; display:flex; flex-direction:column; }
+.rmtools, .rmpagebar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 16px;
+  border-bottom:1px solid var(--soft); background:#F6F7F9; flex:none; }
+.rmtools[hidden], .rmpagebar[hidden] { display:none; }
+.rmpagebar { background:#fff; }
+.rmpagebar input { flex:1; min-width:160px; font:inherit; font-size:15px; font-weight:600; min-height:36px;
+  border:1px solid var(--card); border-radius:6px; padding:0 10px; color:var(--ink); background:#FFFEF7; }
+.rmtools select, .rmtools input[type=color] { font:inherit; font-size:13px; min-height:34px; border:1px solid var(--card);
+  border-radius:6px; background:#fff; color:var(--ink); padding:0 6px; }
+.rmtools input[type=color] { width:38px; padding:2px; }
+.rmtools .rmbtn { min-width:34px; padding:6px 9px; }
+.rmtools .gap { width:6px; }
+.rmscroll { flex:1; overflow:auto; padding:18px 24px 24px; }
+.rmheading { margin:0 0 12px; font-size:19px; font-weight:600; line-height:1.3; }
+.rmheading[hidden] { display:none; }
+.rmbody { font-size:14.5px; line-height:1.6; min-height:140px; }
+.rmbody:focus { outline:none; }
+.rmbody[contenteditable=true] { background:#FFFEF7; box-shadow:0 0 0 2px #EBDD96; border-radius:4px; padding:10px 12px; }
+.rmbody h3 { margin:16px 0 6px; font-size:15.5px; }
+.rmbody h3:first-child { margin-top:0; }
+.rmbody p { margin:0 0 10px; }
+.rmbody ul, .rmbody ol { margin:0 0 10px; padding-left:22px; }
+.rmbody li { margin:3px 0; }
+.rmbody table { border-collapse:collapse; margin:0 0 12px; width:100%; }
+.rmbody th, .rmbody td { border:1px solid var(--grid); padding:6px 9px; text-align:left; vertical-align:top; }
+.rmbody th { background:#F6F7F9; white-space:nowrap; font-weight:600; }
+.rmbody pre.rmcopy { white-space:pre-wrap; overflow-wrap:anywhere; background:#F6F7F9; border:1px solid var(--grid); border-radius:6px; padding:12px 14px;
+  font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; max-height:440px; overflow:auto; margin:0 0 12px; }
+.rmcopybtn { margin:0 0 6px; }
+.rmsite { margin-top:18px; padding-top:12px; border-top:2px solid var(--soft); }
+.rmsite[hidden] { display:none; }
+.rmsitehead { font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--mut); margin-bottom:8px; }
+.rmsite .rmbody { min-height:0; }
+.rmbody:has(+ .rmsite:not([hidden])) { min-height:36px; }
+.rmfoot { display:flex; flex-wrap:wrap; gap:6px 14px; align-items:center; padding:8px 30px 8px 16px; border-top:1px solid var(--soft);
+  font-size:12px; color:var(--mut); flex:none; }
+.rmfoot .grow { flex:1; min-width:120px; }
+.rmfoot button { border:0; background:none; color:var(--grow); font:inherit; font-size:12px; cursor:pointer;
+  padding:4px 0; border-bottom:1px solid #BFE0CC; }
+.rmfoot button[hidden] { display:none; }
+.rmgrip { position:absolute; right:0; bottom:0; width:24px; height:24px; cursor:nwse-resize; touch-action:none;
+  border-bottom-right-radius:10px;
+  background:linear-gradient(135deg, transparent 52%, #9AA2AD 52%, #9AA2AD 58%, transparent 58%, transparent 68%, #9AA2AD 68%, #9AA2AD 74%, transparent 74%, transparent 84%, #9AA2AD 84%, #9AA2AD 90%, transparent 90%); }
+.rmgrip:hover { background-color:#ECEEF1; }
+.rmbox.max .rmgrip { display:none; }
+@media (max-width: 700px) {
+  #rmmodal { padding:8px; }
+  .rmbox { width:100% !important; height:100% !important; min-width:0; }
+  .rmhead h2, .rmside, .rmgrip, #rmmax { display:none; }
+  .rmsel { display:block; flex:1; min-width:0; }
+  .rmadd2 { display:inline-block; }
+  .rmscroll { padding:14px 14px 20px; }
+  .rmtools .gap { display:none; }
+  .rmfoot { padding-right:16px; }
+  .rmbody th { white-space:normal; }          /* a three-column table has to fit a phone */
+  .rmbody th, .rmbody td { padding:5px 7px; }
+}
+
+/* ==== Fitting the kit into this site ==== */
+/* The site makes every select and text box full width; inside the pop-up they size as the kit
+   intends (otherwise Font and Size would each take a whole row of the toolbar). */
+#rmmodal select, #rmmodal input[type="text"] { width: auto; }
+/* The kit's pale green edge, in the site's blue. */
+.rmbtn.on { border-color: #b3cfdc; }
+.rmfoot button { border-bottom-color: #b3cfdc; }

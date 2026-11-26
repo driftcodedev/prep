@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Big+Shoulders+Display:wght@700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="short-term/css/style.css">
   <link rel="stylesheet" href="shell/shell.css">
+  <link rel="stylesheet" href="shell/readme.css">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 6h12l-1.2 13a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8z' fill='%231F5F7A'/%3E%3Cpath d='M16 9h3a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-3.5' fill='none' stroke='%231F5F7A' stroke-width='2'/%3E%3C/svg%3E">
 </head>
 <body>
@@ -144,12 +145,164 @@
       </form>
 
       <section id="lt-space" class="lt-space" aria-label="Long-term plan" hidden>
-        <div class="lt-bar"><button type="button" id="lt-lock" class="btn btn-quiet">Lock this tab</button></div>
+        <div class="lt-bar">
+          <button type="button" id="readmebtn" class="btn btn-quiet" aria-haspopup="dialog"><span>README</span></button>
+          <button type="button" id="lt-lock" class="btn btn-quiet">Lock this tab</button>
+        </div>
         <!-- Everything inside #lt-root is drawn by long-term/app.js after the password is entered. -->
         <div id="lt-root" tabindex="-1"></div>
       </section>
     </main>
   </div>
+
+  <!-- README pop-up (shell/readme.js, from readme-button-kit.html). The pages are the JSON below,
+       written from shell/readme-pages.js by `npm run readme`; don't edit the JSON by hand. -->
+<div id="rmmodal" hidden>
+  <div class="rmbox" id="rmbox" role="dialog" aria-modal="true" aria-labelledby="rmtitle">
+    <div class="rmhead">
+      <h2 id="rmtitle">README</h2>
+      <select class="rmsel" id="rmsel" aria-label="Page"></select>
+      <button type="button" class="rmbtn rmadd2" id="rmadd2">+ Page</button>
+      <button type="button" class="rmbtn" id="rmmax" aria-pressed="false">Full screen</button>
+      <button type="button" class="rmbtn" id="rmedit" aria-pressed="false">Edit</button>
+      <button type="button" class="rmbtn x" id="rmclose" aria-label="Close">&times;</button>
+    </div>
+    <div class="rmmain">
+      <div class="rmside">
+        <div class="rmsidehead">Pages</div>
+        <nav class="rmnav" id="rmnav" aria-label="README pages"></nav>
+        <button type="button" class="rmadd" id="rmadd">+ New page</button>
+      </div>
+      <div class="rmpane">
+        <div class="rmpagebar" id="rmpagebar" hidden>
+          <input type="text" id="rmname" maxlength="80" aria-label="Page name" autocomplete="off">
+          <button type="button" class="rmbtn" id="rmup">Move up</button>
+          <button type="button" class="rmbtn" id="rmdown">Move down</button>
+          <button type="button" class="rmbtn" id="rmdel">Delete page</button>
+        </div>
+        <div class="rmtools" id="rmtools" role="toolbar" aria-label="Formatting" hidden>
+          <select id="rmfont" aria-label="Font">
+            <option value="">Font</option>
+            <option value="system-ui, -apple-system, 'Segoe UI', sans-serif">Default</option>
+            <option value="Arial, Helvetica, sans-serif">Arial</option>
+            <option value="Verdana, Geneva, sans-serif">Verdana</option>
+            <option value="Georgia, serif">Georgia</option>
+            <option value="'Times New Roman', Times, serif">Times New Roman</option>
+            <option value="'Courier New', Courier, monospace">Courier New</option>
+          </select>
+          <select id="rmsize" aria-label="Text size">
+            <option value="">Size</option>
+            <option value="2">Small</option>
+            <option value="3">Normal</option>
+            <option value="4">Large</option>
+            <option value="5">Larger</option>
+            <option value="6">Largest</option>
+          </select>
+          <span class="gap"></span>
+          <button type="button" class="rmbtn" data-cmd="bold" aria-label="Bold"><b>B</b></button>
+          <button type="button" class="rmbtn" data-cmd="italic" aria-label="Italic"><i>I</i></button>
+          <button type="button" class="rmbtn" data-cmd="underline" aria-label="Underline"><u>U</u></button>
+          <input type="color" id="rmcolor" value="#101418" aria-label="Text colour">
+          <span class="gap"></span>
+          <button type="button" class="rmbtn" data-cmd="formatBlock" data-val="h3">Heading</button>
+          <button type="button" class="rmbtn" data-cmd="formatBlock" data-val="p">Text</button>
+          <button type="button" class="rmbtn" data-cmd="insertUnorderedList">&bull; List</button>
+          <button type="button" class="rmbtn" data-cmd="insertOrderedList">1. List</button>
+          <span class="gap"></span>
+          <button type="button" class="rmbtn" data-cmd="removeFormat">Clear format</button>
+          <button type="button" class="rmbtn" data-cmd="undo">Undo</button>
+        </div>
+        <div class="rmscroll" id="rmscroll">
+          <h3 class="rmheading" id="rmheading"></h3>
+          <div class="rmbody" id="rmbody"></div>
+          <div class="rmsite" id="rmsite" hidden></div>
+        </div>
+      </div>
+    </div>
+    <div class="rmfoot">
+      <span class="grow" id="rmstate"></span>
+      <button type="button" id="rmexport">Export my notes</button>
+      <button type="button" id="rmresetpage" hidden>Back to the site's version of this page</button>
+      <button type="button" id="rmresetall" hidden>Reset the whole README</button>
+    </div>
+    <div class="rmgrip" id="rmgrip" title="Drag to resize"></div>
+  </div>
+</div>
+<script type="application/json" id="rmpages">[
+ {
+  "id": "about",
+  "title": "About prep",
+  "html": "<p><b>prep<\/b> works out how much food a household needs to store for a long power outage, and how much each person eats each day. It was built for one family's plan and shared with friends.<\/p>\n<h3>Two tabs<\/h3>\n<ul>\n<li><b>Short Term:<\/b> the finished plan. Enter everyone in the household and how long the food should last. You get each person's daily amounts, cooking amounts, a shopping list and the gear.<\/li>\n<li><b>Long Term:<\/b> a workspace for the long-term plan, still being built. It asks for a password.<\/li>\n<\/ul>\n<h3>Your information stays with you<\/h3>\n<p>Nothing you type is sent anywhere. The household you enter is kept in this browser only, so another phone or computer starts blank.<\/p>\n<p>These are estimates for healthy people, not medical advice.<\/p>\n<h3>These notes<\/h3>\n<p>Press <b>Edit<\/b> to change a page, or <b>+ New page<\/b> to add your own. Your changes stay in this browser only. <b>Export my notes<\/b> saves a copy.<\/p>\n<h3>Share the site<\/h3>\n<p>Send friends this link:<\/p>\n<pre class=\"rmcopy\">https://driftcodedev.github.io/prep/<\/pre>",
+  "base": "db0f0bacfc",
+  "aka": [
+   "aboutprep",
+   "about",
+   "aboutthissite",
+   "overview"
+  ]
+ },
+ {
+  "id": "long-term",
+  "title": "The Long Term tab",
+  "html": "<p>The Long Term tab is a workspace for the long-term plan. It's still being built. These notes are only on this tab, so you only see them after the password.<\/p>\n<ul>\n<li><b>The password<\/b> is asked every time: whenever the page loads, and whenever you go back to Short Term.<\/li>\n<li><b>Lock this tab<\/b> locks it straight away.<\/li>\n<li><b>Edits to these notes<\/b> stay in your browser, so nobody else sees them.<\/li>\n<li><b>The lock keeps casual visitors out.<\/b> It isn't real security: the site's files, these pages included, are public on GitHub. Keep anything truly private off the site.<\/li>\n<\/ul>",
+  "base": "81e3e83c3b",
+  "aka": [
+   "thelongtermtab",
+   "longterm",
+   "longtermplan",
+   "password"
+  ]
+ },
+ {
+  "id": "short-term",
+  "title": "Using the Short Term plan",
+  "html": "<ol>\n<li>Under <b>Your household<\/b>, press <b>Add a person<\/b> for each person and fill in their sex, age, height, weight and how active they are. To see how it works first, press <b>Fill in an example household<\/b>.<\/li>\n<li>Choose <b>How long the food should last<\/b> and the <b>Extra margin<\/b>.<\/li>\n<li>Choose <b>Where you'll shop<\/b>: Costco and Amazon, or Walmart and Amazon.<\/li>\n<li>Tick anything you already own under <b>Already have?<\/b> so it stays off the list.<\/li>\n<\/ol>\n<p>The plan appears below as you type.<\/p>\n<h3>What you get<\/h3>\n<ul>\n<li><b>Daily amounts:<\/b> a card for each person in level cups and spoons, plus how much water to drink.<\/li>\n<li><b>Cooking for everyone:<\/b> how much dry rice and beans to cook each day, each person's share, and how to cook it all in one pot.<\/li>\n<li><b>Shopping list:<\/b> rounded up to whole packages, with prices and links.<\/li>\n<li><b>Fire, water and cooking:<\/b> lighters, water filters, a pot, a tripod and the rest of the gear.<\/li>\n<li><b>Weekly weigh-in:<\/b> how to adjust the amounts using a bathroom scale.<\/li>\n<\/ul>\n<h3>Keep a paper copy<\/h3>\n<p>At the end of the plan, press <b>Print the full report<\/b> or <b>Download PDF<\/b>.<\/p>",
+  "base": "97070b9e50",
+  "aka": [
+   "usingtheshorttermplan",
+   "shortterm",
+   "shorttermplan",
+   "howtouse"
+  ]
+ },
+ {
+  "id": "amounts",
+  "title": "How the amounts are worked out",
+  "html": "<ul>\n<li><b>Adults above a healthy weight<\/b> are planned down to one (a BMI of 24.4), eating 500 calories less than it takes to hold their weight. That never goes under 1,500 calories for men or 1,200 for women. Once they get there, they switch to amounts that hold it.<\/li>\n<li><b>Keep current weight:<\/b> each adult's card has a switch to hold their weight instead of losing.<\/li>\n<li><b>Children<\/b> never get a weight-loss ration.<\/li>\n<li><b>Babies under 1<\/b> get formula by weight, iron-fortified infant cereal from 6 months, and mashed rice and beans from 8 months. At the first birthday they move to the toddler amounts.<\/li>\n<li><b>Pregnant and breastfeeding women<\/b> never get a weight-loss ration, and get extra food. A breastfeeding mother's extra follows her baby: half if the baby also has formula, and it stops at the baby's first birthday.<\/li>\n<\/ul>\n<p>The numbers are estimates. The <b>Weekly weigh-in<\/b> rules on the page say how to adjust them from what the scale shows. <b>How the numbers are worked out<\/b>, at the end of the plan, lists the sources.<\/p>",
+  "base": "4d2e9531f8",
+  "aka": [
+   "howtheamountsareworkedout",
+   "calories",
+   "weight",
+   "howitworks"
+  ]
+ },
+ {
+  "id": "prices",
+  "title": "Prices and products",
+  "html": "<ul>\n<li><b>Two ways to shop:<\/b> Costco and Amazon (needs a Costco membership), or Walmart and Amazon (no membership).<\/li>\n<li><b>How products were picked:<\/b> cheap options first, with lots of ratings and few one-star reviews.<\/li>\n<li><b>When prices were checked:<\/b> the date is at the bottom of the Short Term page. Prices change, so confirm at checkout.<\/li>\n<li><b>Gear you own:<\/b> tick it under <b>Already have?<\/b> and it comes off the list and the total.<\/li>\n<\/ul>",
+  "base": "71c5c05bb9",
+  "aka": [
+   "pricesandproducts",
+   "prices",
+   "products",
+   "shopping"
+  ]
+ },
+ {
+  "id": "code",
+  "title": "Where the code is",
+  "html": "<p>The site's code is on GitHub at <b>driftcodedev/prep<\/b>. GitHub Pages publishes the <b>main<\/b> branch a minute or two after each push.<\/p>\n<table>\n<tr><th>Folder<\/th><th>What's in it<\/th><\/tr>\n<tr><td>short-term/<\/td><td>The Short Term plan. Prices and products are in short-term/js/data.js.<\/td><\/tr>\n<tr><td>long-term/<\/td><td>The Long Term plan. Start with long-term/README.md.<\/td><\/tr>\n<tr><td>shell/<\/td><td>The tabs, the password lock and this README. These pages are in shell/readme-pages.js.<\/td><\/tr>\n<tr><td>index.html<\/td><td>The page that holds it all.<\/td><\/tr>\n<\/table>\n<h3>Change these notes<\/h3>\n<p>Edit shell/readme-pages.js, keep each page's id, then run:<\/p>\n<pre class=\"rmcopy\">npm run readme\nnpm test<\/pre>\n<h3>Try the site on your computer<\/h3>\n<pre class=\"rmcopy\">python3 -m http.server 8765<\/pre>\n<p>Then open http://localhost:8765/.<\/p>",
+  "base": "3e7be2630d",
+  "aka": [
+   "wherethecodeis",
+   "code",
+   "fordevelopers",
+   "repo"
+  ]
+ }
+]</script>
+  <script src="shell/readme.js"></script>
 
   <script type="module" src="short-term/js/app.js"></script>
   <script type="module" src="shell/tabs.js"></script>

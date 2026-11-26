@@ -7,6 +7,7 @@ A one-page calculator for storing food for a long power outage. You enter each p
 - **One shopping list**, rounded up to whole packages, with prices and links. Choose Costco and Amazon (needs a membership) or Walmart and Amazon (no membership).
 - **Fire, water and cooking gear**: BIC lighters, LifeStraw filters (the cheapest mix of 1-, 3- and 5-packs for one straw per person age 3 and up), a waterBOB bathtub bladder, an EarthMinded rain diverter kit (Home Depot), a splitting axe, a Lodge cast iron camp Dutch oven sized to the household (5 qt for 1–2 people, 8 qt for 3–6, 10 qt for 7 or more, bigger if the day's beans wouldn't fit ¾ full, with every size listed in cups), a Lodge 43.5-inch campfire tripod with an adjustable chain, a Pot Minder disc that chatters when the pot boils, and a Casio solar watch for timing the pot, with how long each lasts. Tick off anything you already own.
 - **Short Term and Long Term tabs**: everything above is the Short Term plan. The Long Term tab is a workspace behind a light password lock (the page keeps only a SHA-256 fingerprint of the password; nothing is remembered: it locks again on every page load and whenever you switch away from it, and its code only downloads after the password is entered). It keeps casual visitors out but isn't real security, since the site's files are public.
+- **README** (Long Term tab only, once unlocked): a pop-up notebook of notes about the site. Readers can edit pages, add their own, reorder, resize and export; their changes stay in their own browser. The site's pages are in `shell/readme-pages.js`: edit them there, keep each page's id, then run `npm run readme` and `npm test`.
 - **All in one pot**: the whole day's beans, rice and oats cooked together (beans first, then rice, then oats), with each person's serving in cooked cups by name. Shares follow each person's card by calories and add up to the pot.
 - **Cooking over a fire**: what a simmer looks like and how to hold one on a fire, timers and doneness checks for rice and beans, and wrapping the pot to save wood.
 - **Water use**: how much water goes in the pot for the rice, beans, oats and milk, the household's daily total, and how long a full waterBOB and a rain-fed trash can last.
@@ -20,7 +21,7 @@ Live site: https://driftcodedev.github.io/prep/
 
 ```
 index.html     the page: tab bar and both panels
-shell/         tabs.js (tab switching and the Long Term lock) and shell.css
+shell/         tabs.js (tab switching and the Long Term lock), shell.css, and the README pop-up
 short-term/    the Short Term plan: css/, js/, vendor/pdfmake/, test/
 long-term/     the Long Term plan: app.js, style.css, data/, test/; see long-term/README.md
 ```

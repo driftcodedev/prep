@@ -40,6 +40,7 @@ package.json          npm test runs both plans' tests
 - Each unlock calls `mount` again, so draw from scratch every time. The browser keeps the module loaded between unlocks, so reset any module-level variables inside `mount`. Stop timers and remove `window`/`document` listeners in `unmount`.
 - The tab already has an `h1` ("The long-term plan") above your content, so start your headings at `h2`.
 - `app.js` loads `style.css` from this folder the first time the plan opens.
+- The **README** and **Lock this tab** buttons above your content belong to the frame, not to this folder. The README's pages are in `shell/readme-pages.js`; if they need changing, ask Brett.
 
 ### The household from the Short Term tab
 

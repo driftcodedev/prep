@@ -76,6 +76,9 @@ function closeWorkspace() {
 }
 
 function lock() {
+  // The README lives on this tab: close it if it's open (closing also saves an edit in progress).
+  const readme = document.getElementById("rmmodal");
+  if (readme && !readme.hidden) document.getElementById("rmclose")?.click();
   unlocked = false;
   input.value = "";
   error.hidden = true;
