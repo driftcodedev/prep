@@ -112,13 +112,51 @@ export const PAGES = [
 <tr><th>Warranty</th><td>1 year from the maker.</td></tr>
 </table>
 <h3>Which cars it works on</h3>
-<p>There's no count of the cars it works on and no success rate. The maker says it works on most cars, trucks, tractors and boats, and suggests testing your own car first.</p>
+<p>The maker says it works on most cars, trucks, tractors and boats, and suggests testing your own car first. It keeps a list of cars it and its customers have tested (below), but gives no overall success rate.</p>
 <ul>
 <li>Most newer cars have a valve or screen in the filler neck that stops a hose. The kit's stiffer hoses are made to push past it, but not every car lets them through.</li>
 <li>One buyer couldn't get any hose through the bends to the tank of a 2002 Toyota Tacoma, though it worked on their car.</li>
 <li>A one-star review says it's useless on a lot of vehicles.</li>
 </ul>
 <p><b>Test it on your own car now</b>, while gas stations are open, so you know whether it works before you need it.</p>
+<h3>Cars GasTapper has tested</h3>
+<p>From GasTapper's <a href="https://www.gastapper.com/sample-vehicles.html" target="_blank" rel="noopener">tested vehicles list</a>, checked 25 November 2026. It only covers cars GasTapper or its customers tried, mostly 2011–2016 models, with nothing newer than 2017. "Hard" means it worked but took effort. Some models show up in both columns because different people got different results.</p>
+<table>
+<tr><th>Make</th><th>Worked</th><th>Didn't work</th></tr>
+<tr><td>BMW</td><td>3 Series 2007; 535i 2013; 650i 2011–16; Roadster 2000; X5 2005</td><td>—</td></tr>
+<tr><td>Buick</td><td>Enclave 2011–16; Encore 2011–16; LaCrosse 2008; Regal 2011–16</td><td>LaCrosse 2011–16; Park Avenue 1994; Verano 2011–16</td></tr>
+<tr><td>Cadillac</td><td>ATS, CTS, DTS, Escalade, SRX (all 2011–16)</td><td>—</td></tr>
+<tr><td>Chevrolet</td><td>2500 Diesel 2015; 3500 2011, 2012; 3500 Crew 4x4 2000; Camaro 1996; Camaro Z28 2001; Caprice 1996; Chevelle 1969–70; Corvette 2011–16; Corvette Z06 1993; Cruze 2011–16 (hard); Equinox 2011–16; Impala 2016; Lumina 1995; Malibu 2016; S-10 Tahoe 1989; Silverado V6 2011–16; Sonic 2014–15; Spark 2011–16; Tahoe 1997; Tracker 2000; Traverse 2011–16</td><td>Camaro 2011–16; Captiva 2011–16; HHR SS 2010; Impala 2011–15; Malibu 2011–15; Silverado V8 2011–16; Sonic 2012–13; Suburban 2011–16; Tahoe 2011–16</td></tr>
+<tr><td>Chrysler</td><td>200 2011–16 (hard); 300 2011–16; 300C 2007, 2010; Town &amp; Country 2011–16 (hard)</td><td>—</td></tr>
+<tr><td>Dodge</td><td>Challenger 2008–16; Charger 2011–16; Dart 2011–16 (hard); Durango 2004, 2011–16; Grand Caravan 2011–16 (hard); Journey 2015; Ram 1500 2014; Ram 2500 Diesel 2007</td><td>Journey 2011–16; Ram 2011–16; Ram 1500 2012</td></tr>
+<tr><td>Fiat</td><td>500X 2011–16</td><td>—</td></tr>
+<tr><td>Ford</td><td>C-Max 2011–16; Crown Vic 2001, 2003; E-Series 2011–16; E350 2010; Edge 2011–16; Escape 2011–16 (hard); Excursion 1999–2005 (hard); Expedition 2015; Explorer 2014–16; F-150 2007, 2011–16, and 2014 (needed a 10-foot hose); F-150 Crew 2009; F-250 4x4 1988; Fiesta, Flex, Focus, Fusion (all 2011–16); Mustang 1969, 1973, 1999, 2003, 2011–16; Sport Trac 2001; Taurus 2011–16; Thunderbird 1988</td><td>Crown Victoria 2011–16; Expedition 2012; Explorer 2011–13</td></tr>
+<tr><td>GMC</td><td>Denali 2006; Jimmy 1984; Terrain 2011–16</td><td>Acadia 2011–16; Sierra 2011–16; Terrain Denali (from a note on the list)</td></tr>
+<tr><td>Honda</td><td>Accord 2008, 2011–16; <b>Civic 2004, 2008, 2011–16</b>; Fit 2011–16; Fit Sport 2008; Odyssey 2005–08, 2011–16 (hard); Pilot 2015, 2011–16 (hard)</td><td>—</td></tr>
+<tr><td>Hummer</td><td>H2 2003</td><td>—</td></tr>
+<tr><td>Hyundai</td><td>Accent 2011–16; Elantra 2005, 2011–16; Limited 2011–16; Santa Fe 2011–16; Sonata 2007, 2011–16</td><td>—</td></tr>
+<tr><td>Infiniti</td><td>G35 2011–16; G35 S 2007</td><td>M45 2006</td></tr>
+<tr><td>Jeep</td><td>Cherokee 2011–13; Cherokee Sport 1999; Compass 2011–16 (hard); Grand Cherokee 1997, 2005, 2011–16; Liberty 2006; Liberty Sport 2004; Patriot 2011–16 (hard); Wrangler 2011–16</td><td>Cherokee 2014–16</td></tr>
+<tr><td>Kia</td><td>Forte 2011–16 (hard); Optima Hybrid 2011–16 (hard); Rio 2011–16; Sorento 2011–16; Soul 2011–16 (hard); Sportage 2011–16, 2017</td><td>—</td></tr>
+<tr><td>Lexus</td><td>GX470 2006; ix470 1999 (as listed); RX330 2004; SC400 1995</td><td>—</td></tr>
+<tr><td>Lincoln</td><td>MK VII 1990; MKX 2011–16; Navigator 2006, 2011–16</td><td>—</td></tr>
+<tr><td>Maserati</td><td>Spyder 1989</td><td>—</td></tr>
+<tr><td>Mazda</td><td>2, 3, 6 and CX-3 (all 2011–16); 5 2011; CX-5 2011–16 (hard)</td><td>MX-5 2011–16</td></tr>
+<tr><td>Mercedes</td><td>280c 1998; CLK430 2002; GL350 2016; GL450 2010; ML350 2015; S500 2001; S65 AMG 2006; Sprinter 3500 2006</td><td>—</td></tr>
+<tr><td>Mitsubishi</td><td>Lancer 2011–16; Outlander 2011–16</td><td>Mirage 2011–16</td></tr>
+<tr><td>Nissan</td><td>Altima, Armada (hard), Cube (hard), Frontier, Leaf, Maxima, Pathfinder, Rogue, Sentra, Titan, Versa, Xterra (all 2011–16)</td><td>Juke 2011–16; Murano 2011–16</td></tr>
+<tr><td>Plymouth</td><td>Cuda 1971</td><td>—</td></tr>
+<tr><td>Pontiac</td><td>Catalina 1962; Solstice 2008</td><td>—</td></tr>
+<tr><td>Porsche</td><td>911 1999; Cayenne 2004</td><td>—</td></tr>
+<tr><td>Shelby</td><td>Series 1 1999</td><td>—</td></tr>
+<tr><td>Smart</td><td>ForTwo Coupe 2011–16</td><td>—</td></tr>
+<tr><td>Subaru</td><td>Forester, Impreza, Outback (all 2011–16); Legacy 2005</td><td>—</td></tr>
+<tr><td>Suzuki</td><td>Kizashi 2012; Samurai 1986–91</td><td>—</td></tr>
+<tr><td>Toyota</td><td>4Runner 2006; Avalon 2001 (needed a longer hose); Camry 2008, 2011–13 (hard); Corolla 2004, 2011–16; Land Cruiser 2011–16 (hard); Prius 2007, 2015; Sienna 2011–16; Tacoma 2009; Tacoma 4x4 TRD 2013; Tundra 2005; Venza 2011–16; Yaris 2011–16</td><td>Camry 2014–16; Land Cruiser 2000; Prius 2011–16; Tacoma 2005</td></tr>
+<tr><td>Volkswagen</td><td>Beetle, Jetta, Passat, Tiguan (all 2011–16); Jetta TDI 2004</td><td>Phaeton 2006; TDI Cup 2010</td></tr>
+<tr><td>Volvo</td><td>S40 2005; S80 2011–16; XC90 2006</td><td>—</td></tr>
+</table>
+<p>About 190 cars worked and about 30 didn't. The site blocks automated reading, so this was put together from search results, and a few rows may be missing. Check the link above for the full list.</p>
 <h3>What reviewers say</h3>
 <ul>
 <li><b>Good:</b> it pumps cleanly with no mess, the hoses are long, and it runs from any car's lighter socket.</li>
