@@ -380,6 +380,106 @@ export const PAGES = [
 `,
   },
   {
+    id: "off-grid-checklist",
+    title: "Off-grid checklist",
+    names: ["Checklist", "House checklist", "Off grid checklist", "Buying a solar house", "Showing checklist"],
+    html: `
+<p>Use this when you look at houses with solar panels. The rule: <b>pick a house where blackout power already works.</b> Nothing easy turns a regular grid-tied solar house into one that runs in a blackout. The Solar panels page explains why. Checked 26 November 2026.</p>
+<h3>Which house is the right one</h3>
+<p>Best to worst for a long blackout:</p>
+<table>
+<tr><th>Type</th><th>What you'd see</th><th>Works in a blackout?</th><th>What you'd need to do</th></tr>
+<tr><td><b>Off grid, lithium battery, generator</b></td><td>No power line or meter; a battery bank, inverter and generator</td><td>Yes</td><td>Nothing</td></tr>
+<tr><td><b>Grid-tied with battery backup</b></td><td>A battery, a gateway box by the meter, often a second breaker box</td><td>Yes</td><td>Nothing (check it works without internet)</td></tr>
+<tr><td><b>"Battery-ready" hybrid inverter, no battery</b></td><td>A hybrid inverter only</td><td>No</td><td>An installer adds a battery (a moderate job)</td></tr>
+<tr><td><b>SMA inverter with "Secure Power Supply"</b></td><td>An SMA inverter with a special outlet</td><td>Daytime outlet only</td><td>Flip its switch</td></tr>
+<tr><td><b>Grid-tied, no battery</b></td><td>Panels and a plain inverter</td><td>No</td><td>Treat it as having no solar</td></tr>
+<tr><td><b>Leased system, any type</b></td><td>"Third-party owned" in the listing</td><td>Depends</td><td>You can't change it</td></tr>
+</table>
+<p><b>The rest of the house matters too:</b></p>
+<ul>
+<li><b>Heat:</b> a wood stove. Solar can't heat a Maine house.</li>
+<li><b>Water:</b> a well pump the system can actually start (see the inverter below).</li>
+<li><b>Panels:</b> facing south, no shade, easy to clear of snow. A ground mount is easiest.</li>
+<li><b>Battery:</b> in a heated room. Cold lithium batteries hold less and shouldn't be charged below freezing.</li>
+</ul>
+<h3>The numbers to look for</h3>
+<p><b>kWh (capacity) is how long things can run. kW (power) is how many things can run at once.</b> Always check both.</p>
+<table>
+<tr><th>Part</th><th>What to check</th><th>Target for the Long Term plan</th></tr>
+<tr><td><b>Panels</b>: how much power it collects</td><td>Total size in kW: number of panels × watts each (10 panels × 400 W = 4 kW). Direction, shade, age.</td><td><b>4 kW or more.</b> In Perry each kW makes about 2 kWh a day in winter and 6 in summer. The essentials (lights, phone, fridge, freezer, well pump) use about 3.7 kWh a day, so 2 kW just covers an average winter day; double that refills the battery after cloudy days.</td></tr>
+<tr><td><b>Battery</b>: how much power it stores</td><td><b>Usable</b> kWh, not the headline number. Type (lithium iron phosphate, LFP, is best). Continuous kW. Age, warranty, and whether it's in a heated room.</td><td><b>About 11–15 kWh usable</b> with a generator; more without one. That's 3–4 days of the essentials with no sun. One Powerwall stores 13.5 kWh.</td></tr>
+<tr><td><b>Inverter</b>: how much it runs at once</td><td>The words off-grid, hybrid, inverter/charger or battery inverter. Continuous kW. Surge or motor-start rating. 120/240-volt output. A generator input. Runs without internet.</td><td><b>Hybrid or off-grid, 120/240 volts, with enough surge to start the well pump.</b> A ½–1 HP well pump needs a 4,000–5,000-watt-class generator to start, and an inverter faces the same jolt.</td></tr>
+<tr><td><b>Generator</b></td><td>Size in kW, fuel, auto-start, hours on the hour meter.</td><td>Big enough to start the well pump; starts itself when the battery runs low.</td></tr>
+</table>
+<p><b>Why "usable" matters:</b> lithium iron phosphate batteries usually let you use about 90% of their rated size, but older lead-acid banks only about half.</p>
+<p><b>Why 11–15 kWh:</b> design guides commonly size batteries for 2–3 days without sun when there's a generator to fill in, and 3–5 days for a full-time off-grid home.</p>
+<h3>Reading a listing</h3>
+<p><b>Fields in the listing details</b> (on Zillow they're under facts or utilities):</p>
+<ul>
+<li>"Off Grid": good.</li>
+<li>"Photovoltaics Seller Owned": good. "Photovoltaics Third-Party Owned" means leased.</li>
+<li>"Energy Storage Device": there's a battery.</li>
+<li>"Generator" or "Transfer Switch": there's a backup generator.</li>
+</ul>
+<p><b>Good words in the description:</b> battery, Powerwall, whole-home backup, generator, transfer switch.</p>
+<p><b>Warning signs:</b> "net metering" (it's grid-tied), "leased", "PPA", "monthly solar payment". "No electric bill" can mean off grid <i>or</i> net metering credits, so ask which.</p>
+<p><b>Photos:</b> look at the basement, garage and utility room for batteries and an inverter, and at the outside walls for a gateway box by the meter or a generator. On Google Street View, check whether a power line runs from the pole to the house.</p>
+<p><b>Avoid leases.</b> A leased system is a contract you take over, not something you own, and leases often limit changes, so you couldn't add a battery even with an installer.</p>
+<p><b>Ask the agent for:</b></p>
+<ul>
+<li>The make and model of the battery, inverter, panels and generator (then look up the numbers above).</li>
+<li>12 months of production data from the monitoring app.</li>
+<li>The permit drawings, the manuals and the installer's name.</li>
+<li>A year of power bills, if there's a power company.</li>
+<li>Whether it's owned or leased, and any lease contract.</li>
+<li>Whether the system runs, and can be controlled, without internet.</li>
+</ul>
+<h3>At the showing</h3>
+<p>Tick these off as you go.</p>
+<ul style="list-style: none; padding-left: 0.2rem;">
+<li>☐ <b>Power line and meter?</b> None usually means off grid.</li>
+<li>☐ <b>Labels at the meter or main breaker box.</b> Code requires a plaque there listing every power source. "CAUTION: MULTIPLE SOURCES OF POWER" means solar; a battery or "energy storage system" (ESS) label means there's a battery. Solar but no battery label: it probably goes dark in a blackout.</li>
+<li>☐ <b>Battery:</b> brand, usable kWh, type, date on the label, heated room?</li>
+<li>☐ <b>Inverter:</b> make and model, type words, continuous kW, surge, 120/240 volts, generator input?</li>
+<li>☐ <b>Gateway or transfer switch</b> by the meter, and a second "backup loads" breaker box?</li>
+<li>☐ <b>Panels:</b> how many, watts each, facing which way, any shade, easy to clear of snow?</li>
+<li>☐ <b>Generator:</b> kW, fuel, auto-start, hours on the meter? Lots of hours means the solar can't keep up.</li>
+<li>☐ <b>Well pump:</b> its horsepower, and does the system start it?</li>
+<li>☐ <b>Heat:</b> wood stove?</li>
+<li>☐ <b>Owned, not leased?</b></li>
+<li>☐ <b>See it work.</b> Ask the owner or installer to switch off the main breaker (grid-tied) or the generator (off grid). The lights should stay on. Don't do it yourself.</li>
+</ul>
+<h3>What you can do yourself, and what needs an expert</h3>
+<p><b>Easy, no wiring:</b></p>
+<ul>
+<li>Turning on a system that already has backup, or flipping an SMA outlet's switch.</li>
+<li>Changing app settings, like charging the battery to full before a storm.</li>
+<li>A portable power station with folding panels, with the fridge plugged into it.</li>
+<li>A portable generator outdoors, with extension cords run inside. Never run it indoors.</li>
+</ul>
+<p><b>Needs an expert, so skip these:</b></p>
+<ul>
+<li>Adding a battery to a grid-tied system.</li>
+<li>Swapping the inverter.</li>
+<li>Installing a gateway, transfer switch or generator inlet.</li>
+<li>Adding panels, or any work inside the breaker box.</li>
+</ul>
+<p><b>The rule:</b> pick a house from the top two rows of the table. For any other house, count its solar as zero and plan on a portable power station.</p>
+<h3>Sources</h3>
+<ul>
+<li><a href="https://www.eonnext.com/battery/guides/what-to-look-for-when-buying-a-home-battery" target="_blank" rel="noopener">E.ON Next: what to look for in a home battery</a> and <a href="https://www.energysage.com/energy-storage/comparing-storage-capacities-of-home-batteries/" target="_blank" rel="noopener">EnergySage: comparing battery capacities</a>: compare usable kWh, and continuous kW.</li>
+<li><a href="https://ipsnews.net/business/?p=252888" target="_blank" rel="noopener">IPS News: usable vs nominal battery capacity</a>: LFP about 90% usable, older lead-acid about 50%; kWh is how long, kW is how much at once.</li>
+<li><a href="https://www.morningstarcorp.com/tech-tip-basic-system-sizing-design-concepts/" target="_blank" rel="noopener">Morningstar: system sizing</a>: with a generator, often 2–3 days of battery. <a href="https://www.vatrerpower.com/en-ca/blogs/news/how-to-size-your-off-grid-solar-batteries-a-comprehensive-guide" target="_blank" rel="noopener">Vatrer: off-grid battery sizing</a>: 3–5 days for a full-time off-grid home.</li>
+<li><a href="https://cdn.shopify.com/s/files/1/0401/7084/8411/files/SoftStart_Well_Pump_generator_capabilities_100825.pdf" target="_blank" rel="noopener">SoftStart: well pump generator sizes (PDF)</a>: a ½–1 HP 230-volt pump needs a 4,000–5,000-watt-class generator. <a href="https://greenbuildingadvisor.com/question/dc-powered-deep-well-pump" target="_blank" rel="noopener">Green Building Advisor</a>: size for the starting surge.</li>
+<li><a href="https://www.tesla.com/learn/backup-power-and-energy-savings-for-your-family" target="_blank" rel="noopener">Tesla: Powerwall</a>: 13.5 kWh, 11.5 kW continuous. <a href="https://energylibrary.tesla.com/docs/Public/EnergyStorage/Powerwall/3/Datasheet/en-au/Powerwall-3-Datasheet-AU-EN.pdf" target="_blank" rel="noopener">Powerwall 3 datasheet (PDF)</a>: motor-start rating.</li>
+<li><a href="https://www.redfin.com/blog/buying-a-house-with-solar-panels/" target="_blank" rel="noopener">Redfin: buying a house with solar</a> and <a href="https://www.parealtors.org/?p=22968" target="_blank" rel="noopener">Pennsylvania Realtors: how solar affects buying</a>: leases are an obligation and often limit changes. <a href="https://blog.remax.com/buying-a-home-outfitted-with-solar-power/" target="_blank" rel="noopener">RE/MAX</a>: ask for 12 months of system data.</li>
+<li><a href="https://www.nyserda.ny.gov/-/media/Project/Nyserda/Files/Programs/NY-Sun/Contractor-Resources/Technical-Bulletin-NEC-Labeling-Requirements.pdf" target="_blank" rel="noopener">NYSERDA: electrical code labels (PDF)</a>, <a href="https://www.electricallicenserenewal.com/Electrical-Continuing-Education-Courses/NEC-Content.php?sectionID=1563" target="_blank" rel="noopener">2023 code wording</a> and <a href="https://printproaz.com/blogs/news/solar-battery-storage-labels-nec-706-requirements-guide" target="_blank" rel="noopener">battery labels</a>: the power-source plaque at the meter and battery markings.</li>
+<li><a href="https://profilesolar.com/locations/United-States/Perry/" target="_blank" rel="noopener">profileSOLAR: Perry, Maine</a>: about 2 kWh a day per kW in winter, 6 in summer. The 3.7 kWh a day for essentials is the Long Term plan's figure.</li>
+</ul>
+`,
+  },
+  {
     id: "short-term",
     title: "Using the Short Term plan",
     names: ["Short Term", "Short Term plan", "How to use"],
