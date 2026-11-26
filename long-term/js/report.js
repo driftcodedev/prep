@@ -32,7 +32,7 @@ import {
 
 // README pages (from the README button) that belong in the paper copy, in this order.
 // Pages about using the website itself stay out.
-export const README_IN_REPORT = ["why-cobscook", "solar-panels", "species-extinction", "gas-pump"];
+export const README_IN_REPORT = ["why-cobscook", "solar-panels", "off-grid-checklist", "nov-dec-food-shortage", "species-extinction", "gas-pump"];
 
 export const COLORS = {
   ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", lidTint: "#ddeaf0", paper: "#f2f4f1",
@@ -213,12 +213,7 @@ export function buildReport({ geo, today, dateText, readme = [] }) {
   const pageOf = (id) => pages.find((pg) => pg.id === id);
   const blocks = [];
 
-  const parts = [
-    pageOf("why-cobscook")?.title, "The Cobscook Bay map", "Houses for sale", pageOf("solar-panels")?.title,
-    FISH_PAGE.heading, pageOf("species-extinction")?.title, pageOf("gas-pump")?.title,
-  ].filter(Boolean);
-
-  blocks.push({
+  const cover = {
     t: "cover",
     title: "The long-term plan",
     sub: "Cobscook Bay, Maine",
@@ -226,8 +221,9 @@ export function buildReport({ geo, today, dateText, readme = [] }) {
       `Printed ${dateText}. Houses checked ${niceDate(HOUSES_CHECKED)}; fishing numbers made ${niceDate(FISH_CHECKED)}.`,
       "A phone or laptop won't help once the batteries die. Keep this copy somewhere dry.",
     ],
-    contents: parts,
-  });
+    contents: [], // filled in at the end
+  };
+  blocks.push(cover);
 
   const readmePart = (pg) => {
     if (!pg) return;
@@ -306,6 +302,7 @@ export function buildReport({ geo, today, dateText, readme = [] }) {
   });
 
   readmePart(pageOf("solar-panels"));
+  readmePart(pageOf("off-grid-checklist"));
 
   // --- fishing ---
   blocks.push(part(FISH_PAGE.heading));
@@ -397,8 +394,10 @@ export function buildReport({ geo, today, dateText, readme = [] }) {
   blocks.push(h3("Sources"));
   blocks.push({ t: "ul", items: FISH_SOURCES.map(([title, url]) => [{ text: title, link: url }, { text: ` (${url})` }]) });
 
+  readmePart(pageOf("nov-dec-food-shortage"));
   readmePart(pageOf("species-extinction"));
   readmePart(pageOf("gas-pump"));
+  cover.contents = blocks.filter((b) => b.t === "part").map((b) => b.text);
   return blocks;
 }
 

@@ -26,7 +26,7 @@ test("both pages have the Short Term buttons, and a hidden box for the printout"
 test("the report has every part, in order, with the README pages from the site", () => {
   for (const id of README_IN_REPORT) assert.ok(readme.find((p) => p.id === id), `README page ${id} is published`);
   const parts = blocks.filter((b) => b.t === "part").map((b) => b.text);
-  assert.deepEqual(parts, ["Why Cobscook Bay", "The Cobscook Bay map", "Houses for sale", "Solar panels", "Cobscook Bay fishing by season", "Species extinction", "Pumping gas out of a car"]);
+  assert.deepEqual(parts, ["Why Cobscook Bay", "The Cobscook Bay map", "Houses for sale", "Solar panels", "Off-grid checklist", "Cobscook Bay fishing by season", "Nov–Dec food shortage", "Species extinction", "Pumping gas out of a car"]);
   assert.equal(blocks[0].t, "cover");
   assert.deepEqual(blocks[0].contents, parts);
 });
@@ -83,7 +83,7 @@ test("README HTML becomes blocks: paragraphs, headings, lists, tables and links"
 
 test("the printout is plain HTML with nothing missing", () => {
   assert.doesNotMatch(html, /undefined|NaN|\[object Object\]/);
-  assert.equal((html.match(/<h2 class="ltp-part">/g) || []).length, 7);
+  assert.equal((html.match(/<h2 class="ltp-part">/g) || []).length, blocks.filter((b) => b.t === "part").length);
   assert.equal((html.match(/<section class="ltp-card">/g) || []).length, 3);
   assert.match(html, /<colgroup>/);
   assert.ok((html.match(/<div class="ltp-keep">/g) || []).length >= SEASONS.length, "season tables stay with their headings");
@@ -95,8 +95,9 @@ test("the PDF: letter pages, a new page for each part, and the site's colors", (
   const doc = reportPdf(blocks, { date: "Nov 26, 2026" });
   assert.equal(doc.pageSize, "LETTER");
   const starts = doc.content.filter((n) => n.pageBreak === "before");
-  assert.equal(starts.length, 7);
-  assert.deepEqual(starts.map((n) => n.id), [1, 2, 3, 4, 5, 6, 7].map((n) => `part-${n}`));
+  const parts = blocks.filter((b) => b.t === "part").length;
+  assert.equal(starts.length, parts);
+  assert.deepEqual(starts.map((n) => n.id), Array.from({ length: parts }, (_, i) => `part-${i + 1}`));
   const svgs = JSON.stringify(doc.content).match(/"svg":"<svg/g) || [];
   assert.equal(svgs.length, 1 + SEASONS.length);
   assert.equal(doc.footer(1, 31), null);

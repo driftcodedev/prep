@@ -136,8 +136,8 @@ is shown, so opening straight to Fishing doesn't download it.
 The same two buttons as the Short Term tab sit under the Map / Fishing switch and at the bottom of
 the tab (the bottom one in a `.report-foot` with "Keep a paper copy"). Both give everything on the
 tab, whichever view is open: a cover with contents, then each part on new pages: Why Cobscook Bay,
-the map, houses for sale, Solar panels, fishing by season, Species extinction and Pumping gas out of
-a car. About 31 letter pages.
+the map, houses for sale, Solar panels, Off-grid checklist, fishing by season, Nov–Dec food
+shortage, Species extinction and Pumping gas out of a car. About 36 letter pages.
 
 - **One content list:** `buildReport()` in `js/report.js` returns plain blocks (headings,
   paragraphs, tables, pictures, house cards). Change what's in the report there, and both outputs

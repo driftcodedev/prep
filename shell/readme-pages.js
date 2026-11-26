@@ -117,6 +117,52 @@ export const PAGES = [
 `,
   },
   {
+    id: "nov-dec-food-shortage",
+    title: "Nov–Dec food shortage",
+    names: ["Food shortage", "Winter food shortage", "Winter shortage", "Can the bay feed everyone", "270 people"],
+    html: `
+<p>The Fishing view on the Long Term tab says the bay can feed only about 270 people in November–December. About 7,000 people live around the bay, so on 26 November 2026 Brett asked: will Cobscook Bay still provide enough food for the people who live there? This page keeps the question and the answer, so the number makes sense later.</p>
+<h3>The short answer</h3>
+<p><b>No.</b> Fished at a rate it can keep up, the bay alone can't feed everyone who lives around it, especially in winter. But the 270 is narrower than it sounds, and it doesn't mean Cobscook was a bad choice.</p>
+<h3>What the 270 measures</h3>
+<ul>
+<li><b>Only seafood, only from inside the bay.</b> Fish, shellfish, crabs, urchins and lobster that live in or come into Cobscook Bay.</li>
+<li><b>Only what can be taken every year without wiping a species out.</b> That's 30% of the food-size fish each year (half of the alewife run, so it keeps spawning), and about what's landed today for clams and scallops.</li>
+<li><b>It leaves out</b> seaweed, the open water outside the bay, deer, gardens and your stored food.</li>
+<li><b>A person needs about 2,000 calories a day.</b> People fed = the season's calories ÷ (2,000 × the days in the season).</li>
+</ul>
+<h3>Each season</h3>
+<table>
+<tr><th>Season</th><th>Meat (lb)</th><th>People it could feed</th></tr>
+<tr><td>January–February</td><td>63,000</td><td>about 190</td></tr>
+<tr><td>March–April</td><td>78,000</td><td>about 240</td></tr>
+<tr><td>May–June</td><td>200,000</td><td>about 880</td></tr>
+<tr><td>July–August</td><td>190,000</td><td>about 870</td></tr>
+<tr><td>September–October</td><td>170,000</td><td>about 790</td></tr>
+<tr><td>November–December</td><td>83,000</td><td>about 270</td></tr>
+</table>
+<p>The shortage runs from November to April, not just November–December. January–February is the lowest, at about 190 people.</p>
+<h3>With storage, about 540 people</h3>
+<p>Summer gives about three times what winter does: about 880 people's worth in May–June. Smoke and salt the summer fish, and the year's average comes to about 540 people. That's still only about 8% of the food the roughly 7,000 people around the bay need. Even if these estimates are 3 times too low, it's about a quarter.</p>
+<h3>More can be taken, but only once</h3>
+<p>There's much more in the water than the safe yearly amount, so hungry people could catch far more for a season or two. Then the clam flats are dug out and the fish runs stop coming back, the same pattern as on the <b>Species extinction</b> page. Overfishing early makes the later years worse.</p>
+<h3>Why Cobscook still makes sense</h3>
+<ul>
+<li><b>Inland is worse.</b> Any town of 7,000 can feed only a fraction of its people from its own land and water, and most have no ocean at all. Here, shellfish can be dug all winter, when inland lakes are frozen.</li>
+<li><b>The bay isn't the only food.</b> Deer, a garden (about 5½ months of growing season), seaweed and stored food all add to it. With a boat, there's also the open water of Passamaquoddy Bay and the Gulf of Maine. Eastport and Lubec boats already catch most of their lobster and herring out there.</li>
+<li><b>It's a big advantage for one household.</b> One person's harvest is a tiny share of 540 people's worth. A family that knows when to fish what, and preserves the summer catch, does far better than most.</li>
+<li><b>Winter is still the hard part.</b> November to April is when the bay falls short, so it's what your stored food (the Short Term plan) should be sized to cover.</li>
+</ul>
+<h3>Not worked out yet</h3>
+<ul>
+<li>Adding the 540-with-storage figure and a "share of the population" line to the Fishing page.</li>
+<li>How much a garden and deer would add.</li>
+</ul>
+<h3>Where the numbers come from</h3>
+<p>The fishing model behind the Fishing view; its method and sources are at the bottom of that view and in the paper copy. Most numbers are estimates, and the winter fish and most shellfish are rough guesses. The 7,000 people is the Cobscook Bay Resource Center's count for the nine communities around the bay (see <b>Why Cobscook Bay</b>).</p>
+`,
+  },
+  {
     id: "species-extinction",
     title: "Species extinction",
     names: ["Special extinction", "Extinction", "Overfishing", "Population decline"],
