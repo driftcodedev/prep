@@ -172,6 +172,13 @@ is shown, so opening straight to Fishing doesn't download it.
   seasons. Active adults fed a year = calories ÷ 3,000 a day ÷ 365.
 - **Words:** `data/fishing-notes.js` holds the page text, the 1–5 confidence scale, species notes
   (size, gear, rules, safety), one color per species, the herring methods, the method and the sources.
+- **Pictures:** `PHOTOS` in `data/fishing-notes.js` gives each species one or more pictures from
+  Wikimedia Commons (the cod family and the shellfish row have several). They're hotlinked as Commons'
+  500 px copies, not stored here, and load only when a species' notes are opened (`loading="lazy"`,
+  no referrer sent). Each entry keeps the file name, its Commons folder (`dir`, from the md5 of the
+  name; a test checks it), the 500 px size, the maker and the license, and the caption shows the maker
+  and license as Commons asks. To swap a picture, pick a freely licensed file on Commons and fill in
+  the same fields.
 - **The view** (`js/fishing.js`) is one table: a row per species, a column per season. Tapping a
   season header sorts the rows by that season, most to least (then none counted, not counted that
   season, and no count). "Show" picks calories or pounds. "Numbers" picks amounts, "% of season"

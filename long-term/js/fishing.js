@@ -13,7 +13,7 @@
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
 import {
   FISH_PAGE, SPECIES_COLORS, OTHER_COLOR, MEASURES, NUMBER_VIEWS, CONFIDENCE, PROFILES, HERRING_METHODS, HERRING_CATCH_NOTE,
-  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES,
+  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PHOTOS, PHOTO_LICENSES,
 } from "../data/fishing-notes.js";
 import { esc } from "./geo.js";
 
@@ -179,6 +179,26 @@ export function meatText(sp, profile = PROFILES[sp.id] || {}) {
 const confChip = (sp) => `<span class="ltf-conf ltf-conf-${sp.confidence}" title="${esc(`How sure: ${sp.confidence} of 5. ${CONFIDENCE[sp.confidence]}`)}">${sp.confidence}</span>`;
 const swatch = (sp) => `<span class="ltf-swatch" style="background:${esc(SPECIES_COLORS[sp.id] || OTHER_COLOR)}"></span>`;
 
+// Wikimedia Commons addresses for a picture: the 500 px copy and the file's page (credit and license).
+export function photoSrc(ph) {
+  const f = encodeURIComponent(ph.file);
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${ph.dir}/${f}/500px-${f}`;
+}
+export const photoPage = (ph) => `https://commons.wikimedia.org/wiki/File:${encodeURIComponent(ph.file)}`;
+
+// The species' pictures, each with its name and credit. Lazy, so nothing loads until the notes open.
+export function photosHtml(sp, photos = PHOTOS) {
+  const list = photos[sp.id] || [];
+  if (!list.length) return "";
+  const figs = list.map((ph) => {
+    const lic = PHOTO_LICENSES[ph.license];
+    const licHtml = lic ? `<a href="${esc(lic)}" target="_blank" rel="noopener">${esc(ph.license)}</a>` : esc(ph.license.toLowerCase());
+    return `<figure class="ltf-photo"><a href="${esc(photoPage(ph))}" target="_blank" rel="noopener"><img src="${esc(photoSrc(ph))}" width="${ph.w}" height="${ph.h}" alt="${esc(ph.label)}" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a>`
+      + `<figcaption><b>${esc(ph.label)}</b>${ph.drawing ? " (drawing)" : ""}. ${esc(ph.by)}, ${licHtml}</figcaption></figure>`;
+  });
+  return `<div class="ltf-photos">${figs.join("")}</div>`;
+}
+
 function profileHtml(sp, b, seasons = SEASONS) {
   const p = PROFILES[sp.id] || {};
   const label = seasons[b].label;
@@ -192,7 +212,7 @@ function profileHtml(sp, b, seasons = SEASONS) {
     ["How sure", `${sp.confidence} of 5: ${CONFIDENCE[sp.confidence]}`],
     ["Best season", p.best], ["Size", p.size], ["Gear", p.gear], ["Rules today", p.rules], ["Notes", p.safety],
   ].filter((r) => r && r[1]);
-  return `<dl class="ltf-profile">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>`;
+  return photosHtml(sp) + `<dl class="ltf-profile">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("")}</dl>`;
 }
 
 const CAPTIONS = {

@@ -61,6 +61,49 @@ export const PROFILES = {
   elvers: { best: "Apr–May", size: "2–3 in, about 2,500 per lb", yield: "100%", gear: "Dip net or fyke net in rivers at night", rules: "License by lottery; quota; Mar 22–Jun 7", safety: "Worth hundreds of dollars a pound today" },
 };
 
+// A picture of each species, shown at the top of its notes. They load from Wikimedia Commons
+// (hotlinked, 500 px wide), only when the notes are opened. dir is the file's folder on Commons
+// (the first one and two letters of the md5 of its name); w and h are the 500 px picture's size.
+// by and license are the credit Commons asks for; drawing marks old drawings and paintings.
+export const PHOTOS = {
+  herring: [{ label: "Atlantic herring", file: "Clupea_harengus_Atlantic.jpg", dir: "f/f5", w: 500, h: 375, by: "savoieju", license: "CC BY 4.0" }],
+  mackerel: [{ label: "Atlantic mackerel", file: "Scomber_scombrus_217326414.jpg", dir: "7/7f", w: 500, h: 333, by: "Mikael Nyman", license: "CC BY 4.0" }],
+  periwinkles: [{ label: "Common periwinkle shells, about 1 in", file: "Littorina_littorea_02.JPG", dir: "5/5d", w: 500, h: 330, by: "H. Zell", license: "CC BY-SA 3.0" }],
+  shellfish: [
+    { label: "Soft-shell clams", file: "Mya-arenaria.jpg", dir: "2/2b", w: 500, h: 303, by: "Гурьева Светлана", license: "CC BY-SA 4.0" },
+    { label: "Blue mussels", file: "Miesmuscheln-2.jpg", dir: "a/a9", w: 500, h: 939, by: "Rainer Zenz", license: "CC BY-SA 3.0" },
+  ],
+  scallops: [{ label: "Sea scallop", file: "Placopecten_magellanicus.jpg", dir: "0/0a", w: 500, h: 350, by: "Dann Blackwood, USGS", license: "Public domain" }],
+  alewives: [{ label: "Alewife", file: "Alosa_pseudoharengus_(NY).jpg", dir: "7/7c", w: 500, h: 184, by: "Ellen Edmonson", license: "Public domain", drawing: true }],
+  flounder: [{ label: "Winter flounder (a young one)", file: "Pseudopleuronectes_americanus_(S0892)_(12658628105).jpg", dir: "d/dd", w: 500, h: 225, by: "Smithsonian Environmental Research Center", license: "CC BY 2.0" }],
+  codfamily: [
+    { label: "Silver hake", file: "Merluccius_bilinearis.jpg", dir: "5/52", w: 500, h: 193, by: "Goode and Bean, 1896", license: "Public domain", drawing: true },
+    { label: "White hake", file: "Urophycis_tenuis_1.jpg", dir: "c/c1", w: 500, h: 227, by: "William J. Mac Eachern", license: "CC BY 3.0" },
+    { label: "Haddock", file: "Haddock,_Boston_Aquarium.JPG", dir: "4/4d", w: 500, h: 332, by: "Steven G. Johnson", license: "CC BY-SA 3.0" },
+  ],
+  greencrabs: [{ label: "Green crab", file: "Carcinus_maenas.jpg", dir: "1/17", w: 500, h: 375, by: "Hans Hillewaert", license: "CC BY-SA 4.0" }],
+  lobster: [{ label: "American lobster", file: "Nur01521_-_Flickr_-_NOAA_Photo_Library.jpg", dir: "d/d5", w: 500, h: 330, by: "NOAA Undersea Research Program", license: "Public domain" }],
+  sculpin: [{ label: "Longhorn sculpin", file: "Myoxocephalus_octodecemspinosus.jpg", dir: "4/44", w: 500, h: 239, by: "David Starr Jordan", license: "Public domain", drawing: true }],
+  smelt: [{ label: "Rainbow smelt", file: "Osmerus_mordax.jpg", dir: "f/f0", w: 500, h: 175, by: "Ellen Edmonson and Hugh Chrisp", license: "Public domain", drawing: true }],
+  silverside: [{ label: "Atlantic silverside", file: "Menidia_menidia_RR_08-11-19_0545_(48555459552).jpg", dir: "b/ba", w: 500, h: 124, by: "Smithsonian Environmental Research Center", license: "CC BY 2.0" }],
+  urchins: [{ label: "Green sea urchin", file: "Arctic_Green_Sea_Urchin_(Drøbaksjøpiggsvin)_(Strongylocentrotus_droebachiensis)_-_Øksnes,_Norway_2023-07-14.jpg", dir: "8/83", w: 500, h: 400, by: "Ryan Hodnett", license: "CC BY-SA 4.0" }],
+  cucumbers: [{ label: "Orange-footed sea cucumber", file: "Cucumaria_frondosa_184708776_2.jpg", dir: "c/cb", w: 500, h: 667, by: "Vsevolod", license: "CC BY 4.0" }],
+  whelks: [{ label: "Waved whelk", file: "Buccinum_undatum.jpg", dir: "5/5d", w: 500, h: 396, by: "Hans Hillewaert", license: "CC BY-SA 4.0" }],
+  pollock: [{ label: "Pollock", file: "Pollachius_virens_01.jpg", dir: "a/aa", w: 500, h: 331, by: "Tino Strauss", license: "CC BY-SA 3.0" }],
+  elvers: [{ label: "Elvers (glass eels; these are European, Maine's look the same)", file: "Glass_eels.jpg", dir: "e/eb", w: 500, h: 753, by: "woutervanlanduyt", license: "CC0" }],
+};
+
+// Where each license is written out. Public domain needs no link.
+export const PHOTO_LICENSES = {
+  "CC BY 2.0": "https://creativecommons.org/licenses/by/2.0/",
+  "CC BY 3.0": "https://creativecommons.org/licenses/by/3.0/",
+  "CC BY 4.0": "https://creativecommons.org/licenses/by/4.0/",
+  "CC BY-SA 3.0": "https://creativecommons.org/licenses/by-sa/3.0/",
+  "CC BY-SA 4.0": "https://creativecommons.org/licenses/by-sa/4.0/",
+  "CC0": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "Public domain": "",
+};
+
 // Herring: three separate ways to measure it (year-round average in the bay).
 export const HERRING_METHODS = {
   lead: "Three methods that share no data land between about 0.45 and 1.6 million lb. The numbers above use the middle, 0.9 million lb, which is within about 2 times of each. That earns herring a 3.",
@@ -153,6 +196,7 @@ export const FISH_SOURCES = [
   ["Urchin roe by season in Maine, with a Lubec site (Vadas and others, 2015)", "https://bioone.org/journals/journal-of-shellfish-research/volume-34/issue-3/035.034.0337/Spatial-and-Temporal-Variability-of-Spawning-in-the-Green-Sea/10.2983/035.034.0337.full"],
   ["Maine DMR periwinkle landings", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/periwinkles_table.pdf"],
   ["Maine's elver catch limit (ASMFC, 2024)", "https://asmfc.org/news/press-releases/american-eel-board-approves-addenda-vi-and-vii/"],
+  ["Species pictures: Wikimedia Commons (each picture's maker and license are under it)", "https://commons.wikimedia.org/"],
   ["Maine DMR sea urchin landings", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/urchin_table.pdf"],
   ["Maine BEACON dive survey explorer (DMR): urchin weight, cucumber counts and dive sites", "https://mainedmr.shinyapps.io/UrchinDiveShiny/"],
   ["Maine DMR 2025 spring dive survey report", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/2025%20MEDMR%20Spring%20Dive%20Survey%20Report.pdf"],

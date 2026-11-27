@@ -1,6 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import crypto from "node:crypto";
 import { render } from "../app.js";
 import { PAGE } from "../data/plan.js";
 import { HOUSES, HOUSES_CHECKED, HOUSES_CHANGES } from "../data/houses.js";
@@ -262,10 +263,11 @@ test("the weekly change record matches the house list", () => {
 
 import { VIEWS } from "../app.js";
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
-import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES } from "../data/fishing-notes.js";
+import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICENSES } from "../data/fishing-notes.js";
 import {
   counted, seasonTotal, adultsFed, fedText, seasonRanking, sortRows, bestOf, cellText, rankingText, donutSlices, herringCatch,
   meatText, round2, millions, thousands, caloriesText, poundsText, pct, drawTable, renderFishing, seasonOfDate,
+  photoSrc, photoPage, photosHtml,
 } from "../js/fishing.js";
 
 test("the tab has a Map and a Fishing view, Map first", () => {
@@ -465,4 +467,37 @@ test("fishing table: a row per species with its notes, sorted by the picked seas
   assert.match(page, /Herring caught in Cobscook, 1947–58/);
   assert.equal((page.match(/<li><a href=/g) || []).length, FISH_SOURCES.length);
   assert.doesNotMatch(page, /One trip|a trip|ltf-row/);
+});
+
+test("every species has a picture with its maker and license, shown at the top of its notes", () => {
+  for (const sp of SPECIES) {
+    const list = PHOTOS[sp.id];
+    assert.ok(list && list.length, `${sp.id} picture`);
+    for (const ph of list) {
+      assert.ok(ph.label && ph.by && ph.file, `${sp.id} credit`);
+      assert.ok(ph.license in PHOTO_LICENSES, `${sp.id} license ${ph.license}`);
+      assert.match(ph.dir, /^[0-9a-f]\/[0-9a-f]{2}$/, `${sp.id} folder`);
+      assert.equal(ph.dir[0], ph.dir[2], `${sp.id} folder letters`);
+      assert.ok(ph.w > 0 && ph.h > 0, `${sp.id} size`);
+    }
+  }
+  // Wikimedia's folder for a file comes from the md5 of its name.
+  for (const ph of Object.values(PHOTOS).flat()) {
+    const md5 = crypto.createHash("md5").update(ph.file).digest("hex");
+    assert.equal(ph.dir, `${md5[0]}/${md5.slice(0, 2)}`, ph.file);
+  }
+  const herring = PHOTOS.herring[0];
+  assert.equal(photoSrc(herring), "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Clupea_harengus_Atlantic.jpg/500px-Clupea_harengus_Atlantic.jpg");
+  assert.equal(photoPage(herring), "https://commons.wikimedia.org/wiki/File:Clupea_harengus_Atlantic.jpg");
+  // Three pictures for the cod family; a drawing says so; public domain has no license link.
+  const cod = photosHtml(SPECIES.find((sp) => sp.id === "codfamily"));
+  assert.equal((cod.match(/<figure class="ltf-photo">/g) || []).length, 3);
+  assert.match(cod, /<b>Silver hake<\/b> \(drawing\)\. Goode and Bean, 1896, public domain/);
+  assert.match(cod, /loading="lazy"/);
+  assert.match(cod, /href="https:\/\/creativecommons.org\/licenses\/by\/3.0\/"/);
+  // The notes open with the pictures, before the numbers.
+  const open = drawTable({ measure: "kcal", view: "amount" }, 0, new Set(["urchins"]));
+  const row = open.slice(open.indexOf('id="ltf-d-urchins"'));
+  assert.ok(row.indexOf('class="ltf-photos"') < row.indexOf('class="ltf-profile"'));
+  assert.match(row, /alt="Green sea urchin"/);
 });
