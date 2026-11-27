@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { splitRounded, planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse, infantDay } from "../js/calc.js";
 import { buildPdf } from "../js/pdf.js";
-import { gearItems, lineHint, withHave, shoppingNotes, cookingData, onePotData, HL_START } from "../js/content.js";
+import { gearItems, lineHint, withHave, shoppingNotes, cookingData, onePotData, HL_START, storeGroups } from "../js/content.js";
 import { MAX_LB_PER_BUCKET, PRODUCTS } from "../js/data.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
@@ -244,6 +244,18 @@ test("The PDF reads right on paper: no page-only wording, and it says what was l
     assert.equal(count(hh), count(full) - 1, "owned food isn't printed in the shopping list");
     // Open tub water isn't safe to drink as it is, so milk water only comes from the sealed bag.
     assert.equal(text.includes("or water from the waterBOB"), tub === "bladder");
+  }
+});
+
+test("Buckets, mylar bags and the scale sit in the gear table, after the other gear", () => {
+  for (const store of ["costco", "walmart"]) {
+    const hh = planHousehold({ months: 6, people: [brett], store });
+    const groups = storeGroups(hh);
+    const gear = groups[groups.length - 1];
+    assert.equal(gear.title, "Fire, Water And Cooking Gear");
+    assert.deepEqual(gear.lines.slice(-3).map((l) => l.key), ["buckets", "mylar", "scale"]);
+    for (const g of groups.slice(0, -1)) assert.ok(g.lines.every((l) => l.group === "food"), g.title);
+    assert.ok(Math.abs(groups.reduce((t, g) => t + g.total, 0) - hh.total) < 0.01);
   }
 });
 

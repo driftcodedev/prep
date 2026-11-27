@@ -558,9 +558,10 @@ export function storeGroups(hh) {
   const titles = { Costco: "Costco Warehouse Trip", Walmart: "Walmart Order", Amazon: "Amazon Order" };
   const groups = plan.stores.map((store) => ({
     title: titles[store],
-    lines: hh.lines.filter((l) => l.store === store && l.group !== "gear"),
+    lines: hh.lines.filter((l) => l.store === store && l.group === "food"),
   }));
-  groups.push({ title: "Fire, Water And Cooking Gear", lines: hh.lines.filter((l) => l.group === "gear") });
+  // The gear table also holds the storage gear (buckets, mylar bags) and the scale, after the rest.
+  groups.push({ title: "Fire, Water And Cooking Gear", lines: [...hh.lines.filter((l) => l.group === "gear"), ...hh.lines.filter((l) => l.group === "storage")] });
   return groups.filter((g) => g.lines.length).map((g) => ({ ...g, total: g.lines.reduce((a, l) => a + l.cost, 0) }));
 }
 
