@@ -150,12 +150,6 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 .check { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; }
 .check input { width: 1.15rem; height: 1.15rem; accent-color: var(--lid); }
 
-.owned-field { margin: 0; padding: 0; border: 0; }
-.owned-field legend { padding: 0; margin-bottom: 0.3rem; }
-.owned { display: flex; flex-wrap: wrap; gap: 0.5rem 1.1rem; padding-top: 0.35rem; }
-.owned .check { white-space: nowrap; }
-.owned-choice { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.1rem; }
-.owned-choice-label { flex-basis: 100%; font-weight: 600; }
 
 .people { display: flex; flex-direction: column; gap: 1.25rem; }
 
@@ -311,10 +305,20 @@ table.data { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 .data td small { display: block; color: var(--ink-2); font-size: 0.8rem; }
 .shop td:nth-child(2) { color: var(--ink-2); }
 .shop th small.keeps { display: block; margin-top: 0.15rem; font-weight: 400; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
-/* The other bathtub water choice, shown in the same row as "or ...". */
-.shop small.alt { margin-top: 0.35rem; font-size: 0.9rem; font-weight: 600; color: var(--ink-2); }
-.shop th small.keeps.alt { margin-top: 0.3rem; font-size: 0.9rem; font-weight: 600; }
-.shop th small.alt a { color: var(--lid); }
+/* Lines that share an explanation (LifeStraw packs, buckets and mylar, the two bathtub water
+   choices) read as one row: no rule between them. */
+.shop tr.joined > th, .shop tr.joined > td { border-bottom: 0; padding-bottom: 0.15rem; }
+.shop tr.cont > th, .shop tr.cont > td { padding-top: 0.15rem; }
+/* Gear ticked "Already have", and the bathtub choice not picked: greyed, price struck through. */
+.shop tr.off > td, .shop tr.off .item-line a { color: var(--ink-2); }
+.shop tr.off .item-line a { text-decoration-color: var(--line); }
+.shop td.num s { color: var(--ink-2); }
+.shop input.pick { width: 1.05rem; height: 1.05rem; margin: 0 0.45rem 0 0; vertical-align: -0.15em; accent-color: var(--lid); cursor: pointer; }
+.shop .or { font-weight: 600; color: var(--ink-2); }
+.shop label.have { display: flex; align-items: center; gap: 0.4rem; width: fit-content; margin-top: 0.4rem; font-size: 0.85rem; font-weight: 600; color: var(--ink-2); cursor: pointer; }
+.shop label.have input { width: 1rem; height: 1rem; margin: 0; accent-color: var(--lid); cursor: pointer; }
+.shop tr.owned label.have { color: var(--lid); }
+.shop-have { margin-top: 0; color: var(--ink-2); }
 /* Price notes ("Sold by a third-party seller") wrap instead of running past the edge. */
 .data td.num small { white-space: normal; }
 /* Same column widths in every store table so they line up down the page. */
@@ -410,6 +414,7 @@ table.shop { table-layout: fixed; min-width: 38rem; }
   body { background: #fff; font-size: 10.5pt; }
   .setup, .people-actions, .privacy, .intro, .report-actions, .report-foot, .shop-compare .btn-link, .goal-toggle { display: none !important; }
   .why-btn { display: none !important; }
+  .shop label.have, .shop input.pick, .shop-have { display: none !important; }
   .more-item > summary::after { display: none; }
   .more-item > summary { padding: 0; margin-top: 1.25rem; }
   .why-row[hidden] { display: table-row !important; }

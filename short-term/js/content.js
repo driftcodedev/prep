@@ -302,7 +302,7 @@ export function gearItems(hh) {
       title: "Fire: BIC Classic lighters",
       product: P.lighters,
       links: [{ label: "50-count tray on Amazon", url: P.lighters.url }],
-      buy: hh.lines.some((l) => l.key === "lighters") ? `One ${P.lighters.size}-lighter tray for the household, ${cents(P.lighters.price)}.` : "You already have lighters, so they're not on the list.",
+      buy: hh.lines.some((l) => l.key === "lighters") ? `One ${P.lighters.size}-lighter tray for the household, ${cents(P.lighters.price)}.` : "You already have lighters, so they're not counted in the total.",
       lasts: `BIC rates each Classic lighter for up to ${lightsNote}. Getting kindling to catch can take 10 seconds or so of flame, so count on about ${num(g.firesPerLighter)} fires per lighter: roughly ${Math.round(g.lighterMonths)} months of one fire a day from a single lighter, and about ${Math.round(g.trayYears / 5) * 5} years from the whole tray. That's plenty to share with family or keep a few in the car.`,
       tips: [
         "Cold butane barely sparks. In winter, warm the lighter in a pocket before you use it.",
@@ -322,7 +322,7 @@ export function gearItems(hh) {
         ? `LifeStraws are for people age ${STRAW_MIN_AGE} and up, so none are on this list.`
         : strawBuy
           ? `One straw for each person age ${STRAW_MIN_AGE} and up: ${plural(g.straws, "straw")} (${strawBuy})${spare ? ", including a spare that costs less than $5 extra" : ""}.`
-          : "You already have water filters, so they're not on the list.",
+          : "You already have water filters, so they're not counted in the total.",
       lasts: `Each straw filters up to ${num(LIFESTRAW_GALLONS)} gallons of clear water. At ½ gallon a day that's about ${fraction(Math.round(g.adultStrawYears * 2) / 2)} years for one adult, and even at a full gallon a day it's more than ${fraction(Math.floor(yearsAtGallon * 2) / 2)} years. Cloudy or muddy water wears a straw out much faster: let it settle, then pour it through a clean cloth first. A worn-out straw stops letting water through rather than letting bad water past.`,
       drink: `Drink at least ½ gallon (8 cups) a day, and more in heat or during hard work. Each card shows that person's amount. Together your household drinks about ${fraction(Math.round(g.waterGallonsTotal * 4) / 4)} gallon${g.waterGallonsTotal > 1.1 ? "s" : ""} a day.`,
       tips: [
@@ -341,10 +341,10 @@ export function gearItems(hh) {
         { label: "V-TOP drain cover", url: P.drainCover.url },
       ],
       buy: hh.lines.some((l) => l.key === "bladder")
-        ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump. To get the drain cover instead, pick it at the top under "Already have".`
+        ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump. To get the drain cover instead, pick it in its row on the shopping list.`
         : hh.lines.some((l) => l.key === "drainCover")
-          ? `One 2-pack, ${cents(P.drainCover.price)} on Amazon. It seals the tub drain so you can fill the tub itself. To get the waterBOB instead, pick it at the top under "Already have".`
-          : "You already have a water bladder or drain cover, so it's not on the list.",
+          ? `One 2-pack, ${cents(P.drainCover.price)} on Amazon. It seals the tub drain so you can fill the tub itself. To get the waterBOB instead, pick it in its row on the shopping list.`
+          : "You already have a water bladder or drain cover, so it's not counted in the total.",
       notes: [{
         label: hh.tub === "drainCover" ? "How to use the drain cover" : "No bag? Fill the tub itself",
         text: `${hh.tub === "drainCover" ? "" : "The waterBOB often sells out. Without one, "}close the tub drain, press the silicone drain cover flat over it so the tub doesn't slowly leak, and fill the tub up to just below the overflow hole. Lay a shower curtain or plastic sheet over it to keep dust out. Open tub water isn't clean enough to drink as it is: sip it through a LifeStraw, and boil it for cooking and for children under ${STRAW_MIN_AGE}. Test the seal ahead of time: run a few inches of water, mark the level with tape and check it the next day.`.replace(/^./, (c) => c.toUpperCase()),
@@ -367,7 +367,7 @@ export function gearItems(hh) {
       title: "Water: EarthMinded rain diverter kit",
       product: P.diverter,
       links: [{ label: "Kit at Home Depot", url: P.diverter.url }],
-      buy: hh.lines.some((l) => l.key === "diverter") ? `One kit, ${cents(P.diverter.price)} at Home Depot. It comes with the FlexiFit diverter, a spigot, a drain, a hose and a hole saw.` : "You already have a rain diverter, so it's not on the list.",
+      buy: hh.lines.some((l) => l.key === "diverter") ? `One kit, ${cents(P.diverter.price)} at Home Depot. It comes with the FlexiFit diverter, a spigot, a drain, a hose and a hole saw.` : "You already have a rain diverter, so it's not counted in the total.",
       lasts: `It turns a trash can into a rain barrel fed from a gutter downspout. A 500 sq ft section of roof sheds about 300 gallons per inch of rain, so even a light rain fills a can. A 32-gallon can holds about ${num(g.canDays(32))} days of your household's water, and a 45-gallon can about ${num(g.canDays(45))} days.`,
       tips: [
         "Use a trash can you already own: 32 to 45 gallons, with a lid and no holes. Keep it just for water.",
@@ -383,7 +383,7 @@ export function gearItems(hh) {
       title: "Firewood: Fiskars X27 splitting axe",
       product: P.axe,
       links: [{ label: "Fiskars X27, 36-inch, on Amazon", url: P.axe.url }],
-      buy: hh.lines.some((l) => l.key === "axe") ? `One 36-inch splitting axe for the household, ${cents(P.axe.price)}.` : "You already have an axe, so it's not on the list.",
+      buy: hh.lines.some((l) => l.key === "axe") ? `One 36-inch splitting axe for the household, ${cents(P.axe.price)}.` : "You already have an axe, so it's not counted in the total.",
       lasts: "Fiskars backs the X27 with a lifetime warranty. With an occasional touch-up from a file it will outlast the outage.",
       tips: [
         "Split on a chopping block with your feet apart, and keep everyone at least two axe lengths away. Keep the sheath on when it's not in use.",
@@ -396,7 +396,7 @@ export function gearItems(hh) {
       title: "Cooking: Lodge camp tripod",
       product: P.tripod,
       links: [{ label: "Lodge 43.5-inch tripod on Amazon", url: P.tripod.url }],
-      buy: hh.lines.some((l) => l.key === "tripod") ? `One per household, ${cents(P.tripod.price)} on Amazon.` : "You already have a tripod, so it's not on the list.",
+      buy: hh.lines.some((l) => l.key === "tripod") ? `One per household, ${cents(P.tripod.price)} on Amazon.` : "You already have a tripod, so it's not counted in the total.",
       lasts: "Solid ½-inch steel bar with a 24-inch galvanized chain, made by Lodge to hang its camp Dutch ovens full of food. Nothing on it wears out.",
       tips: [
         "The chain is your stove dial: hang the pot low to bring it to a boil, then raise it a few links to hold a simmer.",
@@ -410,7 +410,7 @@ export function gearItems(hh) {
       title: "Cooking: Pot Minder boil alert",
       product: P.disc,
       links: [{ label: "Pot Minder on Amazon", url: P.disc.url }],
-      buy: hh.lines.some((l) => l.key === "disc") ? `One, ${cents(P.disc.price)} on Amazon.` : "You already have a boil alert, so it's not on the list.",
+      buy: hh.lines.some((l) => l.key === "disc") ? `One, ${cents(P.disc.price)} on Amazon.` : "You already have a boil alert, so it's not counted in the total.",
       lasts: "It's fired ceramic, so it doesn't wear out. It doesn't whistle: it chatters against the bottom of the pot as the water comes to a boil, loud enough to hear near the fire. It also breaks up the foam that makes beans boil over.",
       tips: [
         "Put it in the empty pot first, then the food and water.",
@@ -424,7 +424,7 @@ export function gearItems(hh) {
       title: "Timing: Casio solar watch",
       product: P.timer,
       links: [{ label: "Casio AQ-S810W on Amazon", url: P.timer.url }],
-      buy: hh.lines.some((l) => l.key === "timer") ? `One per household, ${cents(P.timer.price)} on Amazon.` : "You already have a battery-free timer, so it's not on the list.",
+      buy: hh.lines.some((l) => l.key === "timer") ? `One per household, ${cents(P.timer.price)} on Amazon.` : "You already have a battery-free timer, so it's not counted in the total.",
       lasts: "It never needs a battery: sunlight or any indoor light charges it, and a full charge runs about 10 months in the dark. It has two countdown timers that beep when time is up, plus alarms and a stopwatch.",
       tips: [
         "Set a countdown for each step on the cooking list: 20 minutes for rice, 10 minutes of hard boiling for beans, then 30-minute checks while they simmer.",
@@ -504,7 +504,7 @@ function potItem(hh) {
   const what = beansBatch >= riceBatch ? "the beans with their water" : "the rice with its water";
   const onList = hh.lines.some((l) => l.key === "pot");
   let buy;
-  if (!onList) buy = `You already have a big pot, so it's not on the list. It should hold at least ${num(Math.ceil(p.needCups))} cups and have a wire handle to hang from the tripod.`;
+  if (!onList) buy = `You already have a big pot, so it's not counted in the total. It should hold at least ${num(Math.ceil(p.needCups))} cups and have a wire handle to hang from the tripod.`;
   else if (p.batches > 1) buy = `For your household: the ${p.qt}-quart (${p.cups} cups), ${cents(p.price)}, the biggest in this style. Your biggest batch of the day, ${what}, is about ${num(batch)} cups, more than it holds safely, so cook it in ${p.batches} batches or buy a second pot.`;
   else buy = `For your household: the ${p.qt}-quart, which holds ${p.cups} cups, ${cents(p.price)}. Your biggest batch of the day, ${what}, is about ${num(batch)} cups, so it fills the pot ${fullText(batch / p.cups)} and leaves room to boil.${p.qt === 8 ? " It's the usual size for a family of 3 to 6." : ""}`;
   return {
@@ -558,23 +558,17 @@ export function compareText(hh) {
   return `With a Costco membership, the Costco list would come to ${money(hh.other.total)}, plus ${money(COSTCO_MEMBERSHIP)} for the membership.`;
 }
 
-// pdf: the PDF has no "Why?" buttons; its gear explanations come at the end instead.
-export function shoppingNotes(hh, pdf = false) {
+export function shoppingNotes(hh) {
   const notes = [];
   const beans = hh.lines.find((l) => l.key === "beans");
-  const milk = hh.lines.find((l) => l.key === "milk");
   if (hh.store === "costco") {
     notes.push(`Costco prices are warehouse prices and vary a little by location. The total leaves out the ${money(COSTCO_MEMBERSHIP)} Costco membership.`);
-    notes.push("Amazon's Subscribe & Save takes about 5–15% off the oats, peanut butter, oil and vitamins. You can cancel after the first delivery.");
     if (beans) notes.push("The beans come from Walmart in 20-lb bags: Walmart.com ships orders of $35 or more free, or you can pick them up at your store. Some Costco warehouses, mostly in the West, carry 25-lb pinto bags for about $16–19, which cost a little less if yours has them.");
-    if (milk && milk.qty >= 3) notes.push("Costco's Saco Mix'n Drink 8-lb bag of nonfat dry milk makes 40 quarts for about $35.49–35.99 where it's stocked, which is cheaper per cup than the Amazon bag.");
   } else {
     notes.push("No membership needed. Walmart.com ships orders of $35 or more free, or you can order for pickup at your store. Store prices can differ a little from online prices.");
     notes.push("Great Value and Equate are Walmart's store brands. Any brand of plain long grain rice, pinto beans, old fashioned oats and iodized salt works the same.");
     notes.push("The oats, salt and adult multivitamins come from Amazon, which has bigger, cheaper boxes of oats and big bottles of vitamins (200 to 300 tablets).");
   }
-  notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag and one absorber per bucket, about ${LB_PER_BUCKET} lb each. The buckets are counted from the rice and beans you buy. ${pdf ? '"Storage" near the end shows' : 'Tap "Why?" next to the buckets to see'} how to seal them.`);
-  notes.push("Prices change often, especially around sales. Check them at checkout.");
   return notes;
 }
 
@@ -584,7 +578,7 @@ export function lineHint(l, pdf = false) {
   if (l.keeps) return `Keeps ${l.keeps}`;
   if (l.key === "buckets") return `About ${LB_PER_BUCKET} lb of rice or beans in each.${pdf ? ' How to seal them is under "Storage" near the end.' : ""}`;
   if (l.key === "mylar") return `One bag and one ${num(ABSORBER_CC)} cc oxygen absorber in each bucket.`;
-  if (l.alt) return pdf ? `Or a ${TUB_NAMES[l.alt.key]}: ${l.alt.pack}, ${cents(l.alt.price)}.` : `Pick one at the top under "Already have".`;
+  if (l.alt) return pdf ? `Or a ${TUB_NAMES[l.alt.key]}: ${l.alt.pack}, ${cents(l.alt.price)}.` : "";
   return "";
 }
 

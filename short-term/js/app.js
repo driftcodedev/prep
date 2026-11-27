@@ -29,24 +29,19 @@ const EXAMPLE = [
   { name: "Leo", sex: "male", age: "1", ft: "2", inch: "6", weight: "22", activity: "light", flags: {} },
 ];
 
-const OWNED = [
-  ["hasScale", "Bathroom scale"],
-  ["hasLighters", "Lighters"],
-  ["hasFilters", "Water filters"],
-  ["hasAxe", "Axe"],
-  ["hasDiverter", "Rain diverter"],
-  ["hasTimer", "Battery-free timer"],
-  ["hasPot", "Big pot for the fire"],
-  ["hasTripod", "Cooking tripod"],
-  ["hasDisc", "Boil alert disc"],
-];
+// "Already have" tick boxes sit in the shopping list rows. Each gear line maps to one saved setting.
+const OWNED_BY_LINE = {
+  scale: "hasScale", lighters: "hasLighters", axe: "hasAxe", bladder: "hasBladder", drainCover: "hasBladder",
+  diverter: "hasDiverter", timer: "hasTimer", pot: "hasPot", tripod: "hasTripod", disc: "hasDisc",
+};
+const ownedKeyFor = (lineKey) => (lineKey.startsWith("straw") ? "hasFilters" : OWNED_BY_LINE[lineKey]);
 
 let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, hasPot: false, hasTripod: false, hasDisc: false, people: [blankPerson()], ...(load() || {}) };
 if (!STORE_PLANS[state.store]) state.store = "costco";
-// Bathtub water: buy the waterBOB bag, buy the V-TOP drain cover, or already have one.
-// (Older saves only had the hasBladder tick box.)
-const TUB_CHOICES = [["bladder", "waterBOB bag"], ["drainCover", "V-TOP drain cover"], ["have", "Already have one"]];
-if (!TUB_CHOICES.some(([k]) => k === state.tub)) state.tub = state.hasBladder ? "have" : "bladder";
+// Bathtub water: the waterBOB bag or the V-TOP drain cover, picked in the list row.
+// (A save from the short-lived three-way choice may say "have".)
+if (state.tub === "have") { state.tub = "bladder"; state.hasBladder = true; }
+if (state.tub !== "drainCover") state.tub = "bladder";
 
 function load() {
   try {
@@ -263,28 +258,70 @@ function cookingBody(hh) {
 // "Why?" panels that are open, by gear card key, so they stay open when the list redraws.
 const openWhy = new Set();
 
+// The bathtub water line becomes two rows, the waterBOB then the drain cover, with a radio
+// button to pick one. Only the picked one counts in the total.
+function withTubChoice(lines) {
+  return lines.flatMap((l) => {
+    if (!l.alt) return [l];
+    const picked = { ...l, choice: true, picked: true };
+    const other = { ...l.alt, qty: 1, cost: l.alt.price, choice: true, picked: false };
+    delete other.alt;
+    return l.key === "bladder" ? [picked, other] : [other, picked];
+  });
+}
+
+// Lines that share an explanation sit together as one row: the LifeStraw packs, the buckets and
+// mylar bags, and the two bathtub water choices. The first gets the "Why?" button and the
+// "Already have" box (the bathtub's goes under both choices); the explanation opens under the last.
+function clusters(lines) {
+  const out = [];
+  for (const l of lines) {
+    const key = cardKeyFor(l.key);
+    const last = out[out.length - 1];
+    if (key && last && last.key === key) last.lines.push(l);
+    else out.push({ key, lines: [l] });
+  }
+  return out;
+}
+
 function shopTable(lines, cards, shown) {
-  const body = lines.map((l) => {
-    // Only the first line of a card gets the button (the LifeStraw packs share one, so do buckets and mylar).
-    const cardKey = cardKeyFor(l.key);
-    const card = cardKey && !shown.has(cardKey) ? cards[cardKey] : null;
-    if (card) shown.add(cardKey);
-    const open = card && openWhy.has(cardKey);
-    const why = card
-      ? ` <button type="button" class="why-btn" data-why="${cardKey}" aria-expanded="${open}" aria-controls="why-${cardKey}">${open ? "Hide" : "Why?"}</button>`
-      : "";
-    // The bathtub water row also shows the other choice ("or ..."), which isn't counted in the total.
-    const a = l.alt;
-    const altItem = a ? `<small class="keeps alt">or <a href="${a.url}" target="_blank" rel="noopener">${esc(TUB_NAMES[a.key])}</a></small>` : "";
-    return `
-      <tr>
-        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${why}${altItem}${lineHint(l) ? `<small class="keeps">${esc(lineHint(l))}</small>` : ""}</th>
-        <td>${esc(l.pack)}${a ? `<small class="alt">or ${esc(a.pack)}</small>` : ""}</td>
+  const body = clusters(withTubChoice(lines)).map(({ key, lines: ls }) => {
+    const card = key && !shown.has(key) ? cards[key] : null;
+    if (card) shown.add(key);
+    const open = card && openWhy.has(key);
+    const ownKey = ownedKeyFor(ls[0].key);
+    const owned = ownKey && !!state[ownKey];
+    const rows = ls.map((l, i) => {
+      const first = i === 0;
+      const lastRow = i === ls.length - 1;
+      const off = owned || (l.choice && !l.picked);
+      const cls = [lastRow ? "" : "joined", i ? "cont" : "", off ? "off" : "", owned ? "owned" : ""].filter(Boolean).join(" ");
+      const why = first && card
+        ? ` <button type="button" class="why-btn" data-why="${key}" aria-expanded="${open}" aria-controls="why-${key}">${open ? "Hide" : "Why?"}</button>`
+        : "";
+      const radio = l.choice
+        ? `<input type="radio" class="pick" name="tub" value="${l.key}"${l.picked ? " checked" : ""} aria-label="Buy the ${esc(TUB_NAMES[l.key])}">`
+        : "";
+      // The bathtub's box covers both choices, so it goes under the second one.
+      const choice = ls.some((x) => x.choice);
+      const have = ownKey && (choice ? lastRow : first)
+        ? `<label class="have"><input type="checkbox" data-owned="${ownKey}"${owned ? " checked" : ""}> Already have${choice ? " one" : ""}</label>`
+        : "";
+      const hint = lineHint(l);
+      const cost = owned || (l.choice && !l.picked)
+        ? `<s>${money(l.cost)}</s><small>${owned ? "you have it" : "not picked"}</small>`
+        : `${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)}</small>` : ""}`;
+      return `
+      <tr${cls ? ` class="${cls}"` : ""}>
+        <th scope="row"><span class="item-line">${radio}${l.choice && i ? '<span class="or">or</span> ' : ""}<a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${why}</span>${hint ? `<small class="keeps">${esc(hint)}</small>` : ""}${have}</th>
+        <td>${esc(l.pack)}</td>
         <td class="num">${l.qty}</td>
         <td>${esc(l.amountText)}</td>
-        <td class="num">${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)}</small>` : ""}${a ? `<small class="alt">or ${money(a.price)}</small>` : ""}</td>
-      </tr>${card ? `
-      <tr class="why-row" id="why-${cardKey}"${open ? "" : " hidden"}><td colspan="5"><div class="why-panel">${gearBody(card)}</div></td></tr>` : ""}`;
+        <td class="num">${cost}</td>
+      </tr>`;
+    }).join("");
+    return rows + (card ? `
+      <tr class="why-row" id="why-${key}"${open ? "" : " hidden"}><td colspan="5"><div class="why-panel">${gearBody(card)}</div></td></tr>` : "");
   }).join("");
   return `
     <div class="table-scroll"><table class="data shop">
@@ -293,20 +330,22 @@ function shopTable(lines, cards, shown) {
     </table></div>`;
 }
 
-function shoppingSection(hh) {
+// lines: every line, owned or not (see renderResults). The totals leave out owned gear.
+function shoppingSection(hh, lines) {
   const cards = Object.fromEntries(gearItems(hh).map((it) => [it.key, it]));
   const shown = new Set();
-  const tables = storeGroups(hh).map((g) => `
-    <h3 class="sub-title">${esc(g.title)} <span class="sub-total">${money(g.total)}</span></h3>
+  const counted = (l) => !(ownedKeyFor(l.key) && state[ownedKeyFor(l.key)]);
+  const tables = storeGroups({ ...hh, lines }).map((g) => `
+    <h3 class="sub-title">${esc(g.title)} <span class="sub-total">${money(g.lines.filter(counted).reduce((t, l) => t + l.cost, 0))}</span></h3>
     ${shopTable(g.lines, cards, shown)}`).join("");
-  // Gear that's off the list (already owned, or no LifeStraws for small children) keeps its
-  // explanation in a short folded list after the shopping notes.
+  // The rare explanation with no line (no LifeStraws when everyone is under 3) is folded after the notes.
   const offList = Object.values(cards).filter((it) => !shown.has(it.key) && it.key !== "storage");
   return `
   <section class="block shopping" aria-labelledby="shop-title">
     <h2 id="shop-title" class="section-title">Shopping list</h2>
     <p class="shop-summary">${esc(shoppingLead(hh))}: <strong>${money(hh.total)}</strong>.</p>
     <p class="shop-compare">${esc(compareText(hh))} <button type="button" class="btn-link" data-switch-store>${hh.store === "costco" ? "Show the Walmart list" : "Show the Costco list"}</button></p>
+    <p class="shop-have">Tick "Already have" under anything you own and it comes off the total.</p>
     ${tables}
     <ul class="notes">${shoppingNotes(hh).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
     ${offList.length ? `
@@ -413,14 +452,19 @@ function scheduleRender() {
 
 function renderResults() {
   const people = state.people.map(toPerson);
+  const base = { months: state.months, reservePct: state.reserve, store: state.store, tub: state.tub, people };
   const hh = planHousehold({
-    months: state.months, reservePct: state.reserve, store: state.store, tub: state.tub, people,
+    ...base,
     owned: {
       scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe,
-      bladder: state.tub === "have", diverter: !!state.hasDiverter, timer: !!state.hasTimer,
+      bladder: !!state.hasBladder, diverter: !!state.hasDiverter, timer: !!state.hasTimer,
       pot: !!state.hasPot, tripod: !!state.hasTripod, disc: !!state.hasDisc,
     },
   });
+  // Owned gear only drops lines and their cost, nothing else (cooking, the pot size and the
+  // one-pot steps stay the same), so the page lists every line from a plan with nothing owned
+  // and greys out the ones ticked "Already have".
+  allLines = planHousehold(base).lines;
   lastHousehold = hh;
   const el = $("#results");
   if (!hh.plans.length) {
@@ -440,7 +484,7 @@ function renderResults() {
     ${incomplete}
     <p class="results-intro">Measure dry food with level cups and spoons. Each card shows one person's day.</p>
     <div class="cards">${hh.plans.map((pl) => card(pl, hh)).join("")}</div>
-    ${shoppingSection(hh)}
+    ${shoppingSection(hh, allLines)}
     ${moreSection(hh)}
     <div class="report-foot">
       <p>Keep a paper copy. Print the whole report, or save it as a PDF to print later.</p>
@@ -452,6 +496,7 @@ function renderResults() {
 // ---------- print and PDF ----------
 
 let lastHousehold = null;
+let allLines = [];
 let pdfLib = null;
 
 function loadScript(src) {
@@ -524,19 +569,19 @@ function init() {
   $("#reserve").value = String(state.reserve);
   $("#store").innerHTML = Object.entries(STORE_PLANS)
     .map(([k, sp]) => `<option value="${k}"${k === state.store ? " selected" : ""}>${sp.choice}</option>`).join("");
-  $("#owned").innerHTML = OWNED.map(([k, label]) =>
-    `<label class="check"><input type="checkbox" data-owned="${k}"${state[k] ? " checked" : ""}><span>${label}</span></label>`).join("") +
-    `<div class="owned-choice" role="radiogroup" aria-labelledby="tub-label"><span id="tub-label" class="owned-choice-label">Bathtub water:</span>${
-      TUB_CHOICES.map(([k, label]) => `<label class="check"><input type="radio" name="tub" value="${k}"${state.tub === k ? " checked" : ""}><span>${label}</span></label>`).join("")}</div>`;
 
   $("#months").addEventListener("change", (e) => { state.months = Number(e.target.value); save(); scheduleRender(); });
   $("#reserve").addEventListener("change", (e) => { state.reserve = Number(e.target.value); save(); scheduleRender(); });
   $("#store").addEventListener("change", (e) => { state.store = e.target.value; save(); scheduleRender(); });
-  $("#owned").addEventListener("change", (e) => {
-    if (e.target.name === "tub") { state.tub = e.target.value; save(); scheduleRender(); return; }
-    const k = e.target.dataset.owned;
-    if (!k) return;
-    state[k] = e.target.checked; save(); scheduleRender();
+  // "Already have" tick boxes and the bathtub water choice, in the shopping list rows.
+  $("#results").addEventListener("change", (e) => {
+    const t = e.target;
+    let focus = null;
+    if (t.name === "tub") { state.tub = t.value; focus = `input[name="tub"][value="${t.value}"]`; }
+    else if (t.dataset.owned) { state[t.dataset.owned] = t.checked; focus = `[data-owned="${t.dataset.owned}"]`; }
+    else return;
+    save(); renderResults();
+    $(focus)?.focus({ preventScroll: true });
   });
 
   $("#results").addEventListener("toggle", (e) => {

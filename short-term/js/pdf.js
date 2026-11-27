@@ -150,7 +150,7 @@ function shopping(hh) {
       { align: ["left", "left", "right", "left", "right"] },
     ));
   }
-  out.push(bullets(shoppingNotes(hh, true), { margin: [0, 8, 0, 0], color: C.ink2 }));
+  out.push(bullets(shoppingNotes(hh), { margin: [0, 8, 0, 0], color: C.ink2 }));
   out.push(
     { stack: [{ text: "How long it keeps", style: "h3", margin: [0, 8, 0, 3] }, para(KEEPS_LEAD)], unbreakable: true, headlineLevel: 1 },
     leadBullets(keepsNotes(hh)),

@@ -683,7 +683,7 @@ export const PAGES = [
 <li>Under <b>Your household</b>, press <b>Add a person</b> for each person and fill in their sex, age, height, weight and how active they are. To see how it works first, press <b>Fill in an example household</b>.</li>
 <li>Choose <b>How long the food should last</b> and the <b>Extra margin</b>.</li>
 <li>Choose <b>Where you'll shop</b>: Costco, Walmart and Amazon, or Walmart and Amazon.</li>
-<li>Tick anything you already own under <b>Already have?</b> so it stays off the list.</li>
+<li>Tick <b>Already have</b> under anything in the shopping list you already own, and it comes off the total.</li>
 </ol>
 <p>The plan appears below as you type.</p>
 <h3>What you get</h3>
@@ -722,7 +722,7 @@ export const PAGES = [
 <li><b>Two ways to shop:</b> Costco, Walmart and Amazon (needs a Costco membership), or Walmart and Amazon (no membership). Either way, the beans come from Walmart in 20-lb bags (Amazon only sells 3 of its 1-lb bags at a time), and the oats, salt and adult multivitamins come from Amazon.</li>
 <li><b>How products were picked:</b> cheap options first, with lots of ratings and few one-star reviews.</li>
 <li><b>When prices were checked:</b> the date is at the bottom of the Short Term page. Prices change, so confirm at checkout.</li>
-<li><b>Gear you own:</b> tick it under <b>Already have?</b> and it comes off the list and the total.</li>
+<li><b>Gear you own:</b> tick <b>Already have</b> under it in the shopping list and it comes off the total.</li>
 </ul>
 `,
   },

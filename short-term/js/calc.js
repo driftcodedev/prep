@@ -706,9 +706,11 @@ function shoppingFor(ctx, products) {
     if (!have.axe) addLine("axe", 1, "splitting firewood", "gear");
     if (!have.bladder) {
       // One row for bathtub water: the picked option is counted, and the other is shown with it as "or".
+      const covers = { bladder: "fill when the power goes out", drainCover: "seals the tub drain" };
       const other = tub === "drainCover" ? "bladder" : "drainCover";
-      const alt = { key: other, pack: products[other].pack, url: products[other].url, price: products[other].price };
-      addLine(tub, 1, tub === "drainCover" ? "seals the tub drain" : "fill when the power goes out", "gear", { alt });
+      const o = products[other];
+      const alt = { key: other, item: o.item, pack: o.pack, url: o.url, price: o.price, priceNote: o.priceNote, amountText: covers[other] };
+      addLine(tub, 1, covers[tub], "gear", { alt });
     }
     if (!have.diverter) addLine("diverter", 1, "rain from the roof into a trash can", "gear");
     if (!have.pot) addLine("pot", 1, `holds ${pot.cups} cups`, "gear", { pack: `Lodge Deep Camp Dutch Oven, ${pot.qt} qt`, price: pot.price });
