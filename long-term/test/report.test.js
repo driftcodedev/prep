@@ -45,8 +45,8 @@ test("the fishing part: calories and pounds by season, a ring per season, and ev
   assert.equal(rings.items[4].sub, "A year's food for about 2,020 active adults");
   const cal = blocks.find((b) => b.t === "table" && b.head.at(-1) === "Sure (1–5)");
   assert.equal(cal.rows.length, SPECIES.length + 2);
-  assert.deepEqual(cal.rows.at(-2).slice(1, 7).map((c) => c.text), ["263", "288", "656", "1,296", "2,210", "502"]);
-  assert.deepEqual(cal.rows.at(-1).slice(1, 7).map((c) => c.text), ["240", "260", "600", "1,180", "2,020", "460"]);
+  assert.deepEqual(cal.rows.at(-2).slice(1, 7).map((c) => c.text), ["263", "288", "672", "1,296", "2,210", "502"]);
+  assert.deepEqual(cal.rows.at(-1).slice(1, 7).map((c) => c.text), ["240", "260", "610", "1,180", "2,020", "460"]);
   assert.ok(keepsWithNext({ t: "h3" }, cal), "the calories table stays with its heading");
   const lb = blocks.find((b) => b.t === "table" && b.head.at(-1) === "Where the number comes from");
   assert.equal(lb.rows.length, SPECIES.length);

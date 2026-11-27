@@ -305,15 +305,15 @@ test("the scores agreed for each species", () => {
   const score = Object.fromEntries(SPECIES.map((sp) => [sp.id, sp.confidence]));
   assert.deepEqual(score, {
     herring: 3, mackerel: 2, periwinkles: 3, shellfish: 3, scallops: 3, alewives: 4, flounder: 3, codfamily: 3,
-    greencrabs: 2, lobster: 2, sculpin: 2, smelt: 2, silverside: 2, urchins: 1, cucumbers: 1, whelks: 1, pollock: 1, elvers: 1,
+    greencrabs: 2, lobster: 3, sculpin: 2, smelt: 3, silverside: 2, urchins: 1, cucumbers: 1, whelks: 1, pollock: 1, elvers: 1,
   });
 });
 
 test("season totals match the sources-check doc", () => {
   const millionsBySeason = [0, 1, 2, 3, 4, 5].map((b) => Math.round(seasonTotal(SPECIES, "kcal", b) / 1e6));
-  assert.deepEqual(millionsBySeason, [263, 288, 656, 1296, 2210, 502]);
+  assert.deepEqual(millionsBySeason, [263, 288, 672, 1296, 2210, 502]);
   const fed = [0, 1, 2, 3, 4, 5].map((b) => fedText(seasonTotal(SPECIES, "kcal", b)));
-  assert.deepEqual(fed, ["240", "260", "600", "1,180", "2,020", "460"]);
+  assert.deepEqual(fed, ["240", "260", "610", "1,180", "2,020", "460"]);
   assert.ok(Math.abs(adultsFed(1095000) - 1) < 1e-9);
   const herring = SPECIES.find((sp) => sp.id === "herring");
   assert.deepEqual(herring.lb.map((v) => Math.round(v / 1000)), [0, 0, 302, 1107, 3580, 410]);
@@ -326,7 +326,8 @@ test("season totals match the sources-check doc", () => {
   const flounder = SPECIES.find((sp) => sp.id === "flounder");
   assert.deepEqual(flounder.lb.map((v) => Math.round(v / 1000)), [0, 0, 414, 236, 99, 120]);
   const lobster = SPECIES.find((sp) => sp.id === "lobster");
-  assert.deepEqual(lobster.lb.map((v) => (v === null ? null : Math.round(v / 1000))), [null, null, null, 201, 345, null]);
+  // Lobster: May–June is Maine's spring survey scaled to local water by the fall comparison.
+  assert.deepEqual(lobster.lb.map((v) => (v === null ? null : Math.round(v / 1000))), [null, null, 234, 201, 345, null]);
 });
 
 test("each season's ranking adds to 100% and matches the doc's order", () => {
