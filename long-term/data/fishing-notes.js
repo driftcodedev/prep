@@ -57,7 +57,7 @@ export const PROFILES = {
   urchins: { best: "Roe best Nov–Feb", size: "2–3 in across", yield: "Roe 3–12% by season", gear: "Rake, dive or drag; some at the lowest tides", rules: "License; no urchin fishing Apr–Aug; Whiting and Dennys Bays have their own short season", safety: "Roe is poor after spring spawning. The bay's urchins have dropped by about half since 2015–19" },
   cucumbers: { best: "All year", size: "About 0.4–0.5 lb next door in Canada, smaller than in 2004", yield: "Skin and muscle, about 13–32%", gear: "Drag from a boat", rules: "Closed, limited-entry drag fishery", safety: "Lean; very low calories. Most live in deep, fast channels (20–100 m)" },
   whelks: { best: "May–Aug", size: "2–4 in", yield: "about 30% (est.)", gear: "By hand at low tide, baited trap", rules: "Check with DMR", safety: "Can carry toxins from the shellfish they eat" },
-  pollock: { best: "Sep–Oct; around all year", size: "10–14 in (young)", yield: "about 40%", gear: "Rod and jig from breakwaters", rules: "No size or bag limit in Maine waters", safety: "" },
+  pollock: { best: "June–October", size: "Mostly young in the bay, about 2–5 oz", yield: "about 40%", gear: "Rod and jig from breakwaters", rules: "No size or bag limit in Maine waters", safety: "" },
   elvers: { best: "Apr–May", size: "2–3 in, about 2,500 per lb", yield: "100%", gear: "Dip net or fyke net in rivers at night", rules: "License by lottery; quota; Mar 22–Jun 7", safety: "Worth hundreds of dollars a pound today" },
 };
 
@@ -86,6 +86,7 @@ export const METHOD = [
   "Rainbow smelt: the Canadian trawl agrees with the net survey in July–October. The January–April peak comes from the survey's May catch: smelt gather in estuaries in winter and run up Cobscook's streams in spring, but how many is still unchecked.",
   "Green sea urchins: DMR's spring dive survey for the Cobscook–Passamaquoddy area, which covers rock and gravel down to 15 m (52 million sq m). About 3 of every 4 of its dive sites each year are inside Cobscook, and its randomly placed sites put Cobscook at 62–73% of that bottom. DMR's weight per sq m was about 210 g in 2024 and 160 g in 2025 (read off their chart), so Cobscook holds about 14 million lb (11–18 million). Urchins stay put, so every season gets that amount. Calories use roe at 6% of the weight; it runs 3–12% by season and site, so calories could be 190 million to 1.1 billion a season. That spread, and no second method, keep urchins at 2.",
   "Sea cucumbers: the same dive survey finds only 0.02–0.1 per sq m down to 15 m, about 1 million lb (0.4–2.2 million) in shallow water. Most live in deep, fast channels (20–100 m), as in the Canadian fishery next door, and no one has counted those in Cobscook, so the table leaves them blank.",
+  "Whelks and pollock stay blank. DMR has never surveyed whelks; Maine landed about 6,157 lb in 2019, mostly caught by accident in lobster traps, and the Canadian trawl next door caught whelks in only 3 of 190 tows. The net survey caught 43 pollock in 2011–13, which scales to about 2,000–5,000 lb of mostly young fish (under 1 million calories a season), but the Canadian trawl caught 15–100 times fewer.",
   "Alewives: run counts. Scallops: the state survey, 2014–15, as meat.",
   "The net survey only fished in May, June, August and September, so winter and late-fall amounts for those species are filled in from what's known of their habits.",
   "Calories = pounds × meat share × calories per pound of meat (checked against USDA and other food tables). Active adults fed a year = calories ÷ 3,000 a day ÷ 365.",
@@ -142,6 +143,7 @@ export const FISH_SOURCES = [
   ["Maine DMR clam meat-to-shell conversion", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/softshellclam_table.pdf"],
   ["Cobscook Bay Resource Center: facts and figures", "https://cobscook.org/facts"],
   ["Cobscook Bay Resource Center: green crabs and clams", "https://cobscook.org/clams"],
+  ["Maine DMR: whelks (fishery and landings)", "https://www.maine.gov/dmr/fisheries/commercial/fisheries-by-species/whelks"],
   ["Maine DMR sea urchin landings", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/urchin_table.pdf"],
   ["Maine BEACON dive survey explorer (DMR): urchin weight, cucumber counts and dive sites", "https://mainedmr.shinyapps.io/UrchinDiveShiny/"],
   ["Maine DMR 2025 spring dive survey report", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/2025%20MEDMR%20Spring%20Dive%20Survey%20Report.pdf"],

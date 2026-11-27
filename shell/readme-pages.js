@@ -121,45 +121,47 @@ export const PAGES = [
     title: "Nov–Dec food shortage",
     names: ["Food shortage", "Winter food shortage", "Winter shortage", "Can the bay feed everyone", "270 people"],
     html: `
-<p>The Fishing view on the Long Term tab says the bay can feed only about 270 people in November–December. About 7,000 people live around the bay, so on 26 November 2026 Brett asked: will Cobscook Bay still provide enough food for the people who live there? This page keeps the question and the answer, so the number makes sense later.</p>
+<p>The Fishing view on the Long Term tab used to say the bay could feed only about 270 people in November–December. About 7,000 people live around the bay, so on 26 November 2026 Brett asked: will Cobscook Bay still provide enough food for the people who live there? This page keeps the question and the answer. Updated 27 November 2026 to the Fishing view's current numbers, which count everything in the bay rather than a safe yearly catch.</p>
 <h3>The short answer</h3>
-<p><b>No.</b> Fished at a rate it can keep up, the bay alone can't feed everyone who lives around it, especially in winter. But the 270 is narrower than it sounds, and it doesn't mean Cobscook was a bad choice.</p>
-<h3>What the 270 measures</h3>
+<p><b>No.</b> Even if every animal in the bay were caught, the best season, September–October, is a year's food for about 2,450 active adults: about a third of the people who live around it. The leanest, January–February, is about 670, and only about 240 without urchins, the least certain big number. A catch the bay can keep up year after year would be a fraction of this. That doesn't mean Cobscook was a bad choice.</p>
+<h3>What the numbers measure</h3>
 <ul>
-<li><b>Only seafood, only from inside the bay.</b> Fish, shellfish, crabs, urchins and lobster that live in or come into Cobscook Bay.</li>
-<li><b>Only what can be taken every year without wiping a species out.</b> That's 30% of the food-size fish each year (half of the alewife run, so it keeps spawning), and about what's landed today for clams and scallops.</li>
-<li><b>It leaves out</b> seaweed, the open water outside the bay, deer, gardens and your stored food.</li>
-<li><b>A person needs about 2,000 calories a day.</b> People fed = the season's calories ÷ (2,000 × the days in the season).</li>
+<li><b>Only seafood, only from inside the bay.</b> Fish, shellfish, urchins, crabs and lobster that live in or come into Cobscook Bay.</li>
+<li><b>Everything that's there</b> at the start of each season, before anyone fishes. There are no limits or cutoffs yet, so it's a ceiling, not a safe catch.</li>
+<li><b>It leaves out</b> seaweed, the open water outside the bay, deer, gardens and your stored food. Sea cucumbers, whelks, pollock and elvers aren't counted yet.</li>
+<li><b>An active adult needs about 3,000 calories a day.</b> Adults fed = the season's calories ÷ 3,000 ÷ 365. Children and older people eat less, so across a whole town the food would stretch a little further.</li>
+<li><b>Don't add the seasons together.</b> Urchins, clams, periwinkles and scallops stay all year, so each season counts the same animals again.</li>
 </ul>
 <h3>Each season</h3>
 <table>
-<tr><th>Season</th><th>Meat (lb)</th><th>People it could feed</th></tr>
-<tr><td>January–February</td><td>63,000</td><td>about 190</td></tr>
-<tr><td>March–April</td><td>78,000</td><td>about 240</td></tr>
-<tr><td>May–June</td><td>200,000</td><td>about 880</td></tr>
-<tr><td>July–August</td><td>190,000</td><td>about 870</td></tr>
-<tr><td>September–October</td><td>170,000</td><td>about 790</td></tr>
-<tr><td>November–December</td><td>83,000</td><td>about 270</td></tr>
+<tr><th>Season</th><th>Calories (millions)</th><th>Adults fed a year, if all were caught</th><th>Without urchins</th></tr>
+<tr><td>January–February</td><td>731</td><td>about 670</td><td>about 240</td></tr>
+<tr><td>March–April</td><td>756</td><td>about 690</td><td>about 260</td></tr>
+<tr><td>May–June</td><td>1,140</td><td>about 1,040</td><td>about 610</td></tr>
+<tr><td>July–August</td><td>1,764</td><td>about 1,610</td><td>about 1,180</td></tr>
+<tr><td>September–October</td><td>2,678</td><td>about 2,450</td><td>about 2,020</td></tr>
+<tr><td>November–December</td><td>969</td><td>about 890</td><td>about 460</td></tr>
 </table>
-<p>The shortage runs from November to April, not just November–December. January–February is the lowest, at about 190 people.</p>
-<h3>With storage, about 540 people</h3>
-<p>Summer gives about three times what winter does: about 880 people's worth in May–June. Smoke and salt the summer fish, and the year's average comes to about 540 people. That's still only about 8% of the food the roughly 7,000 people around the bay need. Even if these estimates are 3 times too low, it's about a quarter.</p>
-<h3>More can be taken, but only once</h3>
-<p>There's much more in the water than the safe yearly amount, so hungry people could catch far more for a season or two. Then the clam flats are dug out and the fish runs stop coming back, the same pattern as on the <b>Species extinction</b> page. Overfishing early makes the later years worse.</p>
+<p>The lean stretch is January to April, and January–February is the lowest. November–December is now in the middle, at about 890, because urchins make up about half of it and the end of the herring run adds about a fifth. Urchins score only 2 out of 5 for how sure the number is (it could be off 3–10 times), so the "without urchins" column is the cautious reading.</p>
+<h3>Fall is the peak, and it doesn't keep</h3>
+<p>September–October holds more than 3½ times what January–February does. More than half of it is herring, with mackerel next, and both leave the bay by winter. Smoking and salting the fall catch is what carries a household into spring. Herring also swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).</p>
+<h3>Catching it all works only once</h3>
+<p>These numbers are everything in the water at once. Hungry people could catch a big share of it for a season or two. Then the clam flats are dug out, the urchin beds are stripped and the fish runs stop coming back, the same pattern as on the <b>Species extinction</b> page. The bay's urchins have already about halved since 2015–19. Overfishing early makes the later years worse.</p>
 <h3>Why Cobscook still makes sense</h3>
 <ul>
-<li><b>Inland is worse.</b> Any town of 7,000 can feed only a fraction of its people from its own land and water, and most have no ocean at all. Here, shellfish can be dug all winter, when inland lakes are frozen.</li>
+<li><b>Inland is worse.</b> Any town of 7,000 can feed only a fraction of its people from its own land and water, and most have no ocean at all. Here, shellfish and urchins are there all winter, when inland lakes are frozen.</li>
 <li><b>The bay isn't the only food.</b> Deer, a garden (about 5½ months of growing season), seaweed and stored food all add to it. With a boat, there's also the open water of Passamaquoddy Bay and the Gulf of Maine. Eastport and Lubec boats already catch most of their lobster and herring out there.</li>
-<li><b>It's a big advantage for one household.</b> One person's harvest is a tiny share of 540 people's worth. A family that knows when to fish what, and preserves the summer catch, does far better than most.</li>
-<li><b>Winter is still the hard part.</b> November to April is when the bay falls short, so it's what your stored food (the Short Term plan) should be sized to cover.</li>
+<li><b>It's a big advantage for one household.</b> One family's harvest is a tiny share of what the bay holds. A family that knows when to fish what, and preserves the fall catch, does far better than most.</li>
+<li><b>Winter is still the hard part.</b> November to April is when the bay is leanest, January–April most of all, so it's what your stored food (the Short Term plan) should be sized to cover.</li>
 </ul>
 <h3>Not worked out yet</h3>
 <ul>
-<li>Adding the 540-with-storage figure and a "share of the population" line to the Fishing page.</li>
+<li>How much can be taken each year without wiping a species out. The Fishing view leaves this out until fishing methods are chosen.</li>
 <li>How much a garden and deer would add.</li>
+<li>Cobscook's own urchin counts and roe, which DMR has and could share on request.</li>
 </ul>
 <h3>Where the numbers come from</h3>
-<p>The fishing model behind the Fishing view; its method and sources are at the bottom of that view and in the paper copy. Most numbers are estimates, and the winter fish and most shellfish are rough guesses. The 7,000 people is the Cobscook Bay Resource Center's count for the nine communities around the bay (see <b>Why Cobscook Bay</b>).</p>
+<p>The Fishing view on the Long Term tab. Its method and sources are at the bottom of that view, in the paper copy and in Brett's sources doc. Each species has a 1–5 score for how sure its number is: alewives are a 4; urchins, mackerel, green crabs, sculpin and silverside are 2s; the rest are 3s. The 7,000 people is the Cobscook Bay Resource Center's count for the nine communities around the bay (see <b>Why Cobscook Bay</b>).</p>
 `,
   },
   {

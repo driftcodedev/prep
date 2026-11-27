@@ -148,10 +148,16 @@ SP = [
     # (0.4-2.2) in shallow water. Most live in deep, fast channels (20-100 m) that no one has counted here.
     dict(id="cucumbers", name="Sea cucumbers", short="sea cucumbers", group="urchins", conf=1, lb=NONE, meat=None, kcal=160,
          source="At least about 1 million lb in shallow water; the main beds are deeper and uncounted"),
+    # Whelks: DMR has never surveyed them; Maine landed about 6,157 lb in 2019, mostly lobster bycatch.
+    # The Canadian Passamaquoddy trawl caught whelks in 3 of 190 tows (about 0.2 kg in all).
     dict(id="whelks", name="Whelks", short="whelks", group="shellfish", conf=1, lb=NONE, meat=None, kcal=330,
-         source="No count in the bay"),
+         source="No count in the bay. DMR has never surveyed whelks, and the Canadian trawl next door caught them in only 3 of 190 tows"),
+    # Pollock: the net survey caught 43 in 2011-13 (June 12, August 17, September 14). Scaled like the
+    # other survey fish at the trawl's 2-5 oz a fish, that's about 2,000-5,000 lb, under 1 million
+    # calories a season. The Canadian trawl caught 13 in 184 summer and fall tows, about 40-240 lb:
+    # 15-100x lower. Too far apart to score, so pollock stays blank.
     dict(id="pollock", name="Pollock", short="pollock", group="fish", conf=1, lb=NONE, meat=None, kcal=417,
-         source="No count in the bay"),
+         source="Few and mostly young: the net survey suggests a few thousand pounds in summer and fall; the trawl next door found far fewer"),
     dict(id="elvers", name="Elvers (baby eels)", short="elvers", group="fish", conf=1, lb=NONE, meat=None, kcal=680,
          source="No count in the bay"),
 ]
