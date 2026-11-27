@@ -3,7 +3,7 @@ import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor, TUB_NAMES, withHave, HL_START, HL_END, PLAN_NOTE, GEAR_INTRO,
+  COOK_HABITS, WEIGH_MUSCLE, FRIDGE_LEAD, FRIDGE_NOTES, FRIDGE_SOURCES, keepsTable, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor, TUB_NAMES, withHave, HL_START, HL_END, PLAN_NOTE, GEAR_INTRO,
 } from "./content.js";
 
 const STORAGE_KEY = "prep-household-v1";
@@ -266,6 +266,8 @@ function cookingBody(hh) {
     <ol class="steps">${d.steps.map((st) => `<li>${markPlan(st)}</li>`).join("")}</ol>
     <p>${esc(d.servingLeadTable)}</p>
     <p>${esc(d.note)}</p>` : ""}
+    <h3 class="sub-title">Eating it every day</h3>
+    ${leadList(COOK_HABITS)}
     <p class="muted">${esc(COOK_NOTE)}</p>`;
 }
 
@@ -416,11 +418,23 @@ function printGearSection(hh) {
   </section>`;
 }
 
+const sourceLinks = (list) => list.map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>`).join(", ");
+
 function keepsBody(hh) {
+  const rows = keepsTable(hh);
   return `
     <p class="keeps-lead">${esc(KEEPS_LEAD)}</p>
+    ${rows.length ? `
+    <div class="table-scroll"><table class="data keeps-table">
+      <thead><tr><th scope="col">Food on your list</th><th scope="col">Keeps, unopened, somewhere cool and dry</th></tr></thead>
+      <tbody>${rows.map(([food, keeps]) => `<tr><th scope="row">${esc(food)}</th><td>${esc(keeps)}</td></tr>`).join("")}</tbody>
+    </table></div>` : ""}
     ${leadList(keepsNotes(hh))}
-    <p class="sources">Shelf-life sources: ${KEEPS_SOURCES.map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>`).join(", ")}.</p>`;
+    <p class="sources">Shelf-life sources: ${sourceLinks(KEEPS_SOURCES)}.</p>
+    <h3 class="sub-title">Fridge and freezer food after the grid goes down</h3>
+    <p>${esc(FRIDGE_LEAD)}</p>
+    ${leadList(FRIDGE_NOTES)}
+    <p class="sources">Sources: ${sourceLinks(FRIDGE_SOURCES)}.</p>`;
 }
 
 function rulesBody(hh) {
@@ -433,12 +447,12 @@ function rulesBody(hh) {
       <thead><tr><th scope="col">If you're</th><th scope="col">And the scale shows</th><th scope="col">Do this</th></tr></thead>
       <tbody>${WEIGH_RULES.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>
     </table></div>` : ""}
-    ${hasKids ? `<p>${esc(WEIGH_KIDS)}</p>` : ""}`;
+    ${hasKids ? `<p>${esc(WEIGH_KIDS)}</p>` : ""}
+    ${hasAdults ? `<p><strong>${esc(WEIGH_MUSCLE.lead)}:</strong> ${esc(WEIGH_MUSCLE.text)}</p>` : ""}`;
 }
 
 const leadList = (items) => `<ul class="plain">${items.map((it) => `<li><strong>${esc(it.lead)}:</strong> ${esc(it.text)}</li>`).join("")}</ul>`;
 
-const careBody = () => leadList(CARE);
 
 function aboutBody() {
   return `
@@ -449,10 +463,9 @@ function aboutBody() {
 
 // The guides at the very bottom, folded so the page stays short. Tap a heading to open it.
 const MORE = [
-  ["cook", "Cooking For Everyone", cookingBody],
-  ["keeps", "How Long It Keeps", keepsBody],
+  ["cook", "Cooking", cookingBody],
+  ["keeps", "Shelf Life", keepsBody],
   ["rules", "Weekly Weigh-In", rulesBody],
-  ["care", "Cooking And Storage", careBody],
   ["about", "How The Numbers Are Worked Out", aboutBody],
 ];
 const openMore = new Set(); // which ones are open, so they stay open when the page redraws

@@ -689,10 +689,10 @@ export const PAGES = [
 <h3>What you get</h3>
 <ul>
 <li><b>Daily amounts:</b> a card for each person in level cups and spoons, plus how much water to drink.</li>
-<li><b>Cooking for everyone:</b> how much dry rice and beans to cook each day, each person's share, and how to cook it all in one pot.</li>
-<li><b>Shopping list:</b> rounded up to whole packages, with prices and links.</li>
-<li><b>Fire, water and cooking:</b> lighters, water filters, a pot, a tripod and the rest of the gear.</li>
-<li><b>Weekly weigh-in:</b> how to adjust the amounts using a bathroom scale.</li>
+<li><b>Shopping list:</b> rounded up to whole packages, with prices and links. <b>Why?</b> next to the gear explains what it's for and how to use it.</li>
+<li><b>Cooking:</b> how much dry rice and beans to cook each day, each person's share, and how to cook it over a fire or all in one pot.</li>
+<li><b>Shelf Life:</b> how long each food keeps, and what to do with the fridge and freezer when the power goes out.</li>
+<li><b>Weekly Weigh-In:</b> how to adjust the amounts using a bathroom scale.</li>
 </ul>
 <h3>Keep a paper copy</h3>
 <p>At the end of the plan, press <b>Print the full report</b> or <b>Download PDF</b>.</p>
@@ -710,7 +710,7 @@ export const PAGES = [
 <li><b>Babies under 1</b> get formula by weight, iron-fortified infant cereal from 6 months, and mashed rice and beans from 8 months. At the first birthday they move to the toddler amounts.</li>
 <li><b>Pregnant and breastfeeding women</b> never get a weight-loss ration, and get extra food. A breastfeeding mother's extra follows her baby: half if the baby also has formula, and it stops at the baby's first birthday.</li>
 </ul>
-<p>The numbers are estimates. The <b>Weekly weigh-in</b> rules on the page say how to adjust them from what the scale shows. <b>How the numbers are worked out</b>, at the end of the plan, lists the sources.</p>
+<p>The numbers are estimates. The <b>Weekly Weigh-In</b> rules on the page say how to adjust them from what the scale shows. <b>How The Numbers Are Worked Out</b>, at the end of the plan, lists the sources.</p>
 `,
   },
   {

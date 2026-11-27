@@ -218,8 +218,8 @@ export function cookingData(hh) {
   const water = [
     { label: "What a simmer looks like", text: "small, lazy bubbles breaking the surface every second or two, with steam rising. A boil is big bubbles churning the whole pot. Over a fire, hang the pot low on the tripod chain to bring it to a boil, then raise it a few links to hold a simmer. With no tripod, slide the pot to the edge of the fire or let it burn down to glowing coals. If it starts boiling hard again, raise the pot; if the bubbles stop, lower it." },
     { label: "Hearing the boil", text: "drop the Pot Minder disc into the empty pot before the water and food. It chatters against the bottom when the pot boils. It works best with plain water and beans; with rice it chatters at the first boil, then goes quiet as the rice soaks up the water. Fish it out before serving." },
-    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water makes about ${cupsText(c.riceCooked)} cooked. Bring it to a boil and stir once so no grains stick to the bottom. Put the lid on, raise the pot to a simmer and set a 20-minute timer. Don't stir again or lift the lid until the timer goes off: stirring makes rice gummy and lets the steam out. It's done when you tilt the pot and no water runs, and the grains are soft. If water is left, give it 5 more minutes; if you smell scorching, take it off the heat. Let it sit off the fire with the lid on for 10 minutes. Nothing gets poured away.` },
-    { label: "Beans", text: `${cupsText(c.beans)} of dry beans makes about ${cupsText(c.beansCooked)} cooked. Soak them overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water and drain; save that water for washing or flushing. Cover with ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, boil hard for at least 10 minutes on a timer, then simmer with the lid on for 1½–2 hours. Check every 30 minutes: give them a stir and add water so the beans stay covered. They're done when a bean squashes easily against the side of the pot and is creamy inside, with no chalky center.` },
+    { label: "Rice", text: `${cupsText(c.rice)} of dry rice in ${cupsText(c.rice * COOK_WATER.rice)} of water makes about ${cupsText(c.riceCooked)} cooked. Don't rinse it first: rinsing washes off the added iron and B vitamins. Bring it to a boil and stir once so no grains stick to the bottom. Put the lid on, raise the pot to a simmer and set a 20-minute timer. Don't stir again or lift the lid until the timer goes off: stirring makes rice gummy and lets the steam out. It's done when you tilt the pot and no water runs, and the grains are soft. If water is left, give it 5 more minutes; if you smell scorching, take it off the heat. Let it sit off the fire with the lid on for 10 minutes. Nothing gets poured away.` },
+    { label: "Beans", text: `${cupsText(c.beans)} of dry beans makes about ${cupsText(c.beansCooked)} cooked. Soak them overnight in ${cupsText(c.beans * COOK_WATER.beansSoak)} of water and drain; save that water for washing or flushing. Cover with ${cupsText(c.beans * COOK_WATER.beansCook)} of fresh water, boil hard for at least 10 minutes on a timer, then simmer with the lid on for 1½–2 hours. Check every 30 minutes: give them a stir and add water so the beans stay covered. They're done when a bean squashes easily against the side of the pot and is creamy inside, with no chalky center. A pressure cooker saves a lot of fuel and water.` },
     { label: "Oats", text: `${cupsText(c.oats)} of oats in ${cupsText(c.oats * COOK_WATER.oats)} of water. Simmer about 5 minutes, stirring, until thick.` },
   ];
   if (c.milk + c.whole > 0) {
@@ -230,7 +230,7 @@ export function cookingData(hh) {
   }
   const formulaOz = hh.plans.reduce((a, pl) => a + (pl.phase1.formula || 0), 0);
   if (formulaOz > 0) water.push({ label: "Formula", text: `about ${hl(`${numOf(formulaOz)} fl oz`)} a day takes ${hl(cupsWord(Math.round(formulaOz * 0.9 / 8 * 4) / 4))} of water. Boil it for 1 minute, then mix exactly as the can says. Make one bottle at a time and use it within 2 hours.` });
-  water.push({ label: "Save wood", text: "once rice has boiled for a minute, or beans have boiled hard for 10, you can take the lidded pot off the fire and wrap it tightly in a blanket or sleeping bag. It keeps cooking in its own heat with no simmering to watch. Check after an hour for rice and 3 hours for beans; if they're not done, bring them back to a boil and wrap again. Eat it hot." });
+  water.push({ label: "Save wood", text: "keep the lid on every pot: it saves water and firewood. Once rice has boiled for a minute, or beans have boiled hard for 10, you can take the lidded pot off the fire and wrap it tightly in a blanket or sleeping bag. It keeps cooking in its own heat with no simmering to watch. Check after an hour for rice and 3 hours for beans; if they're not done, bring them back to a boil and wrap again. Eat it hot." });
   return {
     rice: `${cupsText(c.rice)} of dry rice`,
     beans: `${cupsText(c.beans)} of dry beans`,
@@ -635,8 +635,29 @@ export function cardKeyFor(lineKey) {
   return ["lighters", "axe", "bladder", "diverter", "pot", "tripod", "disc", "timer"].includes(lineKey) ? lineKey : null;
 }
 
+// The fridge and freezer the day the power goes out (FoodSafety.gov, USDA, CDC, FDA).
+export const FRIDGE_LEAD = "Eat what's in the fridge and freezer before opening the stored food. Keep the doors shut as much as you can.";
+export const FRIDGE_NOTES = [
+  { lead: "How long they stay cold", text: "With the doors shut, a fridge keeps food safe for about 4 hours, a full freezer about 48 hours and a half-full one about 24." },
+  { lead: "Eat it in order", text: "The fridge food first, the freezer food over the next day or two, then the rice and beans." },
+  { lead: "Throw out after 4 hours without power", text: "Meat, poultry, fish, eggs, milk, soft cheese, cooked rice and pasta, and leftovers. Never taste food to check it: when in doubt, throw it out." },
+  { lead: "Fine to keep", text: "Hard cheese, butter, uncut fresh fruit and vegetables, peanut butter, jam, ketchup, mustard and pickles." },
+  { lead: "Thawed freezer food", text: "If it still has ice crystals or is 40°F or colder, it's safe to cook or refreeze." },
+  { lead: "In winter", text: "Fill buckets or jugs with water and set them outside to freeze, then use the ice in the fridge or a cooler." },
+];
+export const FRIDGE_SOURCES = [
+  ["CDC: keep food safe after an emergency", "https://www.cdc.gov/foodsafety/keep-food-safe-after-emergency.html"],
+  ["FoodSafety.gov: when you lose power", "https://www.foodsafety.gov/blog/three-ways-keep-food-safe-when-you-lose-power"],
+  ["FDA: power outages and floods", "https://www.fda.gov/food/buy-store-serve-safe-food/food-and-water-safety-during-power-outages-and-floods"],
+];
+
+// The Shelf Life table: each food on the list and how long it keeps unopened.
+export function keepsTable(hh) {
+  return hh.lines.filter((l) => l.group === "food" && l.keeps).map((l) => [l.item, l.keeps.replace(/^./, (ch) => ch.toUpperCase())]);
+}
+
 // How long the food keeps: the "Keeps ..." line under each item comes from KEEPS in data.js.
-export const KEEPS_LEAD = "If you shop now and the grid goes down a year or two later, some of this will need replacing first. Rice and beans sealed in mylar keep for decades, so you buy them once. Most of the rest keeps about a year. Each item above shows how long it keeps unopened in a cool, dry place.";
+export const KEEPS_LEAD = "If you shop now and the grid goes down a year or two later, some of this will need replacing first. Rice and beans sealed in mylar keep for decades, so you buy them once. Most of the rest keeps about a year. The table shows how long each food on your list keeps.";
 
 export function keepsNotes(hh) {
   const has = (k) => hh.lines.some((l) => l.key === k);
@@ -656,6 +677,7 @@ export function keepsNotes(hh) {
   notes.push({ lead: "Vitamins and salt", text: "Vitamins don't spoil; they slowly get weaker after about 2 years. Salt never goes bad; only the added iodine fades." });
   if (baby) notes.push({ lead: "Baby food is the exception", text: "Never use infant formula past its date, and use an opened container within a month. Go by the printed date for infant cereal and vitamin drops too." });
   if (has("oats") || has("milk")) notes.push({ lead: "To shrink the yearly list", text: "Oats and nonfat dry milk can be sealed in mylar too: BYU found oats good for up to 30 years and nonfat dry milk about 20. The list only buys bags and buckets for the rice and beans, so get extra if you do this." });
+  if (has("buckets")) notes.push({ lead: "Buckets and mylar bags", text: `Sealed in a mylar bag with an oxygen absorber, white rice keeps 10 to 30 years or more and pinto beans up to 30, inside buckets that last for decades and can be reused. Each absorber works only once. Check the buckets once a year: a bag that has gone soft and puffy has a leak, so reseal it with a fresh absorber.` });
   notes.push({ lead: "Keep it cool, dry and dark", text: "A closet works. Avoid the attic, a hot car or anywhere near a radiator: heat shortens every time above." });
   return notes;
 }
@@ -696,16 +718,14 @@ export const WEIGH_RULES = [
 
 export const WEIGH_KIDS = "Weigh children every two weeks. For a child too small to stand on the scale, weigh yourself holding them and subtract your own weight. Children should hold steady or gain. If a child loses weight, add 2 tablespoons of rice or another ½ cup of milk a day.";
 
-export const CARE = [
-  { lead: "Beans", text: "Soak overnight in 5 cups of water per cup of beans, drain, then cook in about 3 cups of fresh water per cup. Boil hard for at least 10 minutes, 30 to be safe, before simmering 1½–2 hours with the lid on. A pressure cooker saves a lot of fuel and water." },
+// Habits for living on rice and beans, at the end of the Cooking section.
+export const COOK_HABITS = [
   { lead: "Start the beans now", text: "Build up to each person's full amount over two to three weeks so stomachs can adjust." },
-  { lead: "Rice", text: "Don't rinse it: rinsing washes off the added iron and B vitamins. Cook it in 2 cups of water per cup of rice with the lid on, so it soaks up all the water." },
-  { lead: "Water and fuel", text: "Cooking For Everyone, above, shows how much water your household uses each day. Keep the lid on every pot to save water and firewood." },
   { lead: "Vitamins every day", text: "Rice and beans have no vitamin C, and scurvy can start after about four weeks without it. Keep the vitamin C bottle as a backup." },
-  { lead: "Keep your muscle", text: "Push-ups, squats and lunges two or three times a week help anyone who is losing weight hold onto muscle." },
-  { lead: "Storage", text: "Rice and beans sealed in mylar with an oxygen absorber keep for decades. Oil, peanut butter, oats, dry milk and vitamins keep about a year, so replace them yearly. The shopping list shows how long each item keeps." },
-  { lead: "Print this page", text: "A phone or laptop won't help once the batteries die. Print a copy or save the PDF and print it later." },
 ];
+
+// Under the weigh-in rules.
+export const WEIGH_MUSCLE = { lead: "Keep your muscle", text: "Push-ups, squats and lunges two or three times a week help anyone who is losing weight hold onto muscle." };
 
 export const ABOUT = [
   { lead: "Healthy weight", text: "Adults above the CDC's healthy range (BMI 18.5–24.9) are planned down to BMI 24.4, the top of that range. Below it, they're planned up to BMI 18.5. Each person's card on the website has a switch to keep the current weight instead." },

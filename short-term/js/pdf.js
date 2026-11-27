@@ -3,7 +3,7 @@ import { PRICES_CHECKED } from "./data.js";
 import {
   money, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEOS, GEAR_INTRO,
+  COOK_HABITS, WEIGH_MUSCLE, FRIDGE_LEAD, FRIDGE_NOTES, FRIDGE_SOURCES, keepsTable, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEOS, GEAR_INTRO,
 } from "./content.js";
 
 const C = { ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", bean: "#8a4632", beanTint: "#f5e8e1", lidTint: "#ddeaf0", money: "#2a7a3b" };
@@ -15,6 +15,9 @@ const t = (s) => String(s ?? "").replace(/[\uE000\uE001]/g, "").replace(/⅓/g, 
 const h2 = (text, opts = {}) => ({ text: t(text), style: "h2", headlineLevel: 1, ...opts });
 const para = (text, opts = {}) => ({ text: typeof text === "string" ? t(text) : text, style: "p", ...opts });
 const bullets = (items, opts = {}) => ({ ul: items.map((x) => (typeof x === "string" ? t(x) : x)), style: "p", markerColor: C.lid, ...opts });
+const sourcesPara = (label, list) => para([{ text: label, bold: true }, ...list.flatMap(([name, url], i) => [
+  { text: t(name), link: url, color: C.lid, decoration: "underline" }, i < list.length - 1 ? ", " : ".",
+])], { fontSize: 8.5 });
 const leadBullets = (items) => bullets(items.map((it) => ({ text: [{ text: `${t(it.lead)}: `, bold: true }, t(it.text)] })));
 
 const tableLayout = {
@@ -100,7 +103,7 @@ function cooking(hh) {
   const share = d ? new Map(d.rows) : null;
   const head = d ? [...c.head, "Or all in one pot"] : c.head;
   return [
-    h2("Cooking For Everyone"),
+    h2("Cooking"),
     para([{ text: "Each day, cook " }, { text: t(c.rice), bold: true }, " and ", { text: t(c.beans), bold: true }, ` ${t(c.rest)}`]),
     dataTable(head, [...c.rows, c.total].map((r, i, all) => {
       const bold = i === all.length - 1;
@@ -115,6 +118,7 @@ function cooking(hh) {
     bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
     para(c.waterTotal),
     ...onePot(d),
+    { stack: [{ text: "Eating it every day", style: "h3", margin: [0, 4, 0, 3] }, leadBullets(COOK_HABITS)], unbreakable: true, headlineLevel: 1 },
     para(COOK_NOTE, { color: C.ink2 }),
   ].filter(Boolean);
 }
@@ -165,11 +169,13 @@ function shopping(hh) {
   }
   out.push(bullets(shoppingNotes(hh), { margin: [0, 8, 0, 0], color: C.ink2 }));
   out.push(
-    { stack: [{ text: "How Long It Keeps", style: "h3", margin: [0, 8, 0, 3] }, para(KEEPS_LEAD)], unbreakable: true, headlineLevel: 1 },
+    { stack: [{ text: "Shelf Life", style: "h3", margin: [0, 8, 0, 3] }, para(KEEPS_LEAD)], unbreakable: true, headlineLevel: 1 },
+    ...(keepsTable(hh).length ? [dataTable(["Food on your list", "Keeps, unopened, somewhere cool and dry"], keepsTable(hh).map(([food, keeps]) => [{ text: t(food), bold: true }, t(keeps)]), [170, "*"])] : []),
     leadBullets(keepsNotes(hh)),
-    para([{ text: "Shelf-life sources: ", bold: true }, ...KEEPS_SOURCES.flatMap(([label, url], i) => [
-      { text: t(label), link: url, color: C.lid, decoration: "underline" }, i < KEEPS_SOURCES.length - 1 ? ", " : ".",
-    ])], { fontSize: 8.5 }),
+    sourcesPara("Shelf-life sources: ", KEEPS_SOURCES),
+    { stack: [{ text: "Fridge and freezer food after the grid goes down", style: "h3", margin: [0, 8, 0, 3] }, para(FRIDGE_LEAD)], unbreakable: true, headlineLevel: 1 },
+    leadBullets(FRIDGE_NOTES),
+    sourcesPara("Sources: ", FRIDGE_SOURCES),
   );
   return out;
 }
@@ -219,6 +225,7 @@ function weighIn(hh) {
     { stack: [h2("Weekly Weigh-In"), para(WEIGH_INTRO)], unbreakable: true },
     hasAdults ? dataTable(["If you're", "And the scale shows", "Do this"], WEIGH_RULES, [90, "*", "*"]) : null,
     hasKids ? para(WEIGH_KIDS) : null,
+    hasAdults ? para([{ text: `${t(WEIGH_MUSCLE.lead)}: `, bold: true }, t(WEIGH_MUSCLE.text)]) : null,
   ].filter(Boolean);
 }
 
@@ -248,8 +255,6 @@ export function buildPdf(hh, { date = "" } = {}) {
     ...shopping(hh),
     ...gear(hh),
     ...weighIn(hh),
-    h2("Cooking And Storage"),
-    leadBullets(CARE),
     h2("How The Numbers Are Worked Out"),
     leadBullets(ABOUT),
     para([{ text: "Sources: ", bold: true }, ...SOURCES.flatMap(([label, url], i) => [

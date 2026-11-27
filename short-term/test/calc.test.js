@@ -238,7 +238,10 @@ test("The PDF reads right on paper: no page-only wording, and it says what was l
     const text = JSON.stringify(buildPdf(hh, { date: "today" }).content);
     for (const bad of ["Why?", "Tick ", "Tap ", "in its row", "at the top of the page", "Each card has a switch", "pick it at the top"]) assert.ok(!text.includes(bad), `${tub}: ${bad}`);
     assert.ok(text.includes("Left off because you already have them: "));
-    assert.ok(!JSON.stringify(buildPdf({ ...hh, ownedItems: [] }, { date: "today" }).content).includes("White rice"), "owned food isn't printed in the list");
+    // Owned food leaves the shopping table (it stays in the Shelf Life table: it still has to keep).
+    const count = (x) => (JSON.stringify(buildPdf({ ...x, ownedItems: [] }, { date: "today" }).content).match(/White rice/g) || []).length;
+    const full = planHousehold({ months: 6, people: [brett, kid], tub, owned: { pot: true } });
+    assert.equal(count(hh), count(full) - 1, "owned food isn't printed in the shopping list");
     // Open tub water isn't safe to drink as it is, so milk water only comes from the sealed bag.
     assert.equal(text.includes("or water from the waterBOB"), tub === "bladder");
   }
@@ -254,7 +257,7 @@ test("PDF definition covers the whole report and avoids missing glyphs", () => {
   const hh = planHousehold({ months: 6, people: [brett, { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }] });
   const doc = buildPdf(hh, { date: "November 23, 2026" });
   const text = JSON.stringify(doc.content);
-  for (const heading of ["Daily amounts", "Cooking For Everyone", "Or all in one pot", "Cooking over a fire", "Shopping List Grand Total", "How Long It Keeps", "Fire, Water, Cooking And Storage", "Storage: mylar bags, oxygen absorbers and buckets", "How many absorbers", "Weekly Weigh-In", "Cooking And Storage", "How The Numbers Are Worked Out"]) {
+  for (const heading of ["Daily amounts", "Cooking", "Or all in one pot", "Cooking over a fire", "Eating it every day", "Shopping List Grand Total", "Shelf Life", "Fridge and freezer food after the grid goes down", "Fire, Water, Cooking And Storage", "Storage: mylar bags, oxygen absorbers and buckets", "How many absorbers", "Weekly Weigh-In", "Keep your muscle", "How The Numbers Are Worked Out"]) {
     assert.ok(text.includes(heading), heading);
   }
   assert.ok(!/[⅓⅔]/.test(text));
