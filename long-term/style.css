@@ -356,6 +356,10 @@
 #lt-root .ltf-sp::after { content: "▸"; margin-left: 0.25rem; color: var(--lid); font-size: 0.8em; }
 #lt-root .ltf-sp[aria-expanded="true"]::after { content: "▾"; }
 #lt-root .ltf-sp-sub { display: block; margin: 0.1rem 0 0 0.8rem; font-size: 0.85em; font-weight: 400; color: var(--ink-2); line-height: 1.2; }
+#lt-root .ltn-video { margin: 0 0 1.5rem; max-width: 720px; }
+#lt-root .ltn-video-frame { position: relative; aspect-ratio: 16 / 9; background: #111; border-radius: var(--radius); overflow: hidden; }
+#lt-root .ltn-video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+#lt-root .ltn-video figcaption { margin-top: 0.35rem; font-size: 0.78rem; color: var(--ink-2); }
 #lt-root .ltn-empty { margin: 0; padding: 0.9rem 1rem; font-size: 0.92rem; color: var(--ink-2); }
 #lt-root .ltn-note { margin-top: 0.6rem; max-width: 62ch; }
 #lt-root .ltf-sp:focus-visible { outline: 2px solid var(--lid); outline-offset: 2px; border-radius: 3px; }

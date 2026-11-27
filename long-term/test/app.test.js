@@ -268,7 +268,7 @@ import {
   counted, seasonTotal, adultsFed, fedText, seasonRanking, sortRows, bestOf, cellText, rankingText, donutSlices, herringCatch,
   meatText, round2, millions, thousands, caloriesText, poundsText, pct, drawTable, renderFishing, seasonOfDate,
   photoSrc, photoPage, photosHtml, cleanPicks, isPicked, togglePick, pickCount, pickText,
-  netRows, targetTotal, renderNetting, drawFindings,
+  netRows, targetTotal, renderNetting, drawFindings, videoHtml,
 } from "../js/fishing.js";
 
 test("the tab has Map, Fishing and Netting views, Map first", () => {
@@ -606,4 +606,21 @@ test("netting findings: a collapsed section per species in the table, titled wit
   // The page has a place for them under the table, before the notes.
   const page = renderNetting();
   assert.ok(page.indexOf("data-table") < page.indexOf("data-findings") && page.indexOf("data-findings") < page.indexOf("Not shown here"));
+});
+
+test("netting video: plays on the page, above the heading, and loads only when shown", () => {
+  const page = renderNetting();
+  const v = NET_PAGE.video;
+  assert.equal(v.id, "Ac8TSC8w35w");
+  assert.match(page, /<iframe src="https:\/\/www\.youtube-nocookie\.com\/embed\/Ac8TSC8w35w\?rel=0"/);
+  assert.match(page, /title="Every Commercial Fishing Net Explained"/);
+  assert.match(page, /loading="lazy"/);
+  assert.match(page, /allowfullscreen/);
+  // YouTube's player won't play if the referrer is stripped.
+  assert.ok(!/<iframe[^>]*no-referrer/.test(page));
+  assert.ok(page.indexOf("<iframe") < page.indexOf('id="ltn-heading"'), "the video sits above the Netting heading");
+  // A bad id draws nothing rather than a broken player; titles are escaped.
+  assert.equal(videoHtml({ id: "bad id", title: "x", channel: "y" }), "");
+  assert.equal(videoHtml(null), "");
+  assert.match(videoHtml({ id: "Ac8TSC8w35w", title: "<b>", channel: "c" }), /title="&lt;b&gt;"/);
 });

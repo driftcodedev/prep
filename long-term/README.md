@@ -203,6 +203,11 @@ is shown, so opening straight to Fishing doesn't download it.
   the share of the whole bay's season. Its radio names and notes-row ids start `ltn-` so they don't
   clash with the Fishing view's `ltf-` ones. The paper copy doesn't include it, since targets live
   in one browser.
+- **Netting video:** at the top of the Netting tab, above its heading, a YouTube video plays on the
+  page ("Every Commercial Fishing Net Explained", Fisherman Explains). It's set in `NET_PAGE.video`
+  (id, title, channel) and drawn by `videoHtml()` as a youtube-nocookie embed with
+  `loading="lazy"`, so nothing loads until the tab is shown. Keep the iframe's referrer on: YouTube's
+  player refuses to play when the referrer is stripped.
 - **Netting findings:** under the Netting table, each species in it gets a collapsed section titled
   with its name and "netting" ("Atlantic herring netting"), in the species list's order
   (`drawFindings()`). What goes in each is `NET_FINDINGS` in `data/fishing-notes.js`: a list of

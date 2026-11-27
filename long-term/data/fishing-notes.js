@@ -19,6 +19,8 @@ export const NET_PAGE = {
   notShown: "Not shown here: lobster, green crabs and whelks, which are caught in traps, and clams, mussels, periwinkles, scallops, urchins and sea cucumbers, which are taken by hand or drag.",
   more: "Which nets, what size, how many and how to hide them: the Nets and traps page under the README button.",
   noFindings: "No findings yet.",
+  // A YouTube video at the top of the tab, played on the page (youtube-nocookie embed).
+  video: { id: "Ac8TSC8w35w", title: "Every Commercial Fishing Net Explained", channel: "Fisherman Explains" },
 };
 
 // What we find out about netting each species. Under the Netting table, each species in it gets a

@@ -419,12 +419,27 @@ export function drawFindings(rows, findings = NET_FINDINGS, page = NET_PAGE) {
   }).join("");
 }
 
-// The Netting view's static page: heading, the same controls (their own radio names), the table area.
+// A YouTube video that plays on the page. youtube-nocookie keeps YouTube's cookies off until it's
+// played; loading="lazy" means nothing loads until the Netting tab is shown. The page's referrer is
+// left on, since YouTube's player refuses to play without it.
+export function videoHtml(video) {
+  if (!video || !/^[\w-]{11}$/.test(video.id)) return "";
+  const src = `https://www.youtube-nocookie.com/embed/${video.id}?rel=0`;
+  return `
+      <figure class="ltn-video">
+        <div class="ltn-video-frame">
+          <iframe src="${esc(src)}" title="${esc(video.title)}" loading="lazy" allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+        <figcaption>${esc(video.title)}, from ${esc(video.channel)} on YouTube.</figcaption>
+      </figure>`;
+}
+
+// The Netting view's static page: the video, heading, the same controls (their own radio names), the table area.
 export function renderNetting(page = NET_PAGE) {
   const seg = (name, options) => options.map(([v, label], i) => `
           <label class="ltm-seg-item"><input type="radio" name="${name}" value="${esc(v)}"${i === 0 ? " checked" : ""}><span>${esc(label)}</span></label>`).join("");
   return `
-    <section class="ltf ltn" aria-labelledby="ltn-heading">
+    <section class="ltf ltn" aria-labelledby="ltn-heading">${videoHtml(page.video)}
       <h2 id="ltn-heading" class="section-title">${esc(page.heading)}</h2>
       <p class="muted ltf-intro">${esc(page.intro)}</p>
 
