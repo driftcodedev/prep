@@ -34,7 +34,6 @@ const OWNED = [
   ["hasLighters", "Lighters"],
   ["hasFilters", "Water filters"],
   ["hasAxe", "Axe"],
-  ["hasBladder", "Water bladder"],
   ["hasDiverter", "Rain diverter"],
   ["hasTimer", "Battery-free timer"],
   ["hasPot", "Big pot for the fire"],
@@ -44,6 +43,10 @@ const OWNED = [
 
 let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, hasPot: false, hasTripod: false, hasDisc: false, people: [blankPerson()], ...(load() || {}) };
 if (!STORE_PLANS[state.store]) state.store = "costco";
+// Bathtub water: buy the waterBOB bag, buy the V-TOP drain cover, or already have one.
+// (Older saves only had the hasBladder tick box.)
+const TUB_CHOICES = [["bladder", "waterBOB bag"], ["drainCover", "V-TOP drain cover"], ["have", "Already have one"]];
+if (!TUB_CHOICES.some(([k]) => k === state.tub)) state.tub = state.hasBladder ? "have" : "bladder";
 
 function load() {
   try {
@@ -387,10 +390,10 @@ function scheduleRender() {
 function renderResults() {
   const people = state.people.map(toPerson);
   const hh = planHousehold({
-    months: state.months, reservePct: state.reserve, store: state.store, people,
+    months: state.months, reservePct: state.reserve, store: state.store, tub: state.tub, people,
     owned: {
       scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe,
-      bladder: !!state.hasBladder, diverter: !!state.hasDiverter, timer: !!state.hasTimer,
+      bladder: state.tub === "have", diverter: !!state.hasDiverter, timer: !!state.hasTimer,
       pot: !!state.hasPot, tripod: !!state.hasTripod, disc: !!state.hasDisc,
     },
   });
@@ -485,12 +488,15 @@ function init() {
   $("#store").innerHTML = Object.entries(STORE_PLANS)
     .map(([k, sp]) => `<option value="${k}"${k === state.store ? " selected" : ""}>${sp.choice}</option>`).join("");
   $("#owned").innerHTML = OWNED.map(([k, label]) =>
-    `<label class="check"><input type="checkbox" data-owned="${k}"${state[k] ? " checked" : ""}><span>${label}</span></label>`).join("");
+    `<label class="check"><input type="checkbox" data-owned="${k}"${state[k] ? " checked" : ""}><span>${label}</span></label>`).join("") +
+    `<div class="owned-choice" role="radiogroup" aria-labelledby="tub-label"><span id="tub-label" class="owned-choice-label">Bathtub water:</span>${
+      TUB_CHOICES.map(([k, label]) => `<label class="check"><input type="radio" name="tub" value="${k}"${state.tub === k ? " checked" : ""}><span>${label}</span></label>`).join("")}</div>`;
 
   $("#months").addEventListener("change", (e) => { state.months = Number(e.target.value); save(); scheduleRender(); });
   $("#reserve").addEventListener("change", (e) => { state.reserve = Number(e.target.value); save(); scheduleRender(); });
   $("#store").addEventListener("change", (e) => { state.store = e.target.value; save(); scheduleRender(); });
   $("#owned").addEventListener("change", (e) => {
+    if (e.target.name === "tub") { state.tub = e.target.value; save(); scheduleRender(); return; }
     const k = e.target.dataset.owned;
     if (!k) return;
     state[k] = e.target.checked; save(); scheduleRender();

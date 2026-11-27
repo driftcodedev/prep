@@ -544,7 +544,8 @@ export function linkNursing(people) {
   });
 }
 
-export function planHousehold({ months, reservePct = 20, store = "costco", owned = {}, hasScale = false, people }) {
+// tub: which bathtub water option goes on the list, the waterBOB bag ("bladder") or the V-TOP drain cover ("drainCover").
+export function planHousehold({ months, reservePct = 20, store = "costco", owned = {}, hasScale = false, tub = "bladder", people }) {
   const days = Math.round(months * 30.4);
   const reserve = 1 + reservePct / 100;
   const valid = people.filter((p) => validatePerson(p).length === 0);
@@ -583,7 +584,8 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   const eaters = plans.filter((pl) => (pl.phase1.rice || 0) + (pl.phase1.beans || 0) > 0).length;
   const pot = potFor(cook, eaters);
 
-  const ctx = { plans, sum, supp, grams, reserve, strawPeople, have, pot };
+  const tubKey = tub === "drainCover" ? "drainCover" : "bladder";
+  const ctx = { plans, sum, supp, grams, reserve, strawPeople, have, pot, tub: tubKey };
   const shop = shoppingFor(ctx, productsFor(store));
   const otherStore = store === "walmart" ? "costco" : "walmart";
   const other = plans.length ? { store: otherStore, total: shoppingFor(ctx, productsFor(otherStore)).total } : null;
@@ -614,7 +616,7 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   };
 
   return {
-    days, months, reservePct, store, plans, invalidCount: people.length - valid.length,
+    days, months, reservePct, store, tub: tubKey, plans, invalidCount: people.length - valid.length,
     lines: shop.lines, total: shop.total, byStore: shop.byStore, byGroup: shop.byGroup,
     storage: shop.storage, buckets: shop.storage.buckets, cook, shares, gear, other, pot, onePot,
   };
@@ -652,7 +654,7 @@ export function potFor(cook, eaters) {
 }
 
 function shoppingFor(ctx, products) {
-  const { plans, sum, supp, grams, reserve, strawPeople, have, pot } = ctx;
+  const { plans, sum, supp, grams, reserve, strawPeople, have, pot, tub } = ctx;
   const lines = [];
   const addLine = (key, qty, amountText, group, extra = {}) => {
     if (qty <= 0) return;
@@ -702,7 +704,10 @@ function shoppingFor(ctx, products) {
       sp.packs.forEach((pk, i) => addLine(pk.key, pk.qty, i === 0 ? covers : "", "gear"));
     }
     if (!have.axe) addLine("axe", 1, "splitting firewood", "gear");
-    if (!have.bladder) addLine("bladder", 1, "fill when the power goes out", "gear");
+    if (!have.bladder) {
+      if (tub === "drainCover") addLine("drainCover", 1, "seals the tub drain", "gear");
+      else addLine("bladder", 1, "fill when the power goes out", "gear");
+    }
     if (!have.diverter) addLine("diverter", 1, "rain from the roof into a trash can", "gear");
     if (!have.pot) addLine("pot", 1, `holds ${pot.cups} cups`, "gear", { pack: `Lodge Deep Camp Dutch Oven, ${pot.qt} qt`, price: pot.price });
     if (!have.tripod) addLine("tripod", 1, "hangs the pot over the fire", "gear");

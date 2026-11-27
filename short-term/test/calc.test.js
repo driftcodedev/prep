@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { splitRounded, planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse, infantDay } from "../js/calc.js";
 import { buildPdf } from "../js/pdf.js";
-import { gearItems } from "../js/content.js";
+import { gearItems, lineHint } from "../js/content.js";
 import { MAX_LB_PER_BUCKET, PRODUCTS } from "../js/data.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
@@ -170,14 +170,24 @@ test("A pregnant woman gets a prenatal vitamin instead of the regular one", () =
   assert.equal(planPerson(nursing, 182).supplement.key, "multiWomen");
 });
 
-test("The bladder card gives the no-bag option: a drain cover and a LifeStraw", () => {
-  const hh = planHousehold({ months: 6, people: [brett] });
-  const card = gearItems(hh).find((it) => it.key === "bladder");
-  assert.ok(card.links.some((l) => l.url === PRODUCTS.drainCover.url));
-  const note = card.notes.find((n) => n.label.startsWith("No bag"));
-  assert.match(note.text, /drain cover/);
-  assert.match(note.text, /LifeStraw/);
-  assert.ok(!hh.lines.some((l) => l.key === "drainCover"), "not on the shopping list");
+test("Bathtub water: the list has the waterBOB or the V-TOP drain cover, whichever is picked", () => {
+  const bob = planHousehold({ months: 6, people: [brett] });
+  const cover = planHousehold({ months: 6, people: [brett], tub: "drainCover" });
+  const have = planHousehold({ months: 6, people: [brett], tub: "drainCover", owned: { bladder: true } });
+  const keys = (hh) => hh.lines.map((l) => l.key);
+  assert.ok(keys(bob).includes("bladder") && !keys(bob).includes("drainCover"));
+  assert.ok(keys(cover).includes("drainCover") && !keys(cover).includes("bladder"));
+  assert.ok(!keys(have).includes("bladder") && !keys(have).includes("drainCover"));
+  // Each line points to the other choice.
+  assert.match(lineHint(bob.lines.find((l) => l.key === "bladder")), /V-TOP drain cover/);
+  assert.match(lineHint(cover.lines.find((l) => l.key === "drainCover")), /waterBOB/);
+  for (const hh of [bob, cover]) {
+    const card = gearItems(hh).find((it) => it.key === "bladder");
+    assert.equal(card.title, "Water: waterBOB bathtub bladder or V-TOP drain cover");
+    assert.ok(card.links.some((l) => l.url === PRODUCTS.drainCover.url));
+    assert.match(card.notes[0].text, /LifeStraw/);
+  }
+  assert.match(gearItems(cover).find((it) => it.key === "bladder").buy, /^One 2-pack/);
 });
 
 test("Drinking water: ½ gallon for adults, less for small children", () => {

@@ -332,23 +332,33 @@ export function gearItems(hh) {
     },
     {
       key: "bladder",
-      title: "Water: waterBOB bathtub bladder",
-      product: P.bladder,
+      title: "Water: waterBOB bathtub bladder or V-TOP drain cover",
+      product: hh.tub === "drainCover" ? P.drainCover : P.bladder,
       links: [
         { label: "waterBOB", url: P.bladder.url },
         { label: "V-TOP drain cover", url: P.drainCover.url },
       ],
-      buy: hh.lines.some((l) => l.key === "bladder") ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump.` : "You already have a water bladder, so it's not on the list.",
+      buy: hh.lines.some((l) => l.key === "bladder")
+        ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump. To get the drain cover instead, pick it at the top under "Already have".`
+        : hh.lines.some((l) => l.key === "drainCover")
+          ? `One 2-pack, ${cents(P.drainCover.price)} on Amazon. It seals the tub drain so you can fill the tub itself. To get the waterBOB instead, pick it at the top under "Already have".`
+          : "You already have a water bladder or drain cover, so it's not on the list.",
       notes: [{
-        label: "No bag? Fill the tub itself",
-        text: `The waterBOB often sells out. Without one, close the tub drain, press a flat silicone drain cover over it so the tub doesn't slowly leak (V-TOP, 2 for about $4–6 on Amazon), and fill the tub up to just below the overflow hole. Lay a shower curtain or plastic sheet over it to keep dust out. Open tub water isn't clean enough to drink as it is: sip it through a LifeStraw, and boil it for cooking and for children under ${STRAW_MIN_AGE}. Test the seal ahead of time: run a few inches of water, mark the level with tape and check it the next day.`,
+        label: hh.tub === "drainCover" ? "How to use the drain cover" : "No bag? Fill the tub itself",
+        text: `${hh.tub === "drainCover" ? "" : "The waterBOB often sells out. Without one, "}close the tub drain, press the silicone drain cover flat over it so the tub doesn't slowly leak, and fill the tub up to just below the overflow hole. Lay a shower curtain or plastic sheet over it to keep dust out. Open tub water isn't clean enough to drink as it is: sip it through a LifeStraw, and boil it for cooking and for children under ${STRAW_MIN_AGE}. Test the seal ahead of time: run a few inches of water, mark the level with tape and check it the next day.`.replace(/^./, (c) => c.toUpperCase()),
       }],
-      lasts: `It holds up to ${g.bladderGallons} gallons, depending on the size of your tub. Your household uses about ${gallonsText(g.dailyGallons)} a day for drinking, cooking and soaking beans, so a full one lasts about ${num(g.bladderDays)} days (${weeksText(g.bladderDays)}). Sealed, the water stays fresh for up to ${BLADDER_WEEKS} weeks.`,
-      tips: [
-        "Fill it the moment the power goes out, while the tap still runs: lay it in a clean tub and fill it from the faucet.",
-        "Use the hand pump to fill a pot or pitcher, then put the cap back on. It's tap water, so it's safe to drink as it is.",
-        "Use it for drinking and cooking only. Wash with rain water or the bean soaking water.",
-      ],
+      lasts: `A full tub holds up to ${g.bladderGallons} gallons, depending on its size, with or without the bag. Your household uses about ${gallonsText(g.dailyGallons)} a day for drinking, cooking and soaking beans, so a full one lasts about ${num(g.bladderDays)} days (${weeksText(g.bladderDays)}). Sealed in the bag, the water stays fresh for up to ${BLADDER_WEEKS} weeks; in the open tub, keep it covered and filter or boil it.`,
+      tips: hh.tub === "drainCover"
+        ? [
+          "Fill the tub the moment the power goes out, while the tap still runs.",
+          "Dip water out with a clean pot or pitcher, never your hands or a cup you've drunk from.",
+          "Use it for drinking and cooking only. Wash with rain water or the bean soaking water.",
+        ]
+        : [
+          "Fill it the moment the power goes out, while the tap still runs: lay it in a clean tub and fill it from the faucet.",
+          "Use the hand pump to fill a pot or pitcher, then put the cap back on. It's tap water, so it's safe to drink as it is.",
+          "Use it for drinking and cooking only. Wash with rain water or the bean soaking water.",
+        ],
     },
     {
       key: "diverter",
@@ -571,6 +581,8 @@ export function lineHint(l) {
   if (l.keeps) return `Keeps ${l.keeps}`;
   if (l.key === "buckets") return `About ${LB_PER_BUCKET} lb of rice or beans in each. How to seal them is under "Storage" near the bottom.`;
   if (l.key === "mylar") return `One bag and one ${num(ABSORBER_CC)} cc oxygen absorber in each bucket.`;
+  if (l.key === "bladder") return `Or a V-TOP drain cover. Pick one at the top under "Already have".`;
+  if (l.key === "drainCover") return `Or a waterBOB bag. Pick one at the top under "Already have".`;
   return "";
 }
 
@@ -619,7 +631,7 @@ export const KEEPS_SOURCES = [
 
 // ---------- cooking, weigh-ins, storage, method ----------
 
-export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water, the pot and storage: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries, and mylar bags, oxygen absorbers and buckets keep the rice and beans good for decades. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
+export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water, the pot and storage: a filter straw for each person, a bathtub bladder or drain cover so you can fill the tub the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries, and mylar bags, oxygen absorbers and buckets keep the rice and beans good for decades. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
 
 export const COOK_NOTE = "Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.";
 
