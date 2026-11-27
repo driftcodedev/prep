@@ -229,6 +229,20 @@ test("The notes say which gear is slow to arrive", () => {
   assert.ok(shoppingNotes(owned).some((n) => n.startsWith("Mylar bags and food buckets can take")));
 });
 
+test("The PDF reads right on paper: no page-only wording, and it says what was left off", () => {
+  const kid = { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} };
+  for (const tub of ["bladder", "drainCover"]) {
+    const hh = withHave(planHousehold({ months: 6, people: [brett, kid], tub, owned: { pot: true } }), new Set(["rice"]));
+    hh.ownedItems = ["White rice", "Cast iron camp Dutch oven"];
+    const text = JSON.stringify(buildPdf(hh, { date: "today" }).content);
+    for (const bad of ["Why?", "Tick ", "Tap ", "in its row", "at the top of the page", "Each card has a switch", "pick it at the top"]) assert.ok(!text.includes(bad), `${tub}: ${bad}`);
+    assert.ok(text.includes("Left off because you already have them: "));
+    assert.ok(!JSON.stringify(buildPdf({ ...hh, ownedItems: [] }, { date: "today" }).content).includes("White rice"), "owned food isn't printed in the list");
+    // Open tub water isn't safe to drink as it is, so milk water only comes from the sealed bag.
+    assert.equal(text.includes("or water from the waterBOB"), tub === "bladder");
+  }
+});
+
 test("Drinking water: ½ gallon for adults, less for small children", () => {
   assert.equal(waterCups(brett), 8);
   assert.equal(waterCups({ sex: "male", age: 1, flags: {} }), 4);
@@ -239,7 +253,7 @@ test("PDF definition covers the whole report and avoids missing glyphs", () => {
   const hh = planHousehold({ months: 6, people: [brett, { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }] });
   const doc = buildPdf(hh, { date: "November 23, 2026" });
   const text = JSON.stringify(doc.content);
-  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "All in one pot", "Shopping list", "Fire, water, cooking and storage", "Storage: mylar bags, oxygen absorbers and buckets", "How many absorbers", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
+  for (const heading of ["Daily amounts", "Cooking For Everyone", "Or all in one pot", "Cooking over a fire", "Shopping List Grand Total", "How Long It Keeps", "Fire, Water, Cooking And Storage", "Storage: mylar bags, oxygen absorbers and buckets", "How many absorbers", "Weekly Weigh-In", "Cooking And Storage", "How The Numbers Are Worked Out"]) {
     assert.ok(text.includes(heading), heading);
   }
   assert.ok(!/[⅓⅔]/.test(text));

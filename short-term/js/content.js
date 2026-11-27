@@ -226,7 +226,7 @@ export function cookingData(hh) {
     const parts = [];
     if (c.milk > 0) parts.push(`${cupsText(c.milk)} for the nonfat milk`);
     if (c.whole > 0) parts.push(`${cupsText(c.whole)} for the under-2s' whole milk`);
-    water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water${parts.length > 1 ? `: ${parts.join(" and ")}` : ""}. Use boiled water that has cooled, or water from the waterBOB.` });
+    water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water${parts.length > 1 ? `: ${parts.join(" and ")}` : ""}. ${hh.tub === "drainCover" ? "Use boiled water that has cooled: open tub water isn't safe to drink as it is." : "Use boiled water that has cooled, or water from the waterBOB."}` });
   }
   const formulaOz = hh.plans.reduce((a, pl) => a + (pl.phase1.formula || 0), 0);
   if (formulaOz > 0) water.push({ label: "Formula", text: `about ${hl(`${numOf(formulaOz)} fl oz`)} a day takes ${hl(cupsWord(Math.round(formulaOz * 0.9 / 8 * 4) / 4))} of water. Boil it for 1 minute, then mix exactly as the can says. Make one bottle at a time and use it within 2 hours.` });
@@ -360,9 +360,9 @@ export function gearItems(hh) {
         { label: "V-TOP drain cover", url: P.drainCover.url },
       ],
       buy: hh.lines.some((l) => l.key === "bladder")
-        ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump. To get the drain cover instead, pick it in its row on the shopping list.`
+        ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump. The V-TOP drain cover (${cents(P.drainCover.price)}) works instead: see below.`
         : hh.lines.some((l) => l.key === "drainCover")
-          ? `One 2-pack, ${cents(P.drainCover.price)} on Amazon. It seals the tub drain so you can fill the tub itself. To get the waterBOB instead, pick it in its row on the shopping list.`
+          ? `One 2-pack, ${cents(P.drainCover.price)} on Amazon. It seals the tub drain so you can fill the tub itself. The waterBOB bag (${cents(P.bladder.price)}) works instead and keeps the water sealed.`
           : "You already have a water bladder or drain cover, so it's not counted in the total.",
       notes: [{
         label: hh.tub === "drainCover" ? "How to use the drain cover" : "No bag? Fill the tub itself",
@@ -390,7 +390,7 @@ export function gearItems(hh) {
       lasts: `It turns a trash can into a rain barrel fed from a gutter downspout. A 500 sq ft section of roof sheds about 300 gallons per inch of rain, so even a light rain fills a can. A 32-gallon can holds about ${num(g.canDays(32))} days of your household's water, and a 45-gallon can about ${num(g.canDays(45))} days.`,
       tips: [
         "Use a trash can you already own: 32 to 45 gallons, with a lid and no holes. Keep it just for water.",
-        "You need a drill for the hole saw. Keep it fully charged, and top it up every few months, so you can install the kit even after the power goes out. The installation video at the top of the page shows how. You also need a gutter downspout you're allowed to drill into.",
+        "You need a drill for the hole saw. Keep it fully charged, and top it up every few months, so you can install the kit even after the power goes out. The installation video linked at the top of the plan shows how. You also need a gutter downspout you're allowed to drill into.",
         "Mount the diverter level with the top of the can. It stops filling when the can is full, and the rest runs down the downspout as usual.",
         "Set the can on cinder blocks on level ground so a pot fits under the spigot. Full, it's too heavy to move.",
         "Lay window screen under the lid or strap it down with a bungee cord to keep mosquitoes and leaves out.",
@@ -680,7 +680,7 @@ export const KEEPS_SOURCES = [
 
 // ---------- cooking, weigh-ins, storage, method ----------
 
-export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water, the pot and storage: a filter straw for each person, a bathtub bladder or drain cover so you can fill the tub the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries, and mylar bags, oxygen absorbers and buckets keep the rice and beans good for decades. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
+export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water, the pot and storage: a filter straw for each person, a bathtub bladder or drain cover so you can fill the tub the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries, and mylar bags, oxygen absorbers and buckets keep the rice and beans good for decades. Everything you don't already have is on the shopping list; the diverter kit is from Home Depot and the rest from Amazon.";
 
 export const COOK_NOTE = "Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.";
 
@@ -708,7 +708,7 @@ export const CARE = [
 ];
 
 export const ABOUT = [
-  { lead: "Healthy weight", text: "Adults above the CDC's healthy range (BMI 18.5–24.9) are planned down to BMI 24.4, the top of that range. Below it, they're planned up to BMI 18.5. Each card has a switch to keep the current weight instead." },
+  { lead: "Healthy weight", text: "Adults above the CDC's healthy range (BMI 18.5–24.9) are planned down to BMI 24.4, the top of that range. Below it, they're planned up to BMI 18.5. Each person's card on the website has a switch to keep the current weight instead." },
   { lead: "Adult calories", text: "The Mifflin-St Jeor equation times an activity factor. Weight-loss rations are 500 calories below maintenance and never under 1,500 for men or 1,200 for women." },
   { lead: "Children", text: "The National Academies' 2023 energy equations, with no weight loss. Under-2s get whole milk, and milk amounts follow the American Academy of Pediatrics." },
   { lead: "Babies under 1", text: "Formula at about 2½ fl oz a day per pound, up to 32 oz, following the American Academy of Pediatrics. Iron-fortified infant cereal from 6 months (5, then 7 tablespoons a day) and a little soft food from 8 months. Vitamin D drops (400 IU) for any breastfed baby, and for formula-fed babies drinking under 32 oz. Weight gain follows typical growth, and at the first birthday the toddler ration takes over." },

@@ -363,6 +363,11 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 .gear-buy { font-weight: 700; color: var(--lid); }
 .gear-item .gear-links { margin-top: -0.25rem; font-weight: 700; }
 
+/* Printed only: the gear explanations, which open from "Why?" on screen. */
+.print-only { display: none; }
+.gear-print .gear-item { border-top: 3px solid var(--ink); padding-top: 0.6rem; margin-top: 1.25rem; }
+.gear-print .gear-item p { margin: 0.45rem 0; }
+
 /* The folded guides at the bottom: each heading opens and closes its section. */
 .more { margin-top: 2.75rem; max-width: 62rem; border-bottom: 1px solid var(--line); }
 .more-item { border-top: 1px solid var(--line); }
@@ -427,7 +432,9 @@ mark.plan { background: #fff0a3; color: inherit; padding: 0 0.12em; border-radiu
   .shop label.have, .shop input.pick, .shop-have { display: none !important; }
   .more-item > summary::after { display: none; }
   .more-item > summary { padding: 0; margin-top: 1.25rem; }
-  .why-row[hidden] { display: table-row !important; }
+  /* Printed, the list stays compact: the explanations print as their own section after it. */
+  .why-row { display: none !important; }
+  .print-only { display: block !important; }
   .why-panel { position: static; width: auto; }
   .print-meta { display: block; margin: 0 0 6pt; font-size: 9pt; color: var(--ink-2); }
   .videos { display: block; padding: 4pt 0 6pt; border-top: 2px solid #000; }
@@ -439,8 +446,9 @@ mark.plan { background: #fff0a3; color: inherit; padding: 0 0.12em; border-radiu
   .print-meta p { margin: 0; }
   .card-who { font-size: 8pt; }
   .gear-grid { grid-template-columns: 1fr; gap: 8pt; }
-  .gear-item { break-inside: avoid; page-break-inside: avoid; }
-  .gear-title { font-size: 15pt; }
+  .gear-item { margin-top: 10pt; }
+  .gear-title { font-size: 15pt; break-after: avoid; page-break-after: avoid; }
+  .gear-item .gear-buy { break-before: avoid; page-break-before: avoid; }
   .masthead { padding: 0 0 0.5rem; }
   .wordmark { font-size: 40pt; }
   .lede { font-size: 13pt; margin-top: 4pt; max-width: none; }

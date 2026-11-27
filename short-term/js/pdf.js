@@ -6,7 +6,7 @@ import {
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEOS, GEAR_INTRO,
 } from "./content.js";
 
-const C = { ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", bean: "#8a4632", beanTint: "#f5e8e1", lidTint: "#ddeaf0" };
+const C = { ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", bean: "#8a4632", beanTint: "#f5e8e1", lidTint: "#ddeaf0", money: "#2a7a3b" };
 
 // Roboto has no glyph for thirds.
 // The highlight marks around plan numbers (see HL_START in content.js) are page-only.
@@ -95,46 +95,58 @@ function cardsGrid(hh) {
 
 function cooking(hh) {
   const c = cookingData(hh);
+  const d = onePotData(hh);
+  // Like the page: each person's share if it's all cooked in one pot is the table's last column.
+  const share = d ? new Map(d.rows) : null;
+  const head = d ? [...c.head, "Or all in one pot"] : c.head;
   return [
-    h2("Cooking for everyone"),
+    h2("Cooking For Everyone"),
     para([{ text: "Each day, cook " }, { text: t(c.rice), bold: true }, " and ", { text: t(c.beans), bold: true }, ` ${t(c.rest)}`]),
-    dataTable(c.head, [...c.rows, c.total].map((r, i, all) => {
+    dataTable(head, [...c.rows, c.total].map((r, i, all) => {
       const bold = i === all.length - 1;
       const amount = (x) => ({ text: [{ text: t(x.cooked), bold }, x.dry ? { text: `\n${t(x.dry)}`, fontSize: 7.5, color: C.ink2, bold } : ""] });
-      return [{ text: t(r.name), bold: true }, amount(r.rice), amount(r.beans), { text: t(r.oats), bold }];
-    }), [90, "*", "*", "*"]),
+      const row = [{ text: t(r.name), bold: true }, amount(r.rice), amount(r.beans), { text: t(r.oats), bold }];
+      if (d) row.push({ text: t(bold ? d.total[1] : share.get(r.name) || "none"), bold });
+      return row;
+    }), d ? [80, "*", "*", 60, 80] : [90, "*", "*", "*"]),
     c.milk ? para(c.milk) : null,
     { text: "Cooking over a fire", style: "h3", margin: [0, 4, 0, 3], headlineLevel: 1 },
     para(c.fireLead),
     bullets(c.water.map((w) => ({ text: [{ text: `${t(w.label)}: `, bold: true }, t(w.text)] }))),
     para(c.waterTotal),
-    ...onePot(hh),
+    ...onePot(d),
     para(COOK_NOTE, { color: C.ink2 }),
   ].filter(Boolean);
 }
 
-function onePot(hh) {
-  const d = onePotData(hh);
+function onePot(d) {
   if (!d) return [];
   return [
-    { stack: [{ text: "All in one pot", style: "h3", margin: [0, 4, 0, 3] }, para(d.lead)], unbreakable: true, headlineLevel: 1 },
-    { ol: d.steps.map((s) => ({ text: t(s), margin: [0, 0, 0, 2] })), margin: [0, 0, 0, 6] },
-    { stack: [
-      para(d.servingLead),
-      dataTable(d.head, [...d.rows, d.total].map(([n, a], i, all) => [{ text: t(n), bold: true }, { text: t(a), bold: i === all.length - 1 }]), [120, "*"]),
-    ], unbreakable: true },
+    { stack: [{ text: "Or all in one pot", style: "h3", margin: [0, 4, 0, 3] }, para(d.lead)], unbreakable: true, headlineLevel: 1 },
+    { ol: d.steps.map((st) => ({ text: t(st), margin: [0, 0, 0, 2] })), margin: [0, 0, 0, 6] },
+    para(d.servingLeadTable),
     para(d.note),
   ];
 }
 
 function shopping(hh) {
   const out = [
-    h2("Shopping list", { pageBreak: "before" }),
-    para([`${t(shoppingLead(hh))}: `, { text: money(hh.total), bold: true, fontSize: 13 }], { fontSize: 11 }),
+    {
+      columns: [
+        { text: "Shopping List Grand Total", decoration: "underline" },
+        { text: money(hh.total), color: C.money, alignment: "right", width: "auto" },
+      ],
+      style: "h2", fontSize: 17, id: "shopping-start",
+    },
+    para(`${t(shoppingLead(hh))}.`, { fontSize: 11 }),
     para(compareText(hh), { color: C.ink2 }),
-  ];
+    // Ticked "Already have" on the website: say so, since those rows aren't printed.
+    hh.ownedItems && hh.ownedItems.length
+      ? para([{ text: "Left off because you already have them: ", bold: true }, t(hh.ownedItems.join(", ")), "."], { color: C.ink2 })
+      : null,
+  ].filter(Boolean);
   for (const g of storeGroups({ ...hh, lines: hh.shopLines || hh.lines })) {
-    out.push({ columns: [{ text: t(g.title), style: "h3" }, { text: money(g.total), style: "h3", alignment: "right", width: 80 }], margin: [0, 8, 0, 2], headlineLevel: 1 });
+    out.push({ columns: [{ text: t(g.title), style: "h3", decoration: "underline" }, { text: money(g.total), style: "h3", alignment: "right", width: 80 }], margin: [0, 8, 0, 2], headlineLevel: 1 });
     out.push(dataTable(
       ["Item", "Buy", "How many", "Covers", "Cost"],
       g.lines.map((l) => [
@@ -153,7 +165,7 @@ function shopping(hh) {
   }
   out.push(bullets(shoppingNotes(hh), { margin: [0, 8, 0, 0], color: C.ink2 }));
   out.push(
-    { stack: [{ text: "How long it keeps", style: "h3", margin: [0, 8, 0, 3] }, para(KEEPS_LEAD)], unbreakable: true, headlineLevel: 1 },
+    { stack: [{ text: "How Long It Keeps", style: "h3", margin: [0, 8, 0, 3] }, para(KEEPS_LEAD)], unbreakable: true, headlineLevel: 1 },
     leadBullets(keepsNotes(hh)),
     para([{ text: "Shelf-life sources: ", bold: true }, ...KEEPS_SOURCES.flatMap(([label, url], i) => [
       { text: t(label), link: url, color: C.lid, decoration: "underline" }, i < KEEPS_SOURCES.length - 1 ? ", " : ".",
@@ -164,16 +176,23 @@ function shopping(hh) {
 
 function gear(hh) {
   const out = [
-    h2("Fire, water, cooking and storage"),
+    h2("Fire, Water, Cooking And Storage"),
     para(GEAR_INTRO),
   ];
   for (const it of gearItems(hh)) {
+    // The title, what to buy and the links stay together (and with what follows); the rest may run
+    // onto the next page, so a long card doesn't leave half a page empty.
     const block = [
-      { text: t(it.title), style: "h3", margin: [0, 8, 0, 2] },
-      para(it.buy, { bold: true, color: C.lid }),
-      para([it.links.length > 1 ? "On Amazon: " : "", ...it.links.flatMap((l, i) => [
-        { text: t(l.label), link: l.url, color: C.lid, decoration: "underline" }, i < it.links.length - 1 ? ", " : "",
-      ])]),
+      {
+        stack: [
+          { text: t(it.title), style: "h3", margin: [0, 8, 0, 2] },
+          para(it.buy, { bold: true, color: C.lid }),
+          para([it.links.length > 1 ? "On Amazon: " : "", ...it.links.flatMap((l, i) => [
+            { text: t(l.label), link: l.url, color: C.lid, decoration: "underline" }, i < it.links.length - 1 ? ", " : "",
+          ])]),
+        ],
+        unbreakable: true, headlineLevel: 1,
+      },
       ...(it.notes || []).map((n) => para([{ text: `${n.label}: `, bold: true }, t(n.text)])),
       para([{ text: "How long it lasts: ", bold: true }, t(it.lasts)]),
     ];
@@ -188,7 +207,7 @@ function gear(hh) {
     if (it.drink) block.push(para([{ text: "How much to drink: ", bold: true }, t(it.drink)]));
     block.push(bullets(it.tips));
     if (it.packs) block.push(para(it.packs, { color: C.ink2, fontSize: 8.5 }));
-    out.push({ stack: block, unbreakable: true });
+    out.push(...block);
   }
   return out;
 }
@@ -197,7 +216,7 @@ function weighIn(hh) {
   const hasAdults = hh.plans.some((pl) => !pl.isChild);
   const hasKids = hh.plans.some((pl) => pl.isChild);
   return [
-    { stack: [h2("Weekly weigh-in"), para(WEIGH_INTRO)], unbreakable: true },
+    { stack: [h2("Weekly Weigh-In"), para(WEIGH_INTRO)], unbreakable: true },
     hasAdults ? dataTable(["If you're", "And the scale shows", "Do this"], WEIGH_RULES, [90, "*", "*"]) : null,
     hasKids ? para(WEIGH_KIDS) : null,
   ].filter(Boolean);
@@ -207,7 +226,7 @@ export function buildPdf(hh, { date = "" } = {}) {
   const content = [
     {
       columns: [
-        { text: "prep", fontSize: 40, bold: true, color: C.lid, width: "auto", margin: [0, -6, 0, 0] },
+        { text: "Prep", fontSize: 40, bold: true, color: C.lid, width: "auto", margin: [0, -6, 0, 0] },
         {
           stack: [
             { text: "Food for a long power outage, worked out person by person.", fontSize: 13, bold: true },
@@ -229,9 +248,9 @@ export function buildPdf(hh, { date = "" } = {}) {
     ...shopping(hh),
     ...gear(hh),
     ...weighIn(hh),
-    h2("Cooking and storage"),
+    h2("Cooking And Storage"),
     leadBullets(CARE),
-    h2("How the numbers are worked out"),
+    h2("How The Numbers Are Worked Out"),
     leadBullets(ABOUT),
     para([{ text: "Sources: ", bold: true }, ...SOURCES.flatMap(([label, url], i) => [
       { text: t(label), link: url, color: C.lid, decoration: "underline" }, i < SOURCES.length - 1 ? ", " : ".",
@@ -243,12 +262,15 @@ export function buildPdf(hh, { date = "" } = {}) {
     pageSize: "LETTER",
     // Keep headings with what follows them.
     pageBreakBefore: (node, nodeQueries) => {
+      // The shopping list starts on a fresh page (easy to take to the store), unless only a few
+      // lines of cooking ran onto the page it would start on.
+      if (node.id === "shopping-start") return node.startPosition.top > 200;
       if (node.headlineLevel !== 1) return false;
       const after = nodeQueries.getFollowingNodesOnPage ? nodeQueries.getFollowingNodesOnPage() : node.followingNodesOnPage;
       return !after || after.length === 0 || (node.startPosition && node.startPosition.top > 680);
     },
     pageMargins: [40, 40, 40, 44],
-    info: { title: "prep: food plan", author: "prep", subject: t(planSummary(hh)) },
+    info: { title: "Prep: food plan", author: "Prep", subject: t(planSummary(hh)) },
     defaultStyle: { font: "Roboto", fontSize: 9.5, lineHeight: 1.2, color: C.ink },
     styles: {
       h2: { fontSize: 15, bold: true, margin: [0, 14, 0, 5] },

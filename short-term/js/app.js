@@ -3,7 +3,7 @@ import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor, TUB_NAMES, withHave, HL_START, HL_END, PLAN_NOTE,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor, TUB_NAMES, withHave, HL_START, HL_END, PLAN_NOTE, GEAR_INTRO,
 } from "./content.js";
 
 const STORAGE_KEY = "prep-household-v1";
@@ -401,6 +401,21 @@ function gearBody(it) {
       ${it.packs ? `<p class="muted">${esc(it.packs)}</p>` : ""}`;
 }
 
+// Printed only (hidden on screen): every gear explanation as its own section after the shopping
+// list, as in the PDF, instead of opening each "Why?" inside the list.
+function printGearSection(hh) {
+  return `
+  <section class="block print-only gear-print" aria-hidden="true">
+    <h2 class="section-title">Fire, Water, Cooking And Storage</h2>
+    <p>${esc(GEAR_INTRO)}</p>
+    ${gearItems(hh).map((it) => `
+    <article class="gear-item">
+      <h3 class="gear-title">${esc(it.title)}</h3>
+      ${gearBody(it)}
+    </article>`).join("")}
+  </section>`;
+}
+
 function keepsBody(hh) {
   return `
     <p class="keeps-lead">${esc(KEEPS_LEAD)}</p>
@@ -483,6 +498,14 @@ function renderResults() {
   // and greys out the ones ticked "Already have".
   allLines = planHousehold(base).lines;
   const view = withHave(hh, new Set(Object.keys(state.have)));
+  // For the PDF, which doesn't print owned rows: the names of everything ticked "Already have".
+  const ownedSeen = new Set();
+  view.ownedItems = allLines.filter((l) => isOwned(l.key)).filter((l) => {
+    const k = gearKeyFor(l.key) || l.key;
+    if (ownedSeen.has(k)) return false;
+    ownedSeen.add(k);
+    return true;
+  }).map((l) => l.item);
   lastHousehold = view;
   const el = $("#results");
   if (!hh.plans.length) {
@@ -503,6 +526,7 @@ function renderResults() {
     <p class="results-intro">Measure dry food with level cups and spoons. Each card shows one person's day.</p>
     <div class="cards">${hh.plans.map((pl) => card(pl, hh)).join("")}</div>
     ${shoppingSection(view, allLines)}
+    ${printGearSection(hh)}
     ${moreSection(hh)}
     <div class="report-foot">
       <p>Keep a paper copy. Print the whole report, or save it as a PDF to print later.</p>
