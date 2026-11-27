@@ -34,6 +34,7 @@ import {
   commas, pct,
 } from "./fishing.js";
 import { tideLabel } from "./currents.js";
+import { saltingBlocks } from "./salting.js";
 
 // README pages (from the README button) that belong in the paper copy, in this order.
 // Pages about using the website itself stay out.
@@ -318,6 +319,9 @@ export function buildReport({ geo, today, dateText, readme = [], currents = null
 
   // --- fishing ---
   blocks.push(...fishingBlocks());
+
+  // --- salting: the by-hand formulas and how-to, for when there's no power ---
+  blocks.push(...saltingBlocks());
 
   readmePart(pageOf("nov-dec-food-shortage"));
   readmePart(pageOf("species-extinction"));

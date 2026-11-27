@@ -5,12 +5,13 @@
 // locks (switching tabs, the Lock button, or reloading). Each unlock calls mount() again, so
 // mount() must draw from scratch. See README.md in this folder.
 //
-// The tab has three views, picked with the Map / Fishing / Netting switch at the top:
+// The tab has four views, picked with the Map / Fishing / Netting / Salting switch at the top:
 //   Map      the Cobscook Bay map. renderMap() draws the controls, list and notes as plain HTML
 //            (the tests run it in Node); the first time the map is shown, mount() loads Leaflet
 //            and js/map.js to bring it to life.
 //   Fishing  how much food is in the bay, season by season (js/fishing.js).
 //   Netting  the Fishing table cut down to the targets you can catch with a net (js/fishing.js).
+//   Salting  a salt calculator (catch → salt → bay water → boiling and fuel) and how-to (js/salting.js).
 // The last view picked is remembered in this browser (localStorage "prep-lt-view").
 //
 // Paper copy: "Print the full report" and "Download PDF" (top and bottom, like the Short Term tab)
@@ -23,6 +24,7 @@ import { HOUSES } from "./data/houses.js";
 import { RING_COLORS, DEFAULT_RINGS } from "./data/places.js";
 import { esc } from "./js/geo.js";
 import { renderFishing, renderNetting } from "./js/fishing.js";
+import { renderSalting, initialInput } from "./js/salting.js";
 
 export { esc };
 
@@ -30,15 +32,17 @@ export const VIEWS = [
   ["map", "Map", "Houses for sale and distance rings"],
   ["fish", "Fishing", "Food in the bay, by season"],
   ["net", "Netting", "Targets you can catch with a net"],
+  ["salt", "Salting", "Salt for fish and game"],
 ];
 const VIEW_KEY = "prep-lt-view";
 const ICONS = {
   map: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
   fish: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12c3-4.5 7-6 11-4.5 2 .8 3.5 2.3 4.5 4.5-1 2.2-2.5 3.7-4.5 4.5C10 18 6 16.5 3 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M18.5 12 22 8.5v7L18.5 12Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="13.5" cy="11" r="1.1" fill="currentColor"/></svg>',
   net: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3.5 9 9 3.5M3.5 15 15 3.5M3.5 20.5l17-17M9 20.5 20.5 9M15 20.5l5.5-5.5M9 3.5 20.5 15M3.5 3.5l17 17M3.5 9l11.5 11.5M15 3.5l5.5 5.5M3.5 15 9 20.5" fill="none" stroke="currentColor" stroke-width="1.1"/></svg>',
+  salt: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 9.5h7l1.2 10.2a1.2 1.2 0 0 1-1.2 1.3h-7a1.2 1.2 0 0 1-1.2-1.3L8.5 9.5Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8.5 9.5C8.5 5.5 10 3 12 3s3.5 2.5 3.5 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="11" cy="6.2" r=".9" fill="currentColor"/><circle cx="13.2" cy="5.6" r=".9" fill="currentColor"/><circle cx="12.4" cy="7.6" r=".9" fill="currentColor"/></svg>',
 };
 
-// The Map / Fishing / Netting switch, then the views (all but Map hidden until picked).
+// The Map / Fishing / Netting / Salting switch, then the views (all but Map hidden until picked).
 export function render(page = PAGE, context = {}, data = undefined) {
   const tabs = VIEWS.map(([id, label, sub], i) => `
       <button type="button" role="tab" class="lt-view-tab" id="lt-tab-${id}" data-view="${id}" aria-controls="lt-panel-${id}" aria-selected="${i === 0}"${i === 0 ? "" : ' tabindex="-1"'}>
@@ -50,6 +54,7 @@ export function render(page = PAGE, context = {}, data = undefined) {
     <div class="lt-panel" id="lt-panel-map" role="tabpanel" aria-labelledby="lt-tab-map" data-panel="map">${renderMap(page, context, data)}</div>
     <div class="lt-panel" id="lt-panel-fish" role="tabpanel" aria-labelledby="lt-tab-fish" data-panel="fish" hidden>${renderFishing()}</div>
     <div class="lt-panel" id="lt-panel-net" role="tabpanel" aria-labelledby="lt-tab-net" data-panel="net" hidden>${renderNetting()}</div>
+    <div class="lt-panel" id="lt-panel-salt" role="tabpanel" aria-labelledby="lt-tab-salt" data-panel="salt" hidden>${renderSalting(initialInput())}</div>
     <div class="report-foot lt-paper-foot">
       <p>Keep a paper copy. Print everything on this tab, or save it as a PDF to print later.</p>
       ${reportActions("bottom")}
@@ -224,6 +229,7 @@ function loadCss(href, key) {
 let view = null;     // the live map, once it has been shown
 let fishing = null;  // the live Fishing view, once it has been shown
 let netting = null;  // the live Netting view, once it has been shown
+let salting = null;  // the live Salting calculator, once it has been shown
 let mapStarted = false;
 let cleanup = [];
 
@@ -292,10 +298,14 @@ async function showView(root, id, { focus = false } = {}) {
       if (root.isConnected) netting = createFishing(root.querySelector('[data-panel="net"]'), { mode: "net" });
     }
   }
+  if (id === "salt" && !salting) {
+    const { createSalting } = await import("./js/salting.js");
+    if (root.isConnected) salting = createSalting(root.querySelector('[data-panel="salt"]'));
+  }
 }
 
 export async function mount(root, context = {}) {
-  view = null; fishing = null; netting = null; mapStarted = false;
+  view = null; fishing = null; netting = null; salting = null; mapStarted = false;
   root.classList.remove("lt-has-print");
   await Promise.all([loadCss("./vendor/leaflet/leaflet.css", "leaflet"), loadCss("./style.css", "style")]);
   root.innerHTML = render(PAGE, context);
@@ -459,6 +469,7 @@ export function unmount(root) {
   if (view) view.destroy();
   if (fishing) fishing.destroy();
   if (netting) netting.destroy();
-  view = null; fishing = null; netting = null; mapStarted = false;
+  if (salting) salting.destroy();
+  view = null; fishing = null; netting = null; salting = null; mapStarted = false;
   root.classList.remove("lt-has-print");
 }

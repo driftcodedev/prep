@@ -271,9 +271,11 @@ import {
   netRows, targetTotal, renderNetting, drawFindings, drawStudies, videoHtml,
 } from "../js/fishing.js";
 
-test("the tab has Map, Fishing and Netting views, Map first", () => {
+test("the tab has Map, Fishing, Netting and Salting views, Map first", () => {
   const html = render(PAGE, { household: null });
-  assert.deepEqual(VIEWS.map((v) => v[0]), ["map", "fish", "net"]);
+  assert.deepEqual(VIEWS.map((v) => v[0]), ["map", "fish", "net", "salt"]);
+  assert.match(html, /id="lt-panel-salt"[^>]*data-panel="salt" hidden/);
+  assert.match(html, /id="lt-tab-salt"[^>]*>[\s\S]*?Salting/);
   assert.match(html, /role="tablist"/);
   assert.match(html, /id="lt-panel-map"[^>]*data-panel="map"/);
   assert.match(html, /id="lt-panel-fish"[^>]*data-panel="fish" hidden/);

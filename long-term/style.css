@@ -264,9 +264,9 @@
   #lt-root .leaflet-zoom-anim .leaflet-zoom-animated { transition: none; }
 }
 
-/* ---------- Map / Fishing / Netting switch ---------- */
+/* ---------- Map / Fishing / Netting / Salting switch ---------- */
 
-#lt-root .lt-views { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0 0 1.25rem; }
+#lt-root .lt-views { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; margin: 0 0 1.25rem; }
 #lt-root .lt-view-tab {
   display: flex; align-items: center; gap: 0.6rem; min-height: 3.6rem; padding: 0.55rem 0.75rem;
   font: inherit; text-align: left; color: var(--lid); background: var(--card);
@@ -280,7 +280,7 @@
 #lt-root .lt-view-tab[aria-selected="true"] .lt-view-sub { color: #dbe9ef; }
 #lt-root .lt-view-tab:focus-visible { outline: 3px solid var(--lid-dark); outline-offset: 2px; }
 #lt-root .lt-panel[hidden] { display: none; }
-/* Phones: three tabs side by side, so the icon sits over the name and the second line is dropped. */
+/* Phones: four tabs side by side, so the icon sits over the name and the second line is dropped. */
 @media (max-width: 36rem) {
   #lt-root .lt-views { gap: 0.35rem; }
   #lt-root .lt-view-tab { flex-direction: column; justify-content: center; gap: 0.2rem; padding: 0.45rem 0.25rem; text-align: center; min-height: 3.4rem; }
@@ -390,6 +390,83 @@
 #lt-root .ltf .ltm-notes ol li + li { margin-top: 0.45rem; }
 #lt-root .ltf-table { margin-top: 0.6rem; font-size: 0.88rem; }
 #lt-root .ltf-herring td { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ---------- Salting view ---------- */
+
+#lt-root .lts-intro { margin: 0 0 1rem; max-width: 62ch; }
+#lt-root .lts-calc { display: grid; gap: 1.25rem; padding: 1rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); }
+#lt-root .lts-h3 { margin: 0 0 0.75rem; font-family: var(--display); font-size: 1.4rem; font-weight: 700; line-height: 1.15; }
+#lt-root .lts-form { display: grid; gap: 1.1rem; min-width: 0; }
+#lt-root .lts-form .lts-h3 { margin-bottom: 0; }
+#lt-root .lts-row { display: grid; gap: 1rem; }
+#lt-root .lts-unit { display: flex; align-items: center; gap: 0.45rem; }
+#lt-root .lts-unit input { flex: 1; min-width: 0; font-size: 1.15rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+#lt-root .lts-unit > span { flex: none; color: var(--ink-2); font-weight: 700; }
+#lt-root .lts-set { display: grid; gap: 0.4rem; min-width: 0; margin: 0; padding: 0; border: 0; }
+#lt-root .lts-set legend { padding: 0; margin-bottom: 0.45rem; }
+#lt-root .lts-group { margin: 0.35rem 0 0; font-size: 0.82rem; font-weight: 700; color: var(--ink-2); }
+#lt-root .lts-group:first-of-type { margin-top: 0; }
+#lt-root .lts-choice { display: flex; align-items: flex-start; gap: 0.6rem; padding: 0.55rem 0.7rem; background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); cursor: pointer; }
+#lt-root .lts-choice input { flex: none; width: 1.1rem; height: 1.1rem; margin: 0.2rem 0 0; accent-color: var(--lid); }
+#lt-root .lts-choice:hover { border-color: var(--ink-2); }
+#lt-root .lts-choice:has(input:checked) { border-color: var(--lid); background: var(--lid-tint); }
+#lt-root .lts-choice:has(input:focus-visible) { outline: 3px solid var(--lid-dark); outline-offset: 2px; }
+#lt-root .lts-choice b { display: block; line-height: 1.25; }
+#lt-root .lts-choice-sub { display: block; margin-top: 0.1rem; font-size: 0.85rem; line-height: 1.3; color: var(--ink-2); }
+#lt-root .lts-own { margin-top: 0.35rem; }
+#lt-root .lts-more summary { font-weight: 700; font-size: 0.95rem; cursor: pointer; }
+#lt-root .lts-more .field { margin-top: 0.5rem; }
+
+#lt-root .lts-out { min-width: 0; }
+#lt-root .lts-key { display: grid; margin: 0; }
+#lt-root .lts-key > div { display: grid; grid-template-columns: 8rem minmax(0, 1fr); gap: 0.75rem; padding: 0.55rem 0; border-bottom: 1px solid var(--line); }
+#lt-root .lts-key > div:first-child { padding-top: 0; }
+#lt-root .lts-key dt { padding-top: 0.15rem; font-size: 0.88rem; font-weight: 700; color: var(--ink-2); line-height: 1.3; }
+#lt-root .lts-key dd { margin: 0; font-size: 0.92rem; line-height: 1.35; }
+#lt-root .lts-big { display: block; font-family: var(--display); font-size: 2rem; font-weight: 700; line-height: 1.05; color: var(--ink); font-variant-numeric: tabular-nums; }
+#lt-root .lts-out-h { margin: 1.1rem 0 0.5rem; font-size: 1rem; line-height: 1.3; }
+#lt-root .lts-boils { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.6rem; }
+#lt-root .lts-boil { padding: 0.6rem 0.75rem; border: 1.5px solid var(--line); border-radius: var(--radius); }
+#lt-root .lts-boil h4 { min-height: 2.5em; margin: 0 0 0.25rem; font-size: 0.85rem; line-height: 1.25; color: var(--ink-2); }
+#lt-root .lts-boil .lts-big { font-size: 1.6rem; }
+#lt-root .lts-boil p { margin: 0.2rem 0 0; font-size: 0.85rem; line-height: 1.3; }
+#lt-root .lts-hint { margin: 0.6rem 0 0; max-width: 62ch; font-size: 0.85rem; color: var(--ink-2); }
+#lt-root .lts-lines { margin: 0; padding-left: 1.25rem; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+#lt-root .lts-lines li + li { margin-top: 0.3rem; }
+
+#lt-root .lts-hand { margin-top: 2rem; }
+#lt-root .lts-hand .lts-hint { margin-top: -0.4rem; }
+#lt-root .lts-formulas { max-width: 70ch; margin: 0.75rem 0 1.25rem; padding-left: 1.3rem; }
+#lt-root .lts-formulas li + li { margin-top: 0.5rem; }
+#lt-root .lts-table { font-size: 0.88rem; }
+#lt-root .lts-table caption { caption-side: top; padding-bottom: 0.4rem; text-align: left; font-weight: 700; }
+#lt-root .lts-table th[scope="row"] { min-width: 9rem; }
+#lt-root .lts-rates td, #lt-root .lts-rates th { min-width: 8rem; }
+#lt-root .lts-where { display: block; font-size: 0.8rem; font-weight: 400; color: var(--ink-2); }
+
+#lt-root .lts-sections { display: grid; gap: 0.6rem; margin-top: 2rem; }
+#lt-root .lts-sec.ltm-notes { margin-top: 0; }
+#lt-root .lts-sec summary { font-size: 1.02rem; }
+#lt-root .lts-sec p, #lt-root .lts-sec ul, #lt-root .lts-sec ol { max-width: 70ch; font-size: 0.95rem; color: var(--ink); }
+#lt-root .lts-sec p { margin: 0.7rem 0 0; }
+#lt-root .lts-sec ul, #lt-root .lts-sec ol { margin: 0.5rem 0 0; padding-left: 1.25rem; }
+#lt-root .lts-sec li + li { margin-top: 0.4rem; }
+#lt-root .lts-sec .table-scroll { margin: 0.75rem 0 0.25rem; }
+#lt-root .lts-sec .lts-hint { margin-top: 0.4rem; }
+#lt-root .lts-note { padding: 0.5rem 0.75rem; font-size: 0.88rem !important; background: var(--lid-tint); border-left: 3px solid var(--lid); border-radius: 0 var(--radius) var(--radius) 0; }
+#lt-root .lts-sources { font-size: 0.88rem !important; }
+#lt-root .lts-sources a { color: var(--lid); }
+
+@media (max-width: 29.99rem) {
+  #lt-root .lts-boil .lts-big { font-size: 1.4rem; }
+  #lt-root .lts-key > div { grid-template-columns: 6.5rem minmax(0, 1fr); }
+}
+@media (min-width: 30rem) {
+  #lt-root .lts-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (min-width: 56rem) {
+  #lt-root .lts-calc { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); align-items: start; gap: 2rem; padding: 1.25rem 1.5rem; }
+}
 
 /* ---------- Paper copy: Print the full report / Download PDF ---------- */
 /* The buttons reuse the Short Term classes (.report-actions, .report-foot, .pdf-status). The report

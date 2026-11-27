@@ -26,7 +26,7 @@ test("both pages have the Short Term buttons, and a hidden box for the printout"
 test("the report has every part, in order, with the README pages from the site", () => {
   for (const id of README_IN_REPORT) assert.ok(readme.find((p) => p.id === id), `README page ${id} is published`);
   const parts = blocks.filter((b) => b.t === "part").map((b) => b.text);
-  assert.deepEqual(parts, ["Why Cobscook Bay", "The Cobscook Bay map", "Houses for sale", "Solar panels", "Off-grid checklist", "Cobscook Bay fishing by season", "Nov–Dec food shortage", "Species extinction", "Pumping gas out of a car"]);
+  assert.deepEqual(parts, ["Why Cobscook Bay", "The Cobscook Bay map", "Houses for sale", "Solar panels", "Off-grid checklist", "Cobscook Bay fishing by season", "Salting fish and game", "Nov–Dec food shortage", "Species extinction", "Pumping gas out of a car"]);
   assert.equal(blocks[0].t, "cover");
   assert.deepEqual(blocks[0].contents, parts);
 });
