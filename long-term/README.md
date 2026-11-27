@@ -217,7 +217,7 @@ is shown, so opening straight to Fishing doesn't download it.
   Brett's review (`drawStudies()`): the 2008–2011 Gulf of Maine smelt fyke survey (with East Bay
   Brook, the Cobscook stream) and the 2011–2013 Cobscook Bay finfish survey (Vieser's thesis). Each
   is `NET_STUDIES` in `data/fishing-notes.js`: an intro line, label and text rows (net, size, wings,
-  length, where, time in the water, season, years, fish), a catch table, more rows and links. Only
+  length, where, time in the water, season, years, fish), catch tables, more rows and links. Only
   what the studies say goes in, with "Not given" where they don't. They don't depend on targets, so
   they're drawn once with the page and stay open while you work the table.
 - **Parked until fishing methods are picked:** cutoffs, catch per hour, cleaning time and the 2025

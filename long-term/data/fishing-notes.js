@@ -41,8 +41,8 @@ export const NET_FINDINGS = {
 
 // Fyke net studies, under the species sections on the Netting tab: one collapsed section each, for
 // Brett to review. Only what the studies say, with "Not given" where they don't. facts and after are
-// [label, text] rows, before and after the table; table is { caption, head, rows } (the first cell
-// of each row is its name); links are [title, url]. Gathered Nov 27, 2026.
+// [label, text] rows, before and after the tables; tables is a list of { caption, head, rows } (the
+// first cell of each row is its name); links are [title, url]. Gathered Nov 27, 2026.
 export const NET_STUDIES = [
   {
     id: "smelt-survey",
@@ -65,7 +65,7 @@ export const NET_STUDIES = [
       ["Catch measure", "Smelt per overnight haul. Each year's figure is the geometric mean of the weekly averages, which runs lower than a plain average."],
       ["East Bay smelt", "Mostly 2-year-olds, with few or no 1-year-olds. 2-year-old males averaged 166 mm (6½ in). Fewer than 2 males per female, against 4 to 1 across the whole survey."],
     ],
-    table: {
+    tables: [{
       caption: "Smelt per overnight haul, Maine streams (Table 1.3.3 of the 2012 report). A dash means no data that year.",
       head: ["Stream", "2008", "2009", "2010", "2011", "All years"],
       rows: [
@@ -76,7 +76,7 @@ export const NET_STUDIES = [
         ["Tannery Brook", "15.28", "28.26", "41.87", "14.03", "24.86"],
         ["Schoppee Brook", "–", "–", "38.42", "37.25", "37.83"],
       ],
-    },
+    }],
     after: [
       ["Other states, all years", "Massachusetts ran from 20.42 (Fore River) down to 1.01 (Westport River). New Hampshire: Oyster River 5.62 and Winnicut River 1.64."],
       ["What the authors found", "Smelt were under less stress further north, and Maine's eastern runs were the healthiest. Catches varied too much, and the study was too short, to show trends, so the numbers are a reference point. The sex ratio is skewed because males stay on the spawning grounds longer than females."],
@@ -106,10 +106,25 @@ export const NET_STUDIES = [
       ["Season", "May, June, August and September."],
       ["Years", "The methods say 2012 and 2013. The paper's own table, and a 2012 talk that counted 22 fyke sets in 2011, show fyke sets in 2011 too."],
       ["Why fykes", "To catch larger fish."],
-      ["Fish in the fykes", "9 species, in the table below. Atlantic tomcod was the most common in the fykes."],
+      ["2012 fyke sets", "25 sets, each of two nets near each other. Sites, as the project's 2013 report names them: Carrying Place Cove in the outer bay (9 sets), East Sipp Cove/Bay (7) and Dennys Youngs Cove (9). 14 sets ran partly or all at night."],
+      ["Fish in the fykes", "2012: 94 fish of 6 species, counted by month in the first table below. The report calls it only six species with few fish of each. The whole survey's fykes caught 9 species (second table), and Atlantic tomcod was the most common."],
+      ["Seals", "A harbor seal got into a fyke net on June 28, 2012, and drowned. Bars to keep seals out were added to the nets before the August and September sets."],
     ],
-    table: {
-      caption: "Fish caught in the fyke nets. The paper gives a fyke count only for tomcod. For the rest it marks fykes as one of the nets that caught them, and gives the total from all nets. \"A third or more\" means fykes caught at least a third of that total.",
+    tables: [{
+      caption: "Fish caught in the fyke nets in 2012, by month (Table 9 of the project's March 2013 report). Each set is two nets.",
+      head: ["Species", "May", "June", "Aug", "Sep", "Total"],
+      rows: [
+        ["Sets", "3", "7", "8", "7", "25"],
+        ["Atlantic tomcod", "2", "11", "25", "22", "60"],
+        ["Rainbow smelt", "0", "0", "9", "11", "20"],
+        ["Winter flounder", "0", "2", "5", "0", "7"],
+        ["Pollock", "0", "0", "0", "5", "5"],
+        ["Alewife", "0", "1", "0", "0", "1"],
+        ["Atlantic herring", "0", "0", "0", "1", "1"],
+        ["All fish", "2", "14", "39", "39", "94"],
+      ],
+    }, {
+      caption: "Fish caught in the fyke nets over the whole survey (the 2018 paper's Table 2). The paper gives a fyke count only for tomcod. For the rest it marks fykes as one of the nets that caught them, and gives the total from all nets. \"A third or more\" means fykes caught at least a third of that total.",
       head: ["Species", "In fykes", "All nets"],
       rows: [
         ["Atlantic tomcod", "121", "274"],
@@ -122,9 +137,9 @@ export const NET_STUDIES = [
         ["Blueback herring", "Not given", "10"],
         ["White perch", "1", "1"],
       ],
-    },
+    }],
     after: [
-      ["Catch rate", "None for the fykes. Catches were low and effort varied, so fyke data were used only for the species list."],
+      ["Catch rate", "The paper didn't work one out for the fykes, because catches were low and effort varied, so it used them only for the species list. From the 2012 counts: 94 fish in 25 sets, or about 3.8 fish per set of two nets (my arithmetic)."],
       ["Whole survey", "60,476 fish of 46 species, from 390 seine hauls, 112 bottom trawls, 111 midwater trawls and 72 fyke sets."],
       ["Limits", "A 2014 talk on the survey said the netting missed large fish and fish in fast currents, which reach 1.8 m/s (about 3½ knots)."],
       ["The thesis", "Vieser, 2014: \"Collaborative Research on Finfish, Their Distribution, and Diversity in Cobscook Bay, Maine.\" It isn't online yet, as the University of Maine library is moving its theses to a new system. Special collections: um.library.spc@maine.edu. The 2018 paper is the published version."],
@@ -135,6 +150,7 @@ export const NET_STUDIES = [
       ["The thesis record, 2014 (Tethys)", "https://tethys.pnnl.gov/publications/collaborative-research-finfish-their-distribution-diversity-cobscook-bay"],
       ["2014 talk on the survey's netting, American Fisheries Society", "https://afs.confex.com/afs/2014/webprogram/Paper16137.html"],
       ["2012 talk with the 2011 counts, American Fisheries Society", "https://afs.confex.com/afs/2012/webprogram/Paper10763.html"],
+      ["Project's March 2013 report, with the 2012 fyke catches (Table 9)", "https://repository.library.noaa.gov/view/noaa/36331/noaa_36331_DS1.pdf"],
     ],
   },
 ];

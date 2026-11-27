@@ -420,18 +420,17 @@ export function drawFindings(rows, findings = NET_FINDINGS, page = NET_PAGE) {
 }
 
 // Under the species sections: one collapsed section per fyke net study (NET_STUDIES), with its facts
-// as label and text rows, its catch table and its links. These don't depend on your targets, so
+// as label and text rows, its catch tables and its links. These don't depend on your targets, so
 // they're drawn once with the page and stay open while you work the table.
 const factRows = (facts) => (facts || []).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
 export function drawStudies(studies = NET_STUDIES) {
   return studies.map((s) => {
-    const t = s.table;
-    const table = t ? `
+    const table = (s.tables || []).map((t) => `
         <div class="ltn-study-tbl-wrap"><table class="ltn-study-tbl">
           <caption>${esc(t.caption)}</caption>
           <thead><tr>${t.head.map((h) => `<th scope="col">${esc(h)}</th>`).join("")}</tr></thead>
           <tbody>${t.rows.map(([name, ...cells]) => `<tr><th scope="row">${esc(name)}</th>${cells.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>
-        </table></div>` : "";
+        </table></div>`).join("");
     const links = s.links && s.links.length
       ? `<div><dt>Links</dt><dd><ul>${s.links.map(([title, url]) => `<li><a href="${esc(url)}" target="_blank" rel="noopener">${esc(title)}</a></li>`).join("")}</ul></dd></div>`
       : "";

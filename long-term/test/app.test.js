@@ -624,7 +624,8 @@ test("netting studies: a collapsed section per fyke net study, under the species
     }
     assert.ok(labels.some((k) => k.startsWith("Where")), `${s.id} says where`);
     assert.equal(new Set(labels).size, labels.length, `${s.id} labels are unique`);
-    assert.ok(s.table.rows.length && s.table.rows.every((r) => r.length === s.table.head.length), `${s.id} table rows fit the header`);
+    assert.ok(s.tables.length);
+    for (const t of s.tables) assert.ok(t.caption && t.rows.length && t.rows.every((r) => r.length === t.head.length), `${s.id} table rows fit the header`);
     assert.ok(s.links.length >= 2);
     for (const [title, url] of s.links) { assert.ok(title); assert.match(url, /^https:\/\/[^\s"<>]+$/); }
   }
@@ -632,6 +633,15 @@ test("netting studies: a collapsed section per fyke net study, under the species
   // East Bay Brook, the Cobscook stream, leads the smelt survey's table.
   assert.match(html, /<th scope="row">East Bay Brook \(Cobscook\)<\/th><td>15\.48<\/td><td>4\.42<\/td><td>21\.66<\/td><td>11\.86<\/td><td>13\.35<\/td>/);
   assert.match(html, /<th scope="row">Atlantic tomcod<\/th><td>121<\/td><td>274<\/td>/);
+  // The 2012 fyke counts: one herring in 25 sets, and the month columns add up.
+  const fyke2012 = NET_STUDIES[1].tables[0];
+  assert.match(html, /<th scope="row">Atlantic herring<\/th><td>0<\/td><td>0<\/td><td>0<\/td><td>1<\/td><td>1<\/td>/);
+  const num = (r) => r.slice(1).map((c) => Number(c));
+  const fish = fyke2012.rows.filter(([n]) => n !== "Sets" && n !== "All fish");
+  const all = num(fyke2012.rows.find(([n]) => n === "All fish"));
+  all.forEach((v, i) => assert.equal(fish.reduce((t, r) => t + num(r)[i], 0), v, `column ${i} adds up`));
+  for (const r of fyke2012.rows) { const v = num(r); assert.equal(v.slice(0, 4).reduce((a, b) => a + b, 0), v[4], `${r[0]} months add to its total`); }
+  assert.ok(!html.includes("None for the fykes"), "no wording that reads as an empty catch");
   // Text is escaped; a study without a table, later rows or links still draws.
   const odd = drawStudies([{ id: "x", title: "<b>", about: "a & b", facts: [["k", "<i>"]] }]);
   assert.match(odd, /<summary>&lt;b&gt;<\/summary>/);
