@@ -319,6 +319,20 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 .shop th:nth-child(4) { width: 18%; }
 .shop th:nth-child(5) { width: 13%; }
 
+/* "Why?" opens the gear explanation in a row under the item. The panel sticks to the left edge
+   and is no wider than the screen, so it reads without sideways scrolling on a phone. */
+.why-btn { margin-left: 0.3rem; padding: 0.05rem 0.5rem; font: inherit; font-size: 0.8rem; font-weight: 700; line-height: 1.5; color: var(--lid); background: none; border: 1.5px solid currentColor; border-radius: 999px; cursor: pointer; vertical-align: 0.08em; white-space: nowrap; }
+.why-btn:hover { color: var(--bean); }
+.why-btn[aria-expanded="true"] { color: #fff; background: var(--lid); border-color: var(--lid); }
+.why-btn:focus-visible { outline: 2px solid var(--lid); outline-offset: 2px; }
+.data .why-row > td { padding-top: 0; }
+.why-panel { position: sticky; left: 0; box-sizing: border-box; width: min(100%, calc(100vw - 2.5rem)); padding: 0.1rem 0 0.4rem 0.9rem; border-left: 3px solid var(--lid); font-weight: 400; }
+.why-panel p, .why-panel .plain { margin: 0.5rem 0; }
+.why-panel .gear-links { font-weight: 700; }
+.off-list { border-bottom: 1px solid var(--line); padding: 0.55rem 0; max-width: 62rem; }
+.off-list summary { font-weight: 700; cursor: pointer; }
+.off-list .why-panel { position: static; width: auto; margin-top: 0.4rem; }
+
 .shop-summary { font-size: 1.2rem; margin-bottom: 0.4rem; }
 .shop-summary strong { font-size: 1.35rem; }
 .shop-compare { margin-top: 0; color: var(--ink-2); }
@@ -374,6 +388,9 @@ table.shop { table-layout: fixed; min-width: 38rem; }
   @page { margin: 0.5in; }
   body { background: #fff; font-size: 10.5pt; }
   .setup, .people-actions, .privacy, .intro, .report-actions, .report-foot, .shop-compare .btn-link, .goal-toggle { display: none !important; }
+  .why-btn { display: none !important; }
+  .why-row[hidden] { display: table-row !important; }
+  .why-panel { position: static; width: auto; }
   .print-meta { display: block; margin: 0 0 6pt; font-size: 9pt; color: var(--ink-2); }
   .videos { display: block; padding: 4pt 0 6pt; border-top: 2px solid #000; }
   .video + .video { margin-top: 4pt; }

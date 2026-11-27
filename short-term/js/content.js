@@ -556,7 +556,8 @@ export function compareText(hh) {
   return `With a Costco membership, the Costco list would come to ${money(hh.other.total)}, plus ${money(COSTCO_MEMBERSHIP)} for the membership.`;
 }
 
-export function shoppingNotes(hh) {
+// pdf: the PDF has no "Why?" buttons; its gear explanations come at the end instead.
+export function shoppingNotes(hh, pdf = false) {
   const notes = [];
   const beans = hh.lines.find((l) => l.key === "beans");
   const milk = hh.lines.find((l) => l.key === "milk");
@@ -570,20 +571,29 @@ export function shoppingNotes(hh) {
     notes.push("Great Value and Equate are Walmart's store brands. Any brand of plain long grain rice, pinto beans, old fashioned oats and iodized salt works the same.");
     notes.push("The oats, salt and adult multivitamins come from Amazon, which has bigger, cheaper boxes of oats and big bottles of vitamins (200 to 300 tablets).");
   }
-  notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag and one absorber per bucket, about ${LB_PER_BUCKET} lb each. The buckets are counted from the rice and beans you buy, and "Storage" near the bottom of the page shows how to seal them.`);
+  notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag and one absorber per bucket, about ${LB_PER_BUCKET} lb each. The buckets are counted from the rice and beans you buy. ${pdf ? '"Storage" near the end shows' : 'Tap "Why?" next to the buckets to see'} how to seal them.`);
   notes.push("Prices change often, especially around sales. Check them at checkout.");
   return notes;
 }
 
 // The small line under an item's name on the shopping list: how long food keeps, or how the
 // storage items are used.
-export function lineHint(l) {
+export function lineHint(l, pdf = false) {
   if (l.keeps) return `Keeps ${l.keeps}`;
-  if (l.key === "buckets") return `About ${LB_PER_BUCKET} lb of rice or beans in each. How to seal them is under "Storage" near the bottom.`;
+  if (l.key === "buckets") return `About ${LB_PER_BUCKET} lb of rice or beans in each.${pdf ? ' How to seal them is under "Storage" near the end.' : ""}`;
   if (l.key === "mylar") return `One bag and one ${num(ABSORBER_CC)} cc oxygen absorber in each bucket.`;
   if (l.key === "bladder") return `Or a V-TOP drain cover. Pick one at the top under "Already have".`;
   if (l.key === "drainCover") return `Or a waterBOB bag. Pick one at the top under "Already have".`;
   return "";
+}
+
+// Which gear explanation (from gearItems) goes with a shopping-list line. On the page it opens
+// under the line's "Why?" button; lines without one (food, the scale) get no button.
+export function cardKeyFor(lineKey) {
+  if (lineKey.startsWith("straw")) return "straws";
+  if (lineKey === "drainCover") return "bladder";
+  if (lineKey === "buckets" || lineKey === "mylar") return "storage";
+  return ["lighters", "axe", "bladder", "diverter", "pot", "tripod", "disc", "timer"].includes(lineKey) ? lineKey : null;
 }
 
 // How long the food keeps: the "Keeps ..." line under each item comes from KEEPS in data.js.

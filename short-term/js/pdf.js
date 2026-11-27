@@ -139,7 +139,7 @@ function shopping(hh) {
       g.lines.map((l) => [
         { stack: [
           { text: t(l.item), link: l.url, color: C.lid, bold: true, decoration: "underline" },
-          lineHint(l) ? { text: t(lineHint(l)), fontSize: 7, color: C.ink2, margin: [0, 1, 0, 0] } : "",
+          lineHint(l, true) ? { text: t(lineHint(l, true)), fontSize: 7, color: C.ink2, margin: [0, 1, 0, 0] } : "",
         ] },
         { text: t(l.pack), color: C.ink2 },
         { text: String(l.qty), alignment: "right" },
@@ -150,7 +150,7 @@ function shopping(hh) {
       { align: ["left", "left", "right", "left", "right"] },
     ));
   }
-  out.push(bullets(shoppingNotes(hh), { margin: [0, 8, 0, 0], color: C.ink2 }));
+  out.push(bullets(shoppingNotes(hh, true), { margin: [0, 8, 0, 0], color: C.ink2 }));
   out.push(
     { stack: [{ text: "How long it keeps", style: "h3", margin: [0, 8, 0, 3] }, para(KEEPS_LEAD)], unbreakable: true, headlineLevel: 1 },
     leadBullets(keepsNotes(hh)),

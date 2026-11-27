@@ -3,7 +3,7 @@ import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, GEAR_INTRO,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor,
 } from "./content.js";
 
 const STORAGE_KEY = "prep-household-v1";
@@ -269,15 +269,29 @@ function onePotBlock(hh) {
     <p>${esc(d.note)}</p>`;
 }
 
-function shopTable(lines) {
-  const body = lines.map((l) => `
+// "Why?" panels that are open, by gear card key, so they stay open when the list redraws.
+const openWhy = new Set();
+
+function shopTable(lines, cards, shown) {
+  const body = lines.map((l) => {
+    // Only the first line of a card gets the button (the LifeStraw packs share one, so do buckets and mylar).
+    const cardKey = cardKeyFor(l.key);
+    const card = cardKey && !shown.has(cardKey) ? cards[cardKey] : null;
+    if (card) shown.add(cardKey);
+    const open = card && openWhy.has(cardKey);
+    const why = card
+      ? ` <button type="button" class="why-btn" data-why="${cardKey}" aria-expanded="${open}" aria-controls="why-${cardKey}">${open ? "Hide" : "Why?"}</button>`
+      : "";
+    return `
       <tr>
-        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${lineHint(l) ? `<small class="keeps">${esc(lineHint(l))}</small>` : ""}</th>
+        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${why}${lineHint(l) ? `<small class="keeps">${esc(lineHint(l))}</small>` : ""}</th>
         <td>${esc(l.pack)}</td>
         <td class="num">${l.qty}</td>
         <td>${esc(l.amountText)}</td>
         <td class="num">${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)}</small>` : ""}</td>
-      </tr>`).join("");
+      </tr>${card ? `
+      <tr class="why-row" id="why-${cardKey}"${open ? "" : " hidden"}><td colspan="5"><div class="why-panel">${gearBody(card)}</div></td></tr>` : ""}`;
+  }).join("");
   return `
     <div class="table-scroll"><table class="data shop">
       <thead><tr><th scope="col">Item</th><th scope="col">Buy</th><th scope="col" class="num">How many</th><th scope="col">Covers</th><th scope="col" class="num">Cost</th></tr></thead>
@@ -286,9 +300,14 @@ function shopTable(lines) {
 }
 
 function shoppingSection(hh) {
+  const cards = Object.fromEntries(gearItems(hh).map((it) => [it.key, it]));
+  const shown = new Set();
   const tables = storeGroups(hh).map((g) => `
     <h3 class="sub-title">${esc(g.title)} <span class="sub-total">${money(g.total)}</span></h3>
-    ${shopTable(g.lines)}`).join("");
+    ${shopTable(g.lines, cards, shown)}`).join("");
+  // Gear that's off the list (already owned, or no LifeStraws for small children) keeps its
+  // explanation in a short folded list after the shopping notes.
+  const offList = Object.values(cards).filter((it) => !shown.has(it.key) && it.key !== "storage");
   return `
   <section class="block shopping" aria-labelledby="shop-title">
     <h2 id="shop-title" class="section-title">Shopping list</h2>
@@ -296,6 +315,13 @@ function shoppingSection(hh) {
     <p class="shop-compare">${esc(compareText(hh))} <button type="button" class="btn-link" data-switch-store>${hh.store === "costco" ? "Show the Walmart list" : "Show the Costco list"}</button></p>
     ${tables}
     <ul class="notes">${shoppingNotes(hh).map((n) => `<li>${esc(n)}</li>`).join("")}</ul>
+    ${offList.length ? `
+    <h3 class="sub-title">Gear you're not buying</h3>
+    ${offList.map((it) => `
+    <details class="off-list">
+      <summary>${esc(it.title)}</summary>
+      <div class="why-panel">${gearBody(it)}</div>
+    </details>`).join("")}` : ""}
     <h3 class="sub-title">How long it keeps</h3>
     <p class="keeps-lead">${esc(KEEPS_LEAD)}</p>
     ${leadList(keepsNotes(hh))}
@@ -315,25 +341,18 @@ function potSizes(it) {
       <p class="muted">${esc(it.sizesNote)}</p>`;
 }
 
-function gearSection(hh) {
-  const items = gearItems(hh).map((it) => `
-    <article class="gear-item${it.sizes || it.wide ? " gear-wide" : ""}">
-      <h3 class="gear-title">${esc(it.title)}</h3>
+// One gear explanation: what to buy, how long it lasts and how to use it. The title isn't repeated,
+// since it sits under the item's own row (or in its summary line).
+function gearBody(it) {
+  return `
       <p class="gear-buy">${esc(it.buy)}</p>
-      <p class="gear-links">${it.links.length > 1 ? "On Amazon: " : ""}${it.links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join(", ")}</p>
+      ${it.links.length > 1 ? `<p class="gear-links">On Amazon: ${it.links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join(", ")}</p>` : ""}
       ${(it.notes || []).map((n) => `<p><strong>${esc(n.label)}:</strong> ${esc(n.text)}</p>`).join("")}
       <p><strong>How long it lasts:</strong> ${esc(it.lasts)}</p>
       ${it.sizes ? potSizes(it) : ""}
       ${it.drink ? `<p><strong>How much to drink:</strong> ${esc(it.drink)}</p>` : ""}
       <ul class="plain">${it.tips.map((t) => `<li>${esc(t)}</li>`).join("")}</ul>
-      ${it.packs ? `<p class="muted">${esc(it.packs)}</p>` : ""}
-    </article>`).join("");
-  return `
-  <section class="block gear" aria-labelledby="gear-title">
-    <h2 id="gear-title" class="section-title">Fire, water, cooking and storage</h2>
-    <p>${esc(GEAR_INTRO)} Tick off anything you own under "Already have".</p>
-    <div class="gear-grid">${items}</div>
-  </section>`;
+      ${it.packs ? `<p class="muted">${esc(it.packs)}</p>` : ""}`;
 }
 
 function rulesSection(hh) {
@@ -418,7 +437,6 @@ function renderResults() {
     <div class="cards">${hh.plans.map((pl) => card(pl, hh)).join("")}</div>
     ${cookingSection(hh)}
     ${shoppingSection(hh)}
-    ${gearSection(hh)}
     ${rulesSection(hh)}
     ${careSection()}
     ${aboutSection()}
@@ -480,6 +498,15 @@ async function downloadPdf(button) {
 
 // ---------- events ----------
 
+// Printing shows every explanation: open the folded "Gear you're not buying" items for the
+// printout, then close them again. (The "Why?" rows are shown by the print CSS.)
+let printOpened = [];
+window.addEventListener("beforeprint", () => {
+  printOpened = [...document.querySelectorAll("details.off-list:not([open])")];
+  printOpened.forEach((d) => { d.open = true; });
+});
+window.addEventListener("afterprint", () => { printOpened.forEach((d) => { d.open = false; }); printOpened = []; });
+
 function init() {
   $("#prices-date").textContent = PRICES_CHECKED;
   $("#months").innerHTML = Array.from({ length: 12 }, (_, i) => i + 1)
@@ -511,6 +538,17 @@ function init() {
       raw.keepWeight = goal === "keep";
       save(); renderResults();
       $(`[data-goal-id="${CSS.escape(raw.id)}"][data-goal="${goal}"]`)?.focus({ preventScroll: true });
+      return;
+    }
+    const whyBtn = e.target.closest("[data-why]");
+    if (whyBtn) {
+      const key = whyBtn.dataset.why;
+      const row = document.getElementById(`why-${key}`);
+      const open = whyBtn.getAttribute("aria-expanded") !== "true";
+      whyBtn.setAttribute("aria-expanded", String(open));
+      whyBtn.textContent = open ? "Hide" : "Why?";
+      row.hidden = !open;
+      if (open) openWhy.add(key); else openWhy.delete(key);
       return;
     }
     if (e.target.closest("[data-print]")) window.print();
