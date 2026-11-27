@@ -84,6 +84,11 @@ export const PRODUCTS = {
     size: 200, price: 19.98, priceNote: "$12.79–19.98",
     url: "https://www.amazon.com/dp/B09KFLWSXX",
   },
+  prenatal: {
+    item: "Prenatal vitamin (pregnancy)", pack: "250 tablets, Nature Made Prenatal Multi", store: "Amazon", where: "Online",
+    size: 250, price: 26.99, priceNote: "$26.17–26.99",
+    url: "https://www.amazon.com/dp/B001F1G6SI",
+  },
   formula: {
     item: "Infant formula (powder)", pack: "42-oz tub, Kirkland Signature ProCare", store: "Costco", where: "Warehouse",
     sizeGrams: 1190, price: 29.99, priceNote: "$23.97–29.99",
@@ -278,6 +283,7 @@ export const KEEPS = {
   multiMen: VITAMINS_KEEP,
   multiWomen: VITAMINS_KEEP,
   multiWomen50: VITAMINS_KEEP,
+  prenatal: VITAMINS_KEEP,
   multiKids: VITAMINS_KEEP,
   vitC: VITAMINS_KEEP,
   drops: "until the date on the bottle",

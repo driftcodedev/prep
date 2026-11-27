@@ -551,7 +551,7 @@ export function shoppingNotes(hh) {
   } else {
     notes.push("No membership needed. Walmart.com ships orders of $35 or more free, or you can order for pickup at your store. Store prices can differ a little from online prices.");
     notes.push("Great Value and Equate are Walmart's store brands. Any brand of plain long grain rice, pinto beans, old fashioned oats and iodized salt works the same.");
-    notes.push("The oats, salt and adult multivitamins come from Amazon, which has bigger, cheaper boxes of oats and 300-tablet bottles of vitamins.");
+    notes.push("The oats, salt and adult multivitamins come from Amazon, which has bigger, cheaper boxes of oats and big bottles of vitamins (200 to 300 tablets).");
   }
   notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag and one absorber per bucket, about ${LB_PER_BUCKET} lb each. The buckets are counted from the rice and beans you buy, and "Storage" near the bottom of the page shows how to seal them.`);
   notes.push("Prices change often, especially around sales. Check them at checkout.");

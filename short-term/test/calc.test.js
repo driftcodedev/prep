@@ -141,6 +141,35 @@ test("Every food and vitamin on the list says how long it keeps", () => {
   }
 });
 
+test("Vitamins: one a day per person, enough bottles for the months plus the reserve", () => {
+  const her = { name: "Jo", sex: "female", age: 33, heightIn: 65, weightLb: 150, activity: "light", flags: {} };
+  const older = { name: "Ann", sex: "female", age: 60, heightIn: 64, weightLb: 140, activity: "light", flags: {} };
+  const small = { name: "Kai", sex: "male", age: 3, heightIn: 38, weightLb: 32, activity: "light", flags: {} };
+  const hh = planHousehold({ months: 6, reservePct: 20, people: [brett, her, older, small] });
+  const line = (k) => hh.lines.find((l) => l.key === k);
+  const days = hh.days;
+  assert.equal(line("multiMen").amountText, `${Math.ceil(days * 1.2)} tablets`);
+  assert.equal(line("multiMen").qty, 1); // 300 tablets
+  assert.equal(line("multiWomen").qty, 1);
+  assert.equal(line("multiWomen50").qty, 2); // 200-tablet bottles
+  assert.equal(line("multiKids").amountText, `${Math.ceil(days * 0.5 * 1.2)} tablets`); // ½ tablet at ages 2–3
+  assert.equal(line("prenatal"), undefined);
+});
+
+test("A pregnant woman gets a prenatal vitamin instead of the regular one", () => {
+  const pregnant = { name: "Jo", sex: "female", age: 30, heightIn: 65, weightLb: 150, activity: "light", flags: { pregnant: true } };
+  assert.equal(planPerson(pregnant, 182).supplement.key, "prenatal");
+  for (const store of ["costco", "walmart"]) {
+    const hh = planHousehold({ months: 6, people: [brett, pregnant], store });
+    const keys = hh.lines.map((l) => l.key);
+    assert.ok(keys.includes("prenatal"), store);
+    assert.ok(!keys.includes("multiWomen"), store);
+    assert.equal(hh.lines.find((l) => l.key === "prenatal").qty, 1); // 250 tablets
+  }
+  const nursing = { ...pregnant, flags: { breastfeeding: true } };
+  assert.equal(planPerson(nursing, 182).supplement.key, "multiWomen");
+});
+
 test("Drinking water: ½ gallon for adults, less for small children", () => {
   assert.equal(waterCups(brett), 8);
   assert.equal(waterCups({ sex: "male", age: 1, flags: {} }), 4);

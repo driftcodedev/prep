@@ -133,6 +133,8 @@ function supplementFor(p) {
   if (p.age < 2) return { key: "drops", perDay: 1, text: "1 mL vitamin drops" };
   if (p.age < 4) return { key: "multiKids", perDay: 0.5, text: "½ chewable vitamin, crushed" };
   if (p.age < 14) return { key: "multiKids", perDay: 1, text: "1 chewable vitamin" };
+  // Pregnancy needs more iron (27 mg) and folic acid than a regular multivitamin has.
+  if (p.sex === "female" && p.flags?.pregnant) return { key: "prenatal", perDay: 1, text: "1 prenatal vitamin" };
   if (p.sex === "male") return { key: "multiMen", perDay: 1, text: "1 multivitamin" };
   if (p.age >= 51) return { key: "multiWomen50", perDay: 1, text: "1 multivitamin (50+)" };
   return { key: "multiWomen", perDay: 1, text: "1 multivitamin with iron" };
@@ -430,7 +432,7 @@ function warningsFor(plan) {
   if (p.age >= 2 && p.age < 4) w.push("Crush the chewable vitamin and mix it into food.");
   if (plan.isChild) w.push("Children should never diet. Weigh them every two weeks; if a child loses weight, add rice or another ½ cup of milk.");
   if (plan.keptWeight && plan.healthyGoal.mode === "gain") w.push(`Below a healthy weight for this height. The plan holds ${Math.round(p.weightLb)} lb, but gaining to ${plan.healthyGoal.lb} lb would give the body some reserve if food runs short.`);
-  if (f.pregnant) w.push("Take a prenatal vitamin instead of the regular multivitamin and keep regular checkups. The extra calories here are a rough estimate.");
+  if (f.pregnant) w.push("The list has a prenatal vitamin for her instead of the regular multivitamin. After the baby comes, keep taking it while breastfeeding. Keep regular checkups. The extra calories here are a rough estimate.");
   if (plan.nursingExtra) {
     w.push("Keep taking a prenatal or women's multivitamin while breastfeeding. Never cut calories to lose weight while nursing. Drink to thirst, and a glass of water at every feed.");
     const n = p.nursing;
@@ -673,7 +675,7 @@ function shoppingFor(ctx, products) {
     addLine(key, qty, amount, "food");
   }
 
-  for (const key of ["multiMen", "multiWomen", "multiWomen50", "multiKids", "drops", "dropsD"]) {
+  for (const key of ["multiMen", "multiWomen", "multiWomen50", "prenatal", "multiKids", "drops", "dropsD"]) {
     if (!supp[key]) continue;
     const need = supp[key] * reserve;
     addLine(key, Math.ceil(need / products[key].size - 1e-9), key.startsWith("drops") ? `${Math.ceil(need)} mL` : `${Math.ceil(need)} tablets`, "food");
