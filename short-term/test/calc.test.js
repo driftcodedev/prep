@@ -170,6 +170,16 @@ test("A pregnant woman gets a prenatal vitamin instead of the regular one", () =
   assert.equal(planPerson(nursing, 182).supplement.key, "multiWomen");
 });
 
+test("The bladder card gives the no-bag option: a drain cover and a LifeStraw", () => {
+  const hh = planHousehold({ months: 6, people: [brett] });
+  const card = gearItems(hh).find((it) => it.key === "bladder");
+  assert.ok(card.links.some((l) => l.url === PRODUCTS.drainCover.url));
+  const note = card.notes.find((n) => n.label.startsWith("No bag"));
+  assert.match(note.text, /drain cover/);
+  assert.match(note.text, /LifeStraw/);
+  assert.ok(!hh.lines.some((l) => l.key === "drainCover"), "not on the shopping list");
+});
+
 test("Drinking water: ½ gallon for adults, less for small children", () => {
   assert.equal(waterCups(brett), 8);
   assert.equal(waterCups({ sex: "male", age: 1, flags: {} }), 4);

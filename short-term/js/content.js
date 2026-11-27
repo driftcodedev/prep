@@ -334,8 +334,15 @@ export function gearItems(hh) {
       key: "bladder",
       title: "Water: waterBOB bathtub bladder",
       product: P.bladder,
-      links: [{ label: "waterBOB on Amazon", url: P.bladder.url }],
+      links: [
+        { label: "waterBOB", url: P.bladder.url },
+        { label: "V-TOP drain cover", url: P.drainCover.url },
+      ],
       buy: hh.lines.some((l) => l.key === "bladder") ? `One per household, ${cents(P.bladder.price)} on Amazon (sold by a third-party seller). It comes with a hand pump.` : "You already have a water bladder, so it's not on the list.",
+      notes: [{
+        label: "No bag? Fill the tub itself",
+        text: `The waterBOB often sells out. Without one, close the tub drain, press a flat silicone drain cover over it so the tub doesn't slowly leak (V-TOP, 2 for about $4–6 on Amazon), and fill the tub up to just below the overflow hole. Lay a shower curtain or plastic sheet over it to keep dust out. Open tub water isn't clean enough to drink as it is: sip it through a LifeStraw, and boil it for cooking and for children under ${STRAW_MIN_AGE}. Test the seal ahead of time: run a few inches of water, mark the level with tape and check it the next day.`,
+      }],
       lasts: `It holds up to ${g.bladderGallons} gallons, depending on the size of your tub. Your household uses about ${gallonsText(g.dailyGallons)} a day for drinking, cooking and soaking beans, so a full one lasts about ${num(g.bladderDays)} days (${weeksText(g.bladderDays)}). Sealed, the water stays fresh for up to ${BLADDER_WEEKS} weeks.`,
       tips: [
         "Fill it the moment the power goes out, while the tap still runs: lay it in a clean tub and fill it from the faucet.",
