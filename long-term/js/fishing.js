@@ -17,7 +17,35 @@ import {
 } from "../data/fishing-notes.js";
 import { esc } from "./geo.js";
 
-export const DEFAULT_STATE = { measure: "kcal", view: "amount" };
+export const DEFAULT_STATE = { measure: "kcal", view: "amount", picks: {} };
+
+// Targets: the cells Brett has marked green, as { speciesId: [season numbers] }. Anything that
+// isn't a known species or season is dropped, so old or hand-edited saves can't break the table.
+export function cleanPicks(raw, list = SPECIES, seasons = SEASONS) {
+  const out = {};
+  if (!raw || typeof raw !== "object") return out;
+  for (const sp of list) {
+    const bs = Array.isArray(raw[sp.id]) ? raw[sp.id] : [];
+    const ok = [...new Set(bs.filter((b) => Number.isInteger(b) && b >= 0 && b < seasons.length))].sort((x, y) => x - y);
+    if (ok.length) out[sp.id] = ok;
+  }
+  return out;
+}
+export const isPicked = (picks, id, b) => Boolean(picks && picks[id] && picks[id].includes(b));
+export function togglePick(picks, id, b) {
+  const next = { ...picks };
+  const bs = new Set(next[id] || []);
+  if (bs.has(b)) bs.delete(b); else bs.add(b);
+  if (bs.size) next[id] = [...bs].sort((x, y) => x - y); else delete next[id];
+  return next;
+}
+export const pickCount = (picks) => Object.values(picks || {}).reduce((n, bs) => n + bs.length, 0);
+
+// "3 targets picked" / "No targets picked yet"
+export const pickText = (picks) => {
+  const n = pickCount(picks);
+  return n ? `${n} target${n === 1 ? "" : "s"} picked` : "No targets picked yet";
+};
 const STORE = "prep-lt-fish";
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -243,8 +271,9 @@ export function drawTable(state, season, open = new Set(), list = SPECIES, seaso
     const flat = known.every((v) => v === best); // same every season: no best to mark
     const cells = seasons.map((_, b) => {
       const v = valueOf(sp, measure, b);
-      const cls = [b === season ? "is-on" : "", v === null ? "is-unknown" : "", view === "row" && v && v === best && !flat ? "is-best" : ""].filter(Boolean).join(" ");
-      return `<td${cls ? ` class="${cls}"` : ""}>${esc(cellText(sp, measure, view, b, list))}</td>`;
+      const picked = isPicked(state.picks, sp.id, b);
+      const cls = ["ltf-pickcell", b === season ? "is-on" : "", v === null ? "is-unknown" : "", view === "row" && v && v === best && !flat ? "is-best" : "", picked ? "is-picked" : ""].filter(Boolean).join(" ");
+      return `<td class="${cls}"><button type="button" class="ltf-pick" data-pick="${esc(sp.id)}" data-b="${b}" aria-pressed="${picked}" title="${picked ? "Unmark" : "Mark"} ${esc(sp.short)} as a target in ${esc(seasons[b].long)}">${esc(cellText(sp, measure, view, b, list))}</button></td>`;
     }).join("");
     const name = measure === "lb" && sp.weight === "meat" ? `${sp.name} (meat)` : sp.name;
     const isOpen = open.has(sp.id);
@@ -323,7 +352,8 @@ export function renderFishing(page = FISH_PAGE) {
         </div>
       </div>
 
-      <p class="ltf-hint ltf-tbl-hint">Tap a season to sort by it, most to least. Tap a species for its notes. For species that stay all year, like urchins, periwinkles, clams and scallops, each season shows the same animals, so don't add the seasons together.</p>
+      <p class="ltf-hint ltf-tbl-hint">Tap a season to sort by it, most to least. Tap a species for its notes. Tap a number to mark it green as a target for that season, and tap it again to unmark it; your targets are kept in this browser. For species that stay all year, like urchins, periwinkles, clams and scallops, each season shows the same animals, so don't add the seasons together.</p>
+      <div class="ltf-picks-bar"><span class="ltf-picks-count" data-picks-count aria-live="polite"></span><button type="button" class="btn-link ltf-picks-clear" data-clear-picks hidden>Clear targets</button></div>
       <div class="ltf-chart" data-table></div>
 
       <details class="ltm-notes" open>
@@ -359,11 +389,12 @@ function readState() {
     return {
       measure: MEASURES[s.measure] ? s.measure : DEFAULT_STATE.measure,
       view: NUMBER_VIEWS[s.view] ? s.view : DEFAULT_STATE.view,
+      picks: cleanPicks(s.picks),
     };
-  } catch { return { ...DEFAULT_STATE }; }
+  } catch { return { ...DEFAULT_STATE, picks: {} }; }
 }
 function saveState(state) {
-  try { localStorage.setItem(STORE, JSON.stringify({ measure: state.measure, view: state.view })); } catch { /* private mode */ }
+  try { localStorage.setItem(STORE, JSON.stringify({ measure: state.measure, view: state.view, picks: state.picks })); } catch { /* private mode */ }
 }
 
 export function createFishing(panel) {
@@ -375,7 +406,13 @@ export function createFishing(panel) {
   for (const input of panel.querySelectorAll('input[name="ltf-measure"]')) input.checked = input.value === state.measure;
   for (const input of panel.querySelectorAll('input[name="ltf-view"]')) input.checked = input.value === state.view;
 
-  function draw() { table.innerHTML = drawTable(state, season, open); }
+  const count = panel.querySelector("[data-picks-count]");
+  const clear = panel.querySelector("[data-clear-picks]");
+  function showPicks() {
+    if (count) count.textContent = pickText(state.picks);
+    if (clear) clear.hidden = !pickCount(state.picks);
+  }
+  function draw() { table.innerHTML = drawTable(state, season, open); showPicks(); }
 
   function onChange(e) {
     if (e.target.name === "ltf-measure") state.measure = e.target.value;
@@ -385,6 +422,26 @@ export function createFishing(panel) {
     draw();
   }
   function onClick(e) {
+    const cell = e.target.closest("[data-pick]");
+    if (cell && panel.contains(cell)) {
+      const id = cell.dataset.pick;
+      const b = Number(cell.dataset.b);
+      state.picks = togglePick(state.picks, id, b);
+      const on = isPicked(state.picks, id, b);
+      cell.setAttribute("aria-pressed", String(on));
+      cell.title = `${on ? "Unmark" : "Mark"}${cell.title.replace(/^(Unmark|Mark)/, "")}`;
+      cell.closest("td").classList.toggle("is-picked", on);
+      saveState(state);
+      showPicks();
+      return;
+    }
+    if (e.target.closest("[data-clear-picks]") && panel.contains(e.target)) {
+      if (!pickCount(state.picks)) return;
+      state.picks = {};
+      saveState(state);
+      draw();
+      return;
+    }
     const sp = e.target.closest("[data-sp]");
     if (sp && panel.contains(sp)) {
       const id = sp.dataset.sp;

@@ -267,7 +267,7 @@ import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICEN
 import {
   counted, seasonTotal, adultsFed, fedText, seasonRanking, sortRows, bestOf, cellText, rankingText, donutSlices, herringCatch,
   meatText, round2, millions, thousands, caloriesText, poundsText, pct, drawTable, renderFishing, seasonOfDate,
-  photoSrc, photoPage, photosHtml,
+  photoSrc, photoPage, photosHtml, cleanPicks, isPicked, togglePick, pickCount, pickText,
 } from "../js/fishing.js";
 
 test("the tab has a Map and a Fishing view, Map first", () => {
@@ -452,7 +452,7 @@ test("fishing table: a row per species with its notes, sorted by the picked seas
   assert.match(col, />66%</);
   assert.match(col, /<th scope="row">Total<\/th>(<td[^>]*>100%<\/td>){6}/);
   const row = drawTable({ measure: "kcal", view: "row" }, 4);
-  assert.match(row, /class="is-on is-best">100%</);
+  assert.match(row, /class="ltf-pickcell is-on is-best"><button[^>]*>100%</);
   assert.match(row, /All species/);
   const lb = drawTable({ measure: "lb", view: "amount" }, 4);
   assert.match(lb, /Sea scallops \(meat\)/);
@@ -500,4 +500,34 @@ test("every species has a picture with its maker and license, shown at the top o
   const row = open.slice(open.indexOf('id="ltf-d-urchins"'));
   assert.ok(row.indexOf('class="ltf-photos"') < row.indexOf('class="ltf-profile"'));
   assert.match(row, /alt="Green sea urchin"/);
+});
+
+test("targets: tap a number to mark it green; picks are kept tidy and survive sorting", () => {
+  // Saved picks are cleaned: unknown species, bad seasons and repeats are dropped.
+  assert.deepEqual(cleanPicks({ herring: [4, 4, 3, 9, -1, "2"], nosuch: [1], urchins: [] }), { herring: [3, 4] });
+  assert.deepEqual(cleanPicks(null), {});
+  let picks = togglePick({}, "herring", 4);
+  picks = togglePick(picks, "urchins", 0);
+  picks = togglePick(picks, "herring", 3);
+  assert.deepEqual(picks, { herring: [3, 4], urchins: [0] });
+  assert.equal(pickCount(picks), 3);
+  assert.equal(pickText(picks), "3 targets picked");
+  assert.equal(pickText(togglePick({}, "herring", 4)), "1 target picked");
+  assert.equal(pickText({}), "No targets picked yet");
+  picks = togglePick(picks, "urchins", 0);
+  assert.deepEqual(picks, { herring: [3, 4] }, "tapping again unmarks, and an empty species is dropped");
+  assert.ok(isPicked(picks, "herring", 4) && !isPicked(picks, "herring", 0));
+  // Every number is a toggle; picked cells carry is-picked and aria-pressed, whatever season sorts the table.
+  for (const season of [0, 4]) {
+    const tbl = drawTable({ measure: "kcal", view: "amount", picks }, season);
+    assert.equal((tbl.match(/class="ltf-pick"/g) || []).length, SPECIES.length * 6);
+    assert.equal((tbl.match(/aria-pressed="true" title="Unmark/g) || []).length, 2);
+    assert.match(tbl, /<td class="ltf-pickcell[^"]*is-picked"><button type="button" class="ltf-pick" data-pick="herring" data-b="4" aria-pressed="true"/);
+    assert.match(tbl, /data-pick="herring" data-b="0" aria-pressed="false" title="Mark herring as a target in January–February"/);
+  }
+  // Picks show in every view, pounds and percents too.
+  const pct = drawTable({ measure: "lb", view: "col", picks }, 0);
+  assert.match(pct, /is-picked"><button type="button" class="ltf-pick" data-pick="herring" data-b="3"/);
+  // No picks: nothing is green.
+  assert.ok(!drawTable({ measure: "kcal", view: "amount" }, 0).includes("is-picked"));
 });

@@ -184,8 +184,12 @@ is shown, so opening straight to Fishing doesn't download it.
   season, and no count). "Show" picks calories or pounds. "Numbers" picks amounts, "% of season"
   (each species' share of that season's total, by column) or "% of best season" (each season as a
   % of the species' own best season, by row; seasons are never added up). Tapping a species opens
-  its notes in a row under it. Show and Numbers are kept in `localStorage` (`prep-lt-fish`); the
-  season starts on today's.
+  its notes in a row under it. Every number is also a toggle button: tapping it marks that species
+  as a target for that season (green fill, darker green edge, `aria-pressed`), and tapping again
+  unmarks it. Targets stay through sorting and every Show and Numbers choice; a line above the table
+  counts them and offers "Clear targets". Show, Numbers and targets (`picks`, as
+  `{ speciesId: [season numbers] }`, cleaned by `cleanPicks()` on load) are kept in `localStorage`
+  (`prep-lt-fish`), so they're per browser; the season starts on today's.
 - **Parked until fishing methods are picked:** cutoffs, catch per hour, cleaning time and the 2025
   scallop drop. The old per-trip numbers are gone (they're in git history before Nov 27, 2026).
 
