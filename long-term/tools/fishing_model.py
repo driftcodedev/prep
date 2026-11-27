@@ -1,172 +1,187 @@
-"""Cobscook Bay seasonal fishing model: builds ../data/fishing.js.
+"""Cobscook Bay: how much food is in the bay in each two-month season. Builds ../data/fishing.js.
 
 Run from long-term/:  python3 tools/fishing_model.py
-The same model is written up in the "Cobscook Bay seasonal fishing report" doc (Nov 26, 2026).
 
-Every number here is either measured (M), anchored on measured data with stated
-assumptions (A), or a rough order-of-magnitude guess (G). Run: python3 model.py
+Every number is the whole amount in the bay in that season, before anyone fishes: no cutoffs,
+no fishing method and no harvest limit yet. For species that stay all year, each season assumes
+nothing was taken earlier, so their seasons must not be added together.
+
+The method, the checks and every source are in Brett's "Cobscook fishing data: sources check" doc
+(Nov 26-27, 2026). Species with no count in the bay are kept, with no numbers, rather than guessed.
+
+Season pounds come two ways:
+  from_avg   a year-round average, split by the species' seasonal pattern:
+             season = average x that season's share / the average share
+  from_peak  the best season's amount x each season's % of it
+Calories = pounds x meat share x calories per pound of meat.
 """
 import json, os
 
 SEASONS = ["Jan–Feb", "Mar–Apr", "May–Jun", "Jul–Aug", "Sep–Oct", "Nov–Dec"]
+SEASON_LONG = ["January–February", "March–April", "May–June", "July–August", "September–October", "November–December"]
+DAYS = [59, 61, 61, 62, 61, 61]
+ADULT_KCAL_DAY = 3000  # an active adult
 
-# Survey yardstick: alewife run size / survey alewives caught in May-Jun per year.
-RUN = 500_000 + 58_000            # Pennamaquan 2023 (~500k) + Dennys 2024 (58k+)  [M]
-SURVEY_ALEWIFE_MAYJUN = (5 + 736) / 3  # survey catch per year, May+Jun          [M]
-F = RUN / SURVEY_ALEWIFE_MAYJUN         # bay fish per survey fish (per bin, per year) [A, weak]
+# Bay food-web model (Chapman and others 2020): biomass in kg per sq km over 105 sq km.
+MODEL_LB = 105 * 2.2046  # kg per sq km -> lb in the bay
+
+# Net survey yardstick (Vieser and others 2018): bay fish per survey fish, from the counted alewife run.
+RUN = 500_000 + 58_000                   # Pennamaquan 2023 (~500,000) + Dennys 2024 (58,000+)
+SURVEY_ALEWIFE_MAYJUN = (5 + 736) / 3    # alewives the survey caught a year in May-June
+F = RUN / SURVEY_ALEWIFE_MAYJUN          # about 2,259
+
 
 def surv(n3yrs):
-    """Survey count summed over 3 years for a 2-month bin -> bay-wide count (all sizes)."""
+    """Survey catch summed over 3 years for a season -> fish in the bay."""
     return n3yrs / 3 * F
 
-# kind: 'landings' = annual harvest given (lb live or meat) spread over seasons by index
-#       'resident' = same animals all year: annual harvest = h * peak stock, spread by index
-#       'migrant'  = different fish pass each season: harvest = h * present that season
+
+# Canadian Passamaquoddy trawl (DFO, 190 tows 2009-2019): kg per tow -> lb in Cobscook,
+# assuming an 8 m net width, a 1.41 km tow, and 70 sq km below low tide. A minimum.
+TRAWL_LB_PER_KG_TOW = 70 / (1.41 * 0.008) * 2.2046
+
+# Herring caught in Cobscook's "low pool", 1947-58 (NOAA SSRF 476, Tables 3 and 4).
+HERRING_YEARS = [[1947, 49_000], [1948, 5_043_325], [1949, 1_342_600], [1950, 1_455_300],
+                 [1951, 4_778_725], [1952, 2_940_000], [1953, 6_289_150], [1954, 6_368_775],
+                 [1955, 2_136_400], [1956, 755_825], [1957, 2_026_150], [1958, 1_343_825]]
+HERRING_MONTH_PCT = [0, 0, 0, 0, 0.1, 5.5, 6.7, 13.8, 30.1, 36.2, 6.9, 0.7]  # Jan..Dec
+HERRING_SEASON = [HERRING_MONTH_PCT[i] + HERRING_MONTH_PCT[i + 1] for i in range(0, 12, 2)]
+HERRING_AVG_LB = 900_000  # middle of three methods: model 1.6M, sonar 0.45M, 1950s catch x weirs 0.43-2.2M
+
+
+def from_avg(avg, idx):
+    mean = sum(idx) / 6
+    return [avg * i / mean for i in idx]
+
+
+def from_peak(peak, idx):
+    return [peak * i / 100 for i in idx]
+
+
+def add(*lists):
+    return [sum(v) for v in zip(*lists)]
+
+
+NONE = [None] * 6
+
+# confidence: 5 counted in the bay every year (within 25%), 4 measured in the bay (within 2x),
+# 3 bay data checked by a second method (2-3x), 2 one method or methods that disagree (3-10x),
+# 1 more than 10x, or no number.
 SP = [
-  # ---------- shellfish, snails, echinoderms, crustaceans ----------
-  dict(id="clams", boat=False, name="Soft-shell clams", grp="shellfish", group="Shellfish", kind="landings", idx=[80,90,100,100,100,90],
-       annual_live=614_000, per_lb=14, meat=[1/4.9]*6, kcal=390, conf="A",
-       trip=(420, 30), note="Lubec 403,088 lb + Perry 183,619 lb (2025) + Pembroke 27,446 lb (2024, latest public); meat = live ÷ 4.9 (DMR)"),
-  dict(id="mussels", boat=False, name="Blue mussels", grp="shellfish", group="Shellfish", kind="landings", idx=[90,95,100,100,100,95],
-       annual_live=100_000, per_lb=20, meat=[0.135]*6, kcal=390, conf="G",
-       trip=(1000, 50), note="No Cobscook landings published; amount is a guess. Wild meat yield 13.5% (NOAA)"),
-  dict(id="scallops", boat=True, name="Sea scallops", grp="shellfish", group="Shellfish", kind="landings_meat", idx=[100]*6,
-       annual_meat=150_000, per_lb_meat=15, meatfac=[0.85,0.9,1.1,1.15,1.0,0.9], kcal=313, conf="A",
-       trip=(120, None), trip_meat=8, note="155,000 lb meat 2004-05; DMR est. 148,860 lb harvestable 2014-15"),
-  dict(id="periwinkles", boat=False, name="Periwinkles", grp="shellfish", group="Shellfish", kind="landings", idx=[85,90,100,100,100,90],
-       annual_live=50_000, per_lb=100, meat=[0.15]*6, kcal=454, conf="G",
-       trip=(1200, 12), note="Dominant grazer on the bay's rocks; no landings published"),
-  dict(id="whelks", boat=False, name="Whelks", grp="shellfish", group="Shellfish", kind="landings", idx=[80,80,100,100,90,80],
-       annual_live=10_000, per_lb=5, meat=[0.30]*6, kcal=621, conf="G",
-       trip=(10, 2), note="Collected with periwinkles; no landings published"),
-  dict(id="urchins", boat=True, name="Green sea urchins (roe)", grp="urchins", group="Urchins & cucumbers", kind="landings", idx=[100]*6,
-       annual_live=150_000, per_lb=4, meat=[0.12,0.07,0.04,0.05,0.09,0.12], kcal=544, conf="G",
-       trip=(240, 60), note="Maine total 520,530 lb (2024); Cobscook share guessed. Roe yield varies by season"),
-  dict(id="cucumbers", boat=True, name="Sea cucumbers", grp="urchins", group="Urchins & cucumbers", kind="landings", idx=[100]*6,
-       annual_live=100_000, per_lb=1.5, meat=[0.25]*6, kcal=227, conf="G",
-       trip=(10, 15), note="Plentiful in urchin drags; no Cobscook landings published"),
-  dict(id="lobster", boat=True, name="Lobster", grp="crabs", group="Lobster & crabs", kind="landings", idx=[20,15,45,85,100,60],
-       annual_live=100_000, per_lb=0.8, meat=[0.25,0.25,0.23,0.18,0.20,0.24], kcal=349, conf="G",
-       trip=(4, 5), note="Inside-bay catch guessed; soft-shell summer lobsters carry less meat"),
-  dict(id="greencrabs", boat=False, name="Green crabs", grp="crabs", group="Lobster & crabs", kind="landings", idx=[5,15,60,100,80,30],
-       annual_live=300_000, per_lb=12, meat=[0.12]*6, kcal=395, conf="G",
-       trip=(300, 25), note="Invasive and very common in summer; little meat per crab"),
-  # ---------- fish ----------
-  dict(id="herring", boat=False, name="Atlantic herring", grp="fish", group="Fish", kind="migrant", idx=[5,11,100,59,79,18],
-       peak=surv(2838+8203)*0.5, h=0.3, wt=0.06, meat=[0.6]*6, kcal=717, conf="A",
-       trip=(250, 15), note="Survey: 18,086 caught, peak June. Mostly sardine-size fish"),
-  dict(id="flounder", boat=False, name="Winter flounder", grp="fish", group="Fish", kind="resident", idx=[49,92,100,57,24,29],
-       peak=surv(3371+2743)*0.10, h=0.3, wt=0.9, meat=[0.35]*6, kcal=318, conf="A",
-       trip=(6, 5.4), note="Survey: 8,302 caught, peak May. Most caught in nets were young fish"),
-  dict(id="alewives", boat=False, name="Alewives", grp="fish", group="Fish", kind="migrant", idx=[0,5,100,5,0,0],
-       peak=RUN, h=0.5, wt=0.45, meat=[0.4]*6, kcal=590, conf="M",
-       trip=(110, 50), note="Runs counted: ~500,000 Pennamaquan (2023), 58,000+ Dennys (2024)"),
-  dict(id="smelt", boat=False, name="Rainbow smelt", grp="fish", group="Fish", kind="resident", idx=[70,100,60,19,21,50],
-       peak=surv(278+186)*0.6/0.60, h=0.3, wt=0.08, meat=[0.7]*6, kcal=440, conf="A",
-       trip=(50, 4), note="Survey: 567 caught, most in May; spring runs up tidal streams in April"),
-  dict(id="mackerel", boat=False, name="Atlantic mackerel", grp="fish", group="Fish", kind="migrant", idx=[0,0,25,100,70,5],
-       peak=500_000, h=0.3, wt=0.7, meat=[0.5]*6, kcal=930, conf="G",
-       trip=(30, 21), note="Survey nets miss open-water fish; amount guessed from angler reports"),
-  dict(id="pollock", boat=False, name="Pollock", grp="fish", group="Fish", kind="resident", idx=[30,30,60,90,100,60],
-       peak=200_000, h=0.3, wt=0.75, meat=[0.4]*6, kcal=417, conf="G",
-       trip=(10, 7.5), note="Young 'harbor pollock' around all year; amount guessed"),
-  dict(id="silverhake", boat=False, name="Silver hake", grp="fish", group="Fish", kind="migrant", idx=[0,2,67,100,15,3],
-       peak=surv(223+252)*0.3, h=0.3, wt=0.6, meat=[0.4]*6, kcal=408, conf="A",
-       trip=(8, 4.8), note="Survey: 592 caught, June to August"),
-  dict(id="whitehake", boat=False, name="White hake", grp="fish", group="Fish", kind="migrant", idx=[3,3,6,100,91,24],
-       peak=surv(220+120)*0.3, h=0.3, wt=0.75, meat=[0.4]*6, kcal=408, conf="A",
-       trip=(4, 3), note="Survey: 428 caught, almost all August and September"),
-  dict(id="haddock", boat=False, name="Haddock", grp="fish", group="Fish", kind="migrant", idx=[0,0,0,100,59,11],
-       peak=surv(248+124)*0.2, h=0.3, wt=1.0, meat=[0.4]*6, kcal=336, conf="A",
-       trip=(3, 3), note="Survey: 389 caught, August and September only"),
-  dict(id="sculpin", boat=False, name="Longhorn sculpin", grp="fish", group="Fish", kind="resident", idx=[100,93,85,43,14,93],
-       peak=surv(254+222)*0.6/0.85, h=0.3, wt=0.6, meat=[0.25]*6, kcal=363, conf="A",
-       trip=(8, 4.8), note="Survey: 578 caught, most in May; common inshore in cold months"),
-  dict(id="silverside", boat=False, name="Atlantic silverside", grp="fish", group="Fish", kind="migrant", idx=[0,1,7,4,100,17],
-       peak=surv(2375+1200)*0.8, h=0.3, wt=0.012, meat=[0.8]*6, kcal=454, conf="A",
-       trip=(670, 8), note="Survey: 2,701 caught, most in September (a warm year, 2012)"),
-  dict(id="elvers", boat=False, name="Elvers (baby eels)", grp="fish", group="Fish", kind="landings", idx=[0,60,100,0,0,0],
-       annual_live=200, per_lb=2500, meat=[1.0]*6, kcal=680, conf="G",
-       trip=(2500, 1), note="Licensed, quota fishery Mar 22–Jun 7; Cobscook share guessed"),
+    dict(id="herring", name="Atlantic herring", short="herring", group="fish", conf=3,
+         lb=from_avg(HERRING_AVG_LB, HERRING_SEASON), meat=0.6, kcal=717,
+         source="Middle of three separate methods; seasons from the bay's 1947–58 catches"),
+    dict(id="mackerel", name="Atlantic mackerel", short="mackerel", group="fish", conf=2,
+         lb=from_avg(1334 * MODEL_LB, [0, 0, 25, 100, 70, 5]), meat=0.5, kcal=930,
+         source="Bay food-web model only; nothing else counts mackerel in the bay"),
+    dict(id="periwinkles", name="Periwinkles", short="periwinkles", group="shellfish", conf=3,
+         lb=from_avg(6666 * MODEL_LB, [85, 90, 100, 100, 100, 90]), meat=0.16, kcal=395,
+         source="Bay food-web model (from a Cobscook rockweed study)"),
+    dict(id="shellfish", name="Clams, mussels and other shellfish", short="clams and mussels", group="shellfish", conf=2,
+         lb=from_avg(3766 * MODEL_LB, [80, 90, 100, 100, 100, 90]), meat=0.2, kcal=390,
+         source="Bay food-web model (Beal, unpublished)"),
+    dict(id="scallops", name="Sea scallops", short="scallops", group="shellfish", conf=3, weight="meat",
+         lb=[148_860] * 6, meat=1.0, kcal=313,
+         source="State survey, 2014–15: harvestable meat"),
+    dict(id="alewives", name="Alewives", short="alewives", group="fish", conf=4,
+         lb=from_peak(RUN * 0.45, [0, 5, 100, 5, 0, 0]), meat=0.4, kcal=470,
+         source="Run counts: Pennamaquan about 500,000 (2023), Dennys 58,000+ (2024)"),
+    dict(id="flounder", name="Flounders", short="flounder", group="fish", conf=2,
+         lb=from_peak(surv(3371 + 2743) * 0.10 * 0.9, [49, 92, 100, 57, 24, 29]), meat=0.35, kcal=318,
+         source="Net survey, scaled up; the Canadian trawl found 1–5 times less"),
+    dict(id="codfamily", name="Cod family: hakes and haddock", short="cod family", group="fish", conf=3,
+         # food-size fish at the peak, rounded to the nearest 1,000 as in the doc, x pounds per fish
+         lb=add(from_peak(round(surv(223 + 252) * 0.3, -3) * 0.6, [0, 2, 67, 100, 15, 3]),     # silver hake
+                from_peak(round(surv(220 + 120) * 0.3, -3) * 0.75, [3, 3, 6, 100, 91, 24]),   # white hake
+                from_peak(round(surv(248 + 124) * 0.2, -3) * 1.0, [0, 0, 0, 100, 59, 11])),   # haddock
+         meat=0.4, kcal=400,
+         source="Net survey, scaled up; agrees with the Canadian trawl within 1–4 times"),
+    dict(id="greencrabs", name="Green crabs", short="green crabs", group="crabs", conf=2,
+         lb=from_avg(1333 * MODEL_LB, [5, 15, 60, 100, 80, 30]), meat=0.12, kcal=340,
+         source="Bay food-web model (from southern Maine data)"),
+    dict(id="lobster", name="Lobster", short="lobster", group="crabs", conf=2,
+         lb=[None, None, None, 14.69 * TRAWL_LB_PER_KG_TOW, 25.19 * TRAWL_LB_PER_KG_TOW, None], meat=0.2, kcal=349,
+         source="Canadian trawl, July–October only; a minimum"),
+    dict(id="sculpin", name="Longhorn sculpin", short="sculpin", group="fish", conf=2,
+         lb=from_peak(surv(254 + 222) * 0.6 / 0.85 * 0.6, [100, 93, 85, 43, 14, 93]), meat=0.25, kcal=363,
+         source="Net survey, scaled up; the Canadian trawl found 1–5 times less"),
+    dict(id="smelt", name="Rainbow smelt", short="smelt", group="fish", conf=2,
+         lb=from_peak(surv(278 + 186) * 0.08, [70, 100, 60, 19, 21, 50]), meat=0.7, kcal=440,
+         source="Net survey, scaled up; agrees with the Canadian trawl"),
+    dict(id="silverside", name="Atlantic silverside", short="silverside", group="fish", conf=2,
+         lb=from_peak(surv(2375 + 1200) * 0.8 * 0.012, [0, 1, 7, 4, 100, 17]), meat=0.8, kcal=454,
+         source="Net survey, scaled up"),
+    # No count in the bay: kept, with no numbers, rather than guessed.
+    dict(id="urchins", name="Green sea urchins", short="urchins", group="urchins", conf=1, lb=NONE, meat=None, kcal=544,
+         source="No count in the bay. Maine landed 520,530 lb in 2024; the 2025 dive survey has no Cobscook numbers"),
+    dict(id="cucumbers", name="Sea cucumbers", short="sea cucumbers", group="urchins", conf=1, lb=NONE, meat=None, kcal=160,
+         source="No count in the bay. Maine's main beds are in Frenchman and Narraguagus Bays"),
+    dict(id="whelks", name="Whelks", short="whelks", group="shellfish", conf=1, lb=NONE, meat=None, kcal=330,
+         source="No count in the bay"),
+    dict(id="pollock", name="Pollock", short="pollock", group="fish", conf=1, lb=NONE, meat=None, kcal=417,
+         source="No count in the bay"),
+    dict(id="elvers", name="Elvers (baby eels)", short="elvers", group="fish", conf=1, lb=NONE, meat=None, kcal=680,
+         source="No count in the bay"),
 ]
 
-def season_rows():
-    out = []
-    for s in SP:
-        idx = s["idx"]; tot_idx = sum(idx)
-        counts, meats = [0.0]*6, [0.0]*6
-        for b in range(6):
-            share = idx[b] / tot_idx if tot_idx else 0
-            if idx[b] < 10:   # too scarce to fish: left out of totals and tables
-                continue
-            if s["kind"] == "landings":
-                live = s["annual_live"] * share
-                counts[b] = live * s["per_lb"]
-                meats[b] = live * s["meat"][b]
-            elif s["kind"] == "landings_meat":
-                m = s["annual_meat"] * share
-                counts[b] = m * s["per_lb_meat"]
-                meats[b] = m * s["meatfac"][b]
-            elif s["kind"] == "resident":
-                annual = s["h"] * s["peak"]
-                counts[b] = annual * share
-                meats[b] = counts[b] * s["wt"] * s["meat"][b]
-            elif s["kind"] == "migrant":
-                counts[b] = s["h"] * s["peak"] * idx[b] / 100
-                meats[b] = counts[b] * s["wt"] * s["meat"][b]
-        trip = []
-        for b in range(6):
-            if idx[b] < 10:
-                trip.append(None); continue
-            f = idx[b] / 100
-            if s["kind"] == "landings_meat":
-                trip.append(round(s["trip_meat"] * s["meatfac"][b] * f, 1))
-            else:
-                live = s["trip"][1] * f
-                trip.append(round(live * s["meat"][b], 1))
-        out.append(dict(name=s["name"], group=s["group"], idx=idx, conf=s["conf"], kcal=s["kcal"],
-                        counts=counts, meats=meats, kcals=[m * s["kcal"] for m in meats], trip=trip, note=s["note"]))
-    return out
 
-def ranks(idx):
-    order = sorted(set(idx), reverse=True)
-    return [order.index(v) + 1 for v in idx]
+def kcal_of(s):
+    return [None if v is None else v * s["meat"] * s["kcal"] for v in s["lb"]]
 
-DAYS = [59, 61, 61, 62, 61, 61]
-SEASON_LONG = ["January–February", "March–April", "May–June", "July–August", "September–October", "November–December"]
 
 def write_js(path):
-    rows = season_rows()
-    by_name = {s["name"]: s for s in SP}
-    out = ["// Cobscook Bay fishing numbers, by two-month season.",
-           "// Generated by tools/fishing_model.py on the model in the report doc. Don't edit by hand:",
-           "// change the model and run  python3 tools/fishing_model.py  from long-term/.",
+    out = ["// Cobscook Bay: how much food is in the bay in each two-month season.",
+           "// Generated by tools/fishing_model.py. Don't edit by hand: change the model and run",
+           "//   python3 tools/fishing_model.py   from long-term/.",
            "//",
-           "// For each species and season (Jan–Feb first):",
-           "//   index     % of the species' own best season (abundance, 100 = best)",
-           "//   count     animals the bay could give that season without running the stock down",
-           "//   meat      pounds of meat in that harvest (no shell, bones, head or guts)",
-           "//   kcal      calories in that meat",
-           "//   tripMeat  pounds of meat one person can bring home from one outing (null = not worth a trip)",
-           "//   basis     M measured, A built from measured data plus assumptions, G rough guess",
+           "// Every number is the whole amount in the bay in that season, before anyone fishes.",
+           "// No cutoffs and no fishing method yet. For species that stay all year, each season",
+           "// assumes nothing was taken earlier, so don't add their seasons together.",
+           "//",
+           "// For each species, six seasons (Jan–Feb first):",
+           "//   lb          pounds in the bay, live weight (scallops: meat only); null = not counted",
+           "//   kcal        calories in the meat of those pounds; null = not counted",
+           "//   meatShare   meat as a share of live weight",
+           "//   kcalPerLb   calories in a pound of meat",
+           "//   confidence  1 to 5 (see CONFIDENCE in data/fishing-notes.js)",
            "",
-           'export const FISH_CHECKED = "2026-11-26";',
+           'export const FISH_CHECKED = "2026-11-27";',
+           "",
+           f"// Calories an active adult needs in a year ({ADULT_KCAL_DAY:,} a day).",
+           f"export const ADULT_KCAL_YEAR = {ADULT_KCAL_DAY * 365};",
            "",
            "export const SEASONS = " + json.dumps([{"id": s.replace("–", "").lower(), "label": s, "long": l, "days": d}
                                                     for s, l, d in zip(SEASONS, SEASON_LONG, DAYS)], ensure_ascii=False) + ";",
            "",
+           "// Herring caught in Cobscook's \"low pool\", 1947–58 (NOAA SSRF 476, Tables 3 and 4): pounds a year,",
+           "// and each month's % of the catch, Jan..Dec. These months set herring's seasons.",
+           "export const HERRING_CATCH = " + json.dumps({"years": HERRING_YEARS, "monthPct": HERRING_MONTH_PCT, "avgUsed": HERRING_AVG_LB}) + ";",
+           "",
            "export const SPECIES = ["]
-    for r in rows:
-        s = by_name[r["name"]]
-        item = dict(id=s["id"], name=r["name"], group=s["grp"], basis=r["conf"], boat=s["boat"], kcalPerLb=r["kcal"],
-                    index=r["idx"], count=[round(v) for v in r["counts"]], meat=[round(v) for v in r["meats"]],
-                    kcal=[int(round(v, -3)) for v in r["kcals"]], tripMeat=r["trip"])
+    for s in SP:
+        item = dict(id=s["id"], name=s["name"], short=s["short"], group=s["group"], confidence=s["conf"],
+                    weight=s.get("weight", "live"), meatShare=s["meat"], kcalPerLb=s["kcal"],
+                    lb=[None if v is None else round(v) for v in s["lb"]],
+                    kcal=[None if v is None else int(round(v, -3)) for v in kcal_of(s)],
+                    source=s["source"])
         out.append("  " + json.dumps(item, ensure_ascii=False) + ",")
     out.append("];\n")
-    open(path, "w").write("\n".join(out))
+    with open(path, "w") as f:
+        f.write("\n".join(out))
+
+
+def summary():
+    tot = [0.0] * 6
+    for s in SP:
+        for b, v in enumerate(kcal_of(s)):
+            tot[b] += v or 0
+    print("calories (millions):", " | ".join(f"{t / 1e6:,.0f}" for t in tot))
+    print("active adults fed a year:", " | ".join(f"{t / (ADULT_KCAL_DAY * 365):,.0f}" for t in tot))
+
 
 if __name__ == "__main__":
     here = os.path.dirname(os.path.abspath(__file__))
     target = os.path.join(here, "..", "data", "fishing.js")
     write_js(target)
-    print("wrote", os.path.normpath(target), f"(yardstick {F:,.0f})")
+    print("wrote", os.path.normpath(target), f"(net survey yardstick {F:,.0f}; trawl {TRAWL_LB_PER_KG_TOW:,.0f} lb per kg/tow)")
+    summary()

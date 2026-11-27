@@ -21,14 +21,17 @@ import { TOWNS, RING_COLORS, DENNYSVILLE } from "../data/places.js";
 import { PAGE, CURRENTS } from "../data/plan.js";
 import * as POWER from "../data/power.js";
 import { SEASONS, SPECIES, FISH_CHECKED } from "../data/fishing.js";
-import { FISH_PAGE, PROFILES, BASIS, METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES } from "../data/fishing-notes.js";
+import {
+  FISH_PAGE, CONFIDENCE, HERRING_METHODS, HERRING_CATCH_NOTE, METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PROFILES,
+} from "../data/fishing-notes.js";
 import {
   esc, makeShoreDistance, milesBetween, money, niceDate, milesText, shoreText, precisionOf, STATUS_LABEL, POWER_LABEL,
   lifespanRows, changesText,
 } from "./geo.js";
 import { listedText } from "./popup.js";
 import {
-  seasonShares, seasonTotal, peopleFed, ownIndex, donutSlices, calendarOrder, measureText, pct, round2, commas,
+  seasonTotal, seasonRanking, rankingText, fedText, donutSlices, herringCatch, meatText, millions, thousands, caloriesText,
+  commas, pct,
 } from "./fishing.js";
 import { tideLabel } from "./currents.js";
 
@@ -314,100 +317,109 @@ export function buildReport({ geo, today, dateText, readme = [], currents = null
   readmePart(pageOf("off-grid-checklist"));
 
   // --- fishing ---
-  blocks.push(part(FISH_PAGE.heading));
-  blocks.push(p("What Cobscook Bay could feed you in each two-month season, without running the stocks down. Most numbers are estimates: M = measured, A = built from measured data (likely within 2–3 times), G = a rough guess (could be off 10 times)."));
-  blocks.push({ t: "note", runs: FISH_PAGE.draft });
-  blocks.push({
-    t: "table",
-    head: ["Season", "Meat (lb)", "Calories", "People it could feed", "Most food in the bay"],
-    rows: SEASONS.map((s, b) => [
-      s.long, commas(round2(seasonTotal(SPECIES, "meat", b))), measureText(seasonTotal(SPECIES, "kcal", b), "kcal"),
-      `about ${commas(round2(peopleFed(SPECIES, b)))}`,
-      seasonShares(SPECIES, "meat", b).slice(0, 3).map((x) => x.sp.name).join(", "),
-    ]),
-    widths: [80, 50, 70, 70, "*"],
-    align: ["left", "right", "right", "right", "left"],
-    size: "s",
-  });
-  blocks.push({ t: "ul", items: FISH_NOTES });
-
-  blocks.push(h3("Each season's meat, by species"));
-  blocks.push({
-    t: "rings",
-    items: SEASONS.map((s, b) => {
-      const slices = donutSlices(seasonShares(SPECIES, "meat", b));
-      const total = seasonTotal(SPECIES, "meat", b);
-      return {
-        title: s.label,
-        svg: ringSvg(slices, `${Math.round(round2(total) / 1000)}k`, "lb of meat"),
-        sub: `Feeds about ${commas(round2(peopleFed(SPECIES, b)))} people`,
-        legend: slices.map((x) => ({ color: x.color, name: x.name, value: `${measureText(x.value, "meat")} · ${pct(x.share)}` })),
-      };
-    }),
-  });
-
-  blocks.push(h3("When each species is at its best"));
-  blocks.push(p("Each cell is that season as a % of the species' own best season, by meat. 100 = its best; a dash = not around, or too few."));
-  blocks.push({
-    t: "table",
-    head: ["Species", ...SEASONS.map((s) => s.label)],
-    rows: calendarOrder(SPECIES, "meat").map((sp) => {
-      const idx = ownIndex(sp, "meat");
-      return [sp.name, ...idx.map((v) => (v ? { text: String(v), fill: tint(COLORS.lid, 0.08 + v * 0.0082), color: v >= 55 ? "#ffffff" : COLORS.ink, b: v === 100 } : { text: "–", color: COLORS.ink2 }))];
-    }),
-    widths: [130, "*", "*", "*", "*", "*", "*"],
-    align: ["left", "center", "center", "center", "center", "center", "center"],
-    size: "s",
-  });
-
-  for (let b = 0; b < SEASONS.length; b++) {
-    const s = SEASONS[b];
-    const shares = { count: seasonShares(SPECIES, "count", b), meat: seasonShares(SPECIES, "meat", b), kcal: seasonShares(SPECIES, "kcal", b) };
-    const shareOf = (m, id) => shares[m].find((x) => x.sp.id === id)?.share || 0;
-    blocks.push(h3(`${s.long}: every species`));
-    blocks.push({
-      t: "table",
-      head: ["Species", "Number", "Meat (lb)", "% of number", "% of meat", "% of calories", "One trip (lb · cal)", "Basis"],
-      rows: shares.meat.map(({ sp, value }) => [
-        sp.name, commas(round2(sp.count[b])), commas(round2(value)), pct(shareOf("count", sp.id)), pct(shareOf("meat", sp.id)), pct(shareOf("kcal", sp.id)),
-        sp.tripMeat[b] ? `${sp.tripMeat[b]} · ${commas(round2(sp.tripMeat[b] * sp.kcalPerLb))}` : "–", sp.basis,
-      ]),
-      widths: ["*", 52, 44, 40, 36, 42, 62, 26],
-      align: ["left", "right", "right", "right", "right", "right", "right", "center"],
-      size: "xs",
-    });
-    const gone = SPECIES.filter((sp) => !sp.meat[b]).map((sp) => sp.name);
-    if (gone.length) blocks.push({ t: "note", runs: `Not around, or too few to bother with: ${gone.join(", ")}.` });
-  }
-
-  blocks.push(h3("Species notes"));
-  blocks.push({
-    t: "table",
-    head: ["Species", "Best season", "Size · meat · cal per lb", "Gear", "Rules today", "Notes"],
-    rows: SPECIES.map((sp) => {
-      const pr = PROFILES[sp.id] || {};
-      return [{ text: sp.name, b: true }, pr.best || "", `${pr.size || ""} · ${pr.yield || ""} · ${commas(sp.kcalPerLb)}`, pr.gear || "", pr.rules || "", pr.safety || ""];
-    }),
-    widths: [62, 54, 80, 80, 90, "*"],
-    size: "xs",
-  });
-  blocks.push({ t: "note", runs: "Wild Atlantic salmon in the Dennys River are endangered: leave them." });
-
-  blocks.push(h3("Seaweed (not counted above)"));
-  blocks.push({ t: "table", head: ["Seaweed", "Best time to pick", "Use"], rows: SEAWEED.map((r) => [{ text: r[0], b: true }, r[1], r[2]]), widths: [110, 110, "*"], size: "s" });
-  blocks.push({ t: "note", runs: "Seaweed adds iodine, vitamins and minerals, not calories. Cut the fronds and leave the base so it grows back." });
-
-  blocks.push(h3("How these numbers were made"));
-  blocks.push({ t: "ul", items: Object.entries(BASIS).map(([k, v]) => [{ text: `${k}: `, b: true }, { text: v }]) });
-  blocks.push({ t: "ol", items: METHOD });
-  blocks.push(h3("Sources"));
-  blocks.push({ t: "ul", items: FISH_SOURCES.map(([title, url]) => [{ text: title, link: url }, { text: ` (${url})` }]) });
+  blocks.push(...fishingBlocks());
 
   readmePart(pageOf("nov-dec-food-shortage"));
   readmePart(pageOf("species-extinction"));
   readmePart(pageOf("gas-pump"));
   cover.contents = blocks.filter((b) => b.t === "part").map((b) => b.text);
   return blocks;
+}
+
+// The fishing part: how much food is in the bay each season, with how sure each number is.
+export function fishingBlocks(list = SPECIES, seasons = SEASONS) {
+  const out = [part(FISH_PAGE.heading)];
+  const fed = (b) => fedText(seasonTotal(list, "kcal", b));
+  const conf = (sp) => ({ text: String(sp.confidence), b: true });
+  const sixAlign = ["left", "right", "right", "right", "right", "right", "right"];
+
+  out.push(p(`${FISH_PAGE.intro} For species that stay all year, like periwinkles, clams and scallops, each season shows the same animals, so don't add the seasons together.`));
+  out.push({ t: "note", runs: FISH_PAGE.draft });
+
+  out.push(h3("Calories in the bay (millions)"));
+  out.push({
+    t: "table",
+    head: ["Species", ...seasons.map((s) => s.label), "Sure (1–5)"],
+    rows: [
+      ...list.map((sp) => [sp.name, ...sp.kcal.map(millions), conf(sp)]),
+      [{ text: "Total", b: true }, ...seasons.map((_, b) => ({ text: millions(seasonTotal(list, "kcal", b)), b: true })), ""],
+      [{ text: "Active adults fed a year, if all were caught", b: true }, ...seasons.map((_, b) => ({ text: fed(b), b: true })), ""],
+    ],
+    widths: ["*", 44, 44, 44, 44, 44, 44, 40],
+    align: [...sixAlign, "center"],
+    size: "s",
+  });
+  out.push({ t: "note", runs: "? = not counted. Calories = pounds × meat share × calories per pound of meat. Adults fed = calories ÷ 3,000 a day ÷ 365. Herring's 0 in January–April means no catch was recorded then; some herring may be there." });
+
+  out.push(h3("How sure each number is"));
+  out.push({ t: "ul", items: Object.keys(CONFIDENCE).sort((a, b) => b - a).map((k) => [{ text: `${k}: `, b: true }, { text: CONFIDENCE[k] }]) });
+
+  out.push(h3("Pounds in the bay (thousands, live weight)"));
+  out.push({
+    t: "table",
+    head: ["Species", ...seasons.map((s) => s.label), "Where the number comes from"],
+    rows: list.map((sp) => [sp.weight === "meat" ? `${sp.name} (meat)` : sp.name, ...sp.lb.map(thousands), sp.source]),
+    widths: [92, 34, 34, 34, 34, 34, 34, "*"],
+    align: [...sixAlign, "left"],
+    size: "xs",
+  });
+  out.push({ t: "ul", items: FISH_NOTES });
+
+  out.push(h3("Each season's calories, by species"));
+  out.push({
+    t: "rings",
+    items: seasons.map((s, b) => {
+      const slices = donutSlices(seasonRanking(list, "kcal", b));
+      const total = seasonTotal(list, "kcal", b);
+      return {
+        title: s.label,
+        svg: ringSvg(slices, commas(total / 1e6), "million calories"),
+        sub: `A year's food for about ${fed(b)} active adults`,
+        legend: slices.map((x) => ({ color: x.color, name: x.name, value: `${millions(x.value)} million · ${pct(x.share)}` })),
+      };
+    }),
+  });
+
+  out.push(h3("Each season, largest share of the calories first (no cutoffs)"));
+  out.push({
+    t: "table",
+    head: ["Season", "Calories", "Order"],
+    rows: seasons.map((s, b) => [{ text: s.long, b: true }, caloriesText(seasonTotal(list, "kcal", b)).replace(" calories", ""), rankingText(list, b)]),
+    widths: [86, 62, "*"],
+    size: "s",
+  });
+
+  out.push(h3("Herring: three ways to measure it"));
+  out.push(p(HERRING_METHODS.lead));
+  out.push({ t: "table", head: ["Method", "Herring in the bay", "How it was made"], rows: HERRING_METHODS.rows.map((r) => [{ text: r[0], b: true }, r[1], r[2]]), widths: [96, 100, "*"], size: "s" });
+  out.push({ t: "note", runs: HERRING_METHODS.after });
+
+  const hc = herringCatch();
+  out.push(h3("Herring caught in Cobscook, 1947–58"));
+  out.push({ t: "table", head: ["Year", "Pounds", "Year", "Pounds"], rows: hc.rows, widths: [50, 80, 50, 80], align: ["left", "right", "left", "right"], size: "s" });
+  out.push({ t: "note", runs: `Average ${commas(hc.average)} lb a year. By month: ${hc.months} of the catch. ${HERRING_CATCH_NOTE}` });
+
+  out.push(h3("Species notes"));
+  out.push({
+    t: "table",
+    head: ["Species", "Best season", "Size", "Meat", "Gear", "Rules today", "Notes"],
+    rows: list.map((sp) => {
+      const pr = PROFILES[sp.id] || {};
+      return [{ text: sp.name, b: true }, pr.best || "", pr.size || "", meatText(sp, pr), pr.gear || "", pr.rules || "", pr.safety || ""];
+    }),
+    widths: [56, 50, 62, 66, 70, 80, "*"],
+    size: "xs",
+  });
+
+  out.push(h3("Seaweed (not counted above)"));
+  out.push({ t: "table", head: ["Seaweed", "Best time to pick", "Use"], rows: SEAWEED.map((r) => [{ text: r[0], b: true }, r[1], r[2]]), widths: [110, 110, "*"], size: "s" });
+  out.push({ t: "note", runs: "Seaweed adds iodine, vitamins and minerals, not calories. Cut the fronds and leave the base so it grows back." });
+
+  out.push(h3("How these numbers were made"));
+  out.push({ t: "ol", items: METHOD });
+  out.push(h3("Sources"));
+  out.push({ t: "ul", items: FISH_SOURCES.map(([title, url]) => [{ text: title, link: url }, { text: ` (${url})` }]) });
+  return out;
 }
 
 // The currents section: the printed map, then typical and fastest current and slack times by place.

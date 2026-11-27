@@ -9,7 +9,7 @@
 //   Map      the Cobscook Bay map. renderMap() draws the controls, list and notes as plain HTML
 //            (the tests run it in Node); the first time the map is shown, mount() loads Leaflet
 //            and js/map.js to bring it to life.
-//   Fishing  what the bay could feed you, season by season (js/fishing.js).
+//   Fishing  how much food is in the bay, season by season (js/fishing.js).
 // The last view picked is remembered in this browser (localStorage "prep-lt-view").
 //
 // Paper copy: "Print the full report" and "Download PDF" (top and bottom, like the Short Term tab)
@@ -27,7 +27,7 @@ export { esc };
 
 export const VIEWS = [
   ["map", "Map", "Houses for sale and distance rings"],
-  ["fish", "Fishing", "What the bay feeds you, by season"],
+  ["fish", "Fishing", "Food in the bay, by season"],
 ];
 const VIEW_KEY = "prep-lt-view";
 const ICONS = {

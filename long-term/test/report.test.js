@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { render } from "../app.js";
 import { HOUSES } from "../data/houses.js";
 import { SEASONS, SPECIES } from "../data/fishing.js";
-import { buildReport, reportHtml, htmlToBlocks, inlineRuns, mapSvg, ringSvg, tint, keepsWithNext, README_IN_REPORT } from "../js/report.js";
+import { buildReport, fishingBlocks, reportHtml, htmlToBlocks, inlineRuns, mapSvg, ringSvg, tint, keepsWithNext, README_IN_REPORT } from "../js/report.js";
 import { reportPdf } from "../js/report-pdf.js";
 
 const geo = JSON.parse(readFileSync(new URL("../data/geo.json", import.meta.url), "utf8"));
@@ -39,14 +39,24 @@ test("every house is in the house list, numbered by distance to the bay", () => 
   assert.equal(blocks.filter((b) => b.t === "card").length, solar);
 });
 
-test("the fishing part has a ring per season, every species, and a table for each season", () => {
+test("the fishing part: calories and pounds by season, a ring per season, and every species scored", () => {
   const rings = blocks.find((b) => b.t === "rings");
   assert.equal(rings.items.length, SEASONS.length);
-  for (const s of SEASONS) assert.ok(blocks.find((b) => b.t === "h3" && b.text === `${s.long}: every species`), s.long);
+  assert.equal(rings.items[4].sub, "A year's food for about 1,960 active adults");
+  const cal = blocks.find((b) => b.t === "table" && b.head.at(-1) === "Sure (1–5)");
+  assert.equal(cal.rows.length, SPECIES.length + 2);
+  assert.deepEqual(cal.rows.at(-2).slice(1, 7).map((c) => c.text), ["237", "276", "595", "1,235", "2,149", "447"]);
+  assert.deepEqual(cal.rows.at(-1).slice(1, 7).map((c) => c.text), ["220", "250", "540", "1,130", "1,960", "410"]);
+  assert.ok(keepsWithNext({ t: "h3" }, cal), "the calories table stays with its heading");
+  const lb = blocks.find((b) => b.t === "table" && b.head.at(-1) === "Where the number comes from");
+  assert.equal(lb.rows.length, SPECIES.length);
+  const order = blocks.find((b) => b.t === "table" && b.head[2] === "Order");
+  assert.equal(order.rows.length, SEASONS.length);
+  assert.ok(blocks.find((b) => b.t === "h3" && b.text === "Herring: three ways to measure it"));
+  assert.ok(blocks.find((b) => b.t === "h3" && b.text === "Herring caught in Cobscook, 1947–58"));
   const notes = blocks.find((b) => b.t === "table" && b.head[1] === "Best season");
   assert.equal(notes.rows.length, SPECIES.length);
-  const fed = blocks.find((b) => b.t === "table" && b.head.includes("People it could feed"));
-  assert.deepEqual(fed.rows.map((r) => r[3]), ["about 190", "about 240", "about 880", "about 870", "about 790", "about 270"]);
+  assert.doesNotMatch(JSON.stringify(fishingBlocks()), /One trip|People it could feed|undefined|NaN/);
 });
 
 test("the map shows the bands, the bay, every house, and numbers for houses with power", () => {
@@ -86,7 +96,7 @@ test("the printout is plain HTML with nothing missing", () => {
   assert.equal((html.match(/<h2 class="ltp-part">/g) || []).length, blocks.filter((b) => b.t === "part").length);
   assert.equal((html.match(/<section class="ltp-card">/g) || []).length, 3);
   assert.match(html, /<colgroup>/);
-  assert.ok((html.match(/<div class="ltp-keep">/g) || []).length >= SEASONS.length, "season tables stay with their headings");
+  assert.ok((html.match(/<div class="ltp-keep">/g) || []).length >= SEASONS.length, "short tables stay with their headings");
   assert.ok(keepsWithNext({ t: "h3" }, { t: "table", rows: [[]] }));
   assert.ok(!keepsWithNext({ t: "h3" }, { t: "table", rows: Array(40).fill([]) }));
 });

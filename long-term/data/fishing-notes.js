@@ -3,79 +3,88 @@
 
 export const FISH_PAGE = {
   heading: "Cobscook Bay fishing by season",
-  intro: "What the bay could feed you in each two-month season, what makes up that food, and what one trip brings home. Most numbers are estimates: the letter beside each one says how sure it is.",
-  draft: "Draft for review, Nov 26, 2026.",
+  intro: "How much food is in the bay in each two-month season: the whole amount there before anyone fishes. No cutoffs and no fishing method yet. Each species has a score from 1 to 5 for how sure the number is.",
+  draft: "Draft for review, Nov 27, 2026.",
 };
 
 // One color per species, in families: blues for fish, golds and browns for shellfish,
 // purples for urchins and sea cucumbers, red and green for lobster and crabs.
 export const SPECIES_COLORS = {
   herring: "#2f6fbf", mackerel: "#173f73", alewives: "#58a6e0", flounder: "#6b7fa8", smelt: "#4fa8a3",
-  pollock: "#2c6e70", silverhake: "#86b6cf", whitehake: "#a3bfd6", haddock: "#46628a", sculpin: "#8e9db2",
-  silverside: "#93cfdf", elvers: "#3f8f6f",
-  clams: "#c98a2e", scallops: "#e3b23c", mussels: "#8a5a2b", periwinkles: "#b5875a", whelks: "#d2b48c",
+  codfamily: "#46628a", pollock: "#2c6e70", sculpin: "#8e9db2", silverside: "#93cfdf", elvers: "#3f8f6f",
+  shellfish: "#c98a2e", scallops: "#e3b23c", periwinkles: "#b5875a", whelks: "#d2b48c",
   urchins: "#7b4fa0", cucumbers: "#b98ac9",
   lobster: "#c0392b", greencrabs: "#7a9a3a",
 };
 export const OTHER_COLOR = "#c6cfcb";
 
-export const GROUPS = {
-  fish: "Fish",
-  shellfish: "Clams, mussels, scallops and snails",
-  urchins: "Urchins and sea cucumbers",
-  crabs: "Lobster and crabs",
+export const MEASURES = {
+  kcal: { label: "Calories", short: "calories" },
+  lb: { label: "Pounds", short: "pounds" },
 };
 
-export const MEASURES = {
-  count: { label: "Number caught", short: "number", unit: "" },
-  meat: { label: "Meat", short: "meat", unit: "lb" },
-  kcal: { label: "Calories", short: "calories", unit: "cal" },
+// How sure each number is.
+export const CONFIDENCE = {
+  5: "Counted in the bay every year; likely within 25%",
+  4: "Measured in the bay; likely within 2 times",
+  3: "Bay data checked by a second method; likely within 2–3 times",
+  2: "One method, or methods that disagree; could be off 3–10 times",
+  1: "Could be off more than 10 times, or no number yet",
 };
 
 // Species notes. best, size, yield, gear, rules (today), safety.
 export const PROFILES = {
-  clams: { best: "May–Oct; dig all year", size: "2–3 in, about 14 per lb", yield: "20%", gear: "Clam hoe at low tide", rules: "Town license; recreational limit 1 peck a day", safety: "Red tide closures; never dig a closed flat" },
-  mussels: { best: "All year", size: "2–3 in, about 20 per lb", yield: "about 14%", gear: "By hand at low tide", rules: "No license; 2 in minimum; 2 bushels a day", safety: "Red tide; Cobscook has been closed to mussels in toxin outbreaks" },
-  scallops: { best: "All year (season Dec–Mar today)", size: "about 15 meats per lb", yield: "Meat only", gear: "Drag from a boat, diving, or the lowest tides", rules: "Noncommercial license: 1 gallon shucked or 1.5 bushels in shell a day", safety: "Eat only the white muscle; throw away the rest" },
-  periwinkles: { best: "All year", size: "about 1 in, about 100 per lb", yield: "about 15% (est.)", gear: "By hand on rocks", rules: "2 quarts a day", safety: "Boil, pick out with a pin" },
-  whelks: { best: "May–Aug", size: "2–4 in", yield: "about 30% (est.)", gear: "By hand at low tide, baited trap", rules: "Check with DMR", safety: "Can carry toxins from the shellfish they eat" },
-  urchins: { best: "Roe best Nov–Feb", size: "2–3 in across", yield: "Roe 4–12% by season", gear: "Rake, dive or drag; some at the lowest tides", rules: "License; no urchin fishing Apr–Aug; Whiting and Dennys Bays have their own short season", safety: "Roe is poor after spring spawning" },
-  cucumbers: { best: "All year", size: "0.5–1 lb", yield: "about 25% (est.)", gear: "Drag from a boat", rules: "Closed, limited-entry drag fishery", safety: "Lean; very low calories" },
-  lobster: { best: "Sep–Oct", size: "about 1.25 lb", yield: "18–25%", gear: "Traps", rules: "Noncommercial license allows 5 traps", safety: "Don't eat the green tomalley (state advisory)" },
-  greencrabs: { best: "Jul–Aug", size: "2–3 in, about 12 per lb", yield: "about 12%", gear: "Baited trap, by hand under rocks", rules: "Invasive; taking them helps the clams", safety: "Little meat; best for soup and stock" },
-  herring: { best: "May–Jun, Sep–Oct", size: "5–7 in (sardine size)", yield: "about 60%, eaten whole", gear: "Dip net, small seine, sabiki jig, weir", rules: "Saltwater registry", safety: "Oily; smoke or salt for winter" },
-  flounder: { best: "Mar–Jun", size: "12–14 in, about 0.9 lb", yield: "about 35%", gear: "Hook with worm or clam bait on mud", rules: "Check DMR bag limit", safety: "Very lean" },
-  alewives: { best: "May–Jun", size: "10–11 in, about 0.45 lb", yield: "about 40%", gear: "Dip net at the river runs", rules: "Only town-approved harvests; Pembroke's reopened in 2025", safety: "Bony; smoke or salt; leave plenty to spawn" },
-  smelt: { best: "Mar–Apr runs; fall and winter", size: "6–8 in", yield: "about 70%, eaten whole", gear: "Dip net on night spring runs; light hook in fall", rules: "Washington County: nets allowed Jan 1–Apr 1", safety: "Runs are declining; let the first week of a run go by" },
+  herring: { best: "Sep–Oct", size: "5–7 in (sardine size)", yield: "about 60%, eaten whole", gear: "Dip net, small seine, sabiki jig, weir", rules: "Saltwater registry", safety: "Oily; smoke or salt for winter" },
   mackerel: { best: "Jul–Oct", size: "12–16 in, about 0.7 lb", yield: "about 50%", gear: "Rod with a mackerel tree or sabiki, Eastport breakwater", rules: "Saltwater registry", safety: "Most calories per pound; spoils fast, eat or smoke the same day" },
-  pollock: { best: "Sep–Oct; around all year", size: "10–14 in (young)", yield: "about 40%", gear: "Rod and jig from breakwaters", rules: "No size or bag limit in Maine waters", safety: "" },
-  silverhake: { best: "Jul–Aug", size: "about 12 in", yield: "about 40%", gear: "Rod and bait, often at night", rules: "Check DMR", safety: "Soft flesh; eat fresh" },
-  whitehake: { best: "Jul–Oct", size: "12–16 in (young)", yield: "about 40%", gear: "Rod and bait on the bottom", rules: "Check DMR", safety: "" },
-  haddock: { best: "Aug–Sep", size: "about 1 lb (young)", yield: "about 40%", gear: "Rod and bait", rules: "Check DMR", safety: "Mostly young fish inside the bay" },
+  periwinkles: { best: "All year", size: "about 1 in, about 100 per lb", yield: "about 16%", gear: "By hand on rocks", rules: "2 quarts a day", safety: "Boil, pick out with a pin" },
+  shellfish: { best: "All year; clams best May–Oct", size: "Clams 2–3 in, about 14 per lb; mussels 2–3 in, about 20 per lb", yield: "Clams 20%, mussels about 14%", gear: "Clam hoe, or by hand at low tide", rules: "Clams: town license, 1 peck a day. Mussels: 2 in minimum, 2 bushels a day", safety: "Red tide closures; never dig a closed flat. Cobscook has been closed to mussels in toxin outbreaks" },
+  scallops: { best: "All year (season Dec–Mar today)", size: "about 15 meats per lb", yield: "Meat only", gear: "Drag from a boat, diving, or the lowest tides", rules: "Noncommercial license: 1 gallon shucked or 1.5 bushels in shell a day", safety: "Eat only the white muscle; throw away the rest" },
+  alewives: { best: "May–Jun", size: "10–11 in, about 0.45 lb", yield: "about 40%", gear: "Dip net at the river runs", rules: "Only town-approved harvests; Pembroke's reopened in 2025", safety: "Bony; smoke or salt; leave plenty to spawn" },
+  flounder: { best: "Mar–Jun", size: "12–14 in, about 0.9 lb", yield: "about 35%", gear: "Hook with worm or clam bait on mud", rules: "Check DMR bag limit", safety: "Very lean" },
+  codfamily: { best: "Jul–Oct", size: "Silver hake about 12 in; white hake 12–16 in; haddock about 1 lb (mostly young fish)", yield: "about 40%", gear: "Rod and bait on the bottom, often at night", rules: "Check DMR", safety: "Silver hake is soft; eat it fresh" },
+  greencrabs: { best: "Jul–Aug", size: "2–3 in, about 12 per lb", yield: "about 12%", gear: "Baited trap, by hand under rocks", rules: "Invasive; taking them helps the clams", safety: "Little meat; best for soup and stock" },
+  lobster: { best: "Sep–Oct", size: "about 1.25 lb", yield: "18–25%", gear: "Traps", rules: "Noncommercial license allows 5 traps", safety: "Don't eat the green tomalley (state advisory)" },
   sculpin: { best: "Nov–Jun", size: "10–14 in", yield: "about 25% (est.)", gear: "Rod, any bait", rules: "Check DMR", safety: "Spiny, mostly head; eat the tail meat" },
+  smelt: { best: "Mar–Apr runs; fall and winter", size: "6–8 in", yield: "about 70%, eaten whole", gear: "Dip net on night spring runs; light hook in fall", rules: "Washington County: nets allowed Jan 1–Apr 1", safety: "Runs are declining; let the first week of a run go by" },
   silverside: { best: "Sep–Oct", size: "3–5 in", yield: "about 80%, eaten whole", gear: "Fine-mesh seine in shallows", rules: "Check DMR", safety: "Fry whole" },
+  urchins: { best: "Roe best Nov–Feb", size: "2–3 in across", yield: "Roe 4–12% by season", gear: "Rake, dive or drag; some at the lowest tides", rules: "License; no urchin fishing Apr–Aug; Whiting and Dennys Bays have their own short season", safety: "Roe is poor after spring spawning" },
+  cucumbers: { best: "All year", size: "0.5–1 lb", yield: "25–50%", gear: "Drag from a boat", rules: "Closed, limited-entry drag fishery", safety: "Lean; very low calories" },
+  whelks: { best: "May–Aug", size: "2–4 in", yield: "about 30% (est.)", gear: "By hand at low tide, baited trap", rules: "Check with DMR", safety: "Can carry toxins from the shellfish they eat" },
+  pollock: { best: "Sep–Oct; around all year", size: "10–14 in (young)", yield: "about 40%", gear: "Rod and jig from breakwaters", rules: "No size or bag limit in Maine waters", safety: "" },
   elvers: { best: "Apr–May", size: "2–3 in, about 2,500 per lb", yield: "100%", gear: "Dip net or fyke net in rivers at night", rules: "License by lottery; quota; Mar 22–Jun 7", safety: "Worth hundreds of dollars a pound today" },
 };
 
-export const BASIS = {
-  M: "Measured",
-  A: "Built from measured data plus assumptions; likely within 2–3 times",
-  G: "Rough guess; could be off by 10 times",
+// Herring: three separate ways to measure it (year-round average in the bay).
+export const HERRING_METHODS = {
+  lead: "Three methods that share no data land between about 0.45 and 1.6 million lb. The numbers above use the middle, 0.9 million lb, which is within about 2 times of each. That earns herring a 3.",
+  rows: [
+    ["Food-web model", "1.6 million lb", "Built from the 2011–13 bay net survey (Chapman and others 2020)"],
+    ["Sonar, 2010", "About 0.45 million lb (0.06–0.65 by site)", "Echo strength at two outer-bay sites (Viehman 2012), counted as 15 cm herring and spread over 70 sq km, plus 30% for the top layer the sonar missed"],
+    ["1950s catches × today's weirs", "0.43–2.2 million lb", "The bay's 1947–58 average catch (2.9 million lb a year) times the drop in New Brunswick weir catches next door, from about 25,000 tonnes a year in the 1970s–90s to about 3,800 recently (DFO 2016, 2025). The high end allows for fewer weirs fished now"],
+    ["Used", "0.9 million lb", "The middle of the three"],
+  ],
+  after: "The sonar counts every fish, not just herring, at two spots in a fast channel. The weir method assumes Cobscook rose and fell with the New Brunswick shore. Mackerel has no second method yet, so it stays at 2.",
 };
 
+export const HERRING_CATCH_NOTE = "Caught by weirs and stop seines in the \"low pool\": Cobscook Bay and its shores to West Quoddy Head (NOAA SSRF 476). Herring's seasons above follow these months. Nothing was recorded in January–April, partly because weirs weren't fished then and Maine banned sardine canning from December 1 to April 15, so some herring may be there.";
+
 export const METHOD = [
-  "Seasons are two months each. Fish patterns for May to October come from the 2011–13 University of Maine net survey of Cobscook Bay (60,476 fish of 46 species). Winter, and all shellfish, come from each species' known habits and fishing seasons.",
-  "Bay harvest is what could be taken in a season without running the stock down: 30% of the food-size fish a year (alewives 50%, so the runs keep spawning). Clams and scallops use real landings; the other shellfish, crabs and lobster are guesses.",
-  "Fish counts are the survey's catch scaled up by the counted alewife run (558,000 fish ÷ 247 alewives caught a year in May–June = 2,259). That assumes the nets caught every species about equally well. Mackerel and pollock are guesses, because nets miss open-water fish.",
-  "Meat = animals × weight × meat yield. Calories are USDA values for raw meat (estimates where USDA lists none). People fed = calories ÷ (2,000 a day × days in the season).",
-  "One trip: half a bushel of clams, a bushel of mussels, 1 gallon of scallop meat, 2 gallons of periwinkles, a 60 lb tote of urchins, 5 lobster traps, 25 lb of green crabs, 50 lb of alewives, 30 mackerel, 15 lb of herring, 6 flounder, 4 lb of smelt, 8 lb of silversides, a few hake, haddock or sculpin. Less outside the best season.",
-  "A species below 10% of its best season is left out of that season.",
+  "Every number is the whole amount in the bay in that season, before anyone fishes. For species that stay all year (periwinkles, clams, scallops, flounder), each season assumes nothing was taken earlier, so don't add their seasons together.",
+  "Most species: the year-round average weight from the bay food-web model (Chapman and others 2020), split into seasons by when the bay net survey caught them. Season pounds = average × that season's share ÷ the average share.",
+  "Herring: the middle of three separate methods, split into seasons by the bay's own 1947–58 catches (see above).",
+  "Flounder, the cod family (silver hake, white hake, haddock), sculpin, smelt and silverside: the 2011–13 net survey scaled up by the counted alewife run (about 2,260 bay fish for each fish caught), then checked against the Canadian Passamaquoddy trawl.",
+  "Lobster: the Canadian trawl, July–October only, as a minimum. Alewives: run counts. Scallops: the state survey, 2014–15, as meat.",
+  "The net survey only fished in May, June, August and September, so winter and late-fall amounts for those species are filled in from what's known of their habits.",
+  "Calories = pounds × meat share × calories per pound of meat (checked against USDA and other food tables). Active adults fed a year = calories ÷ 3,000 a day ÷ 365.",
+  "Species with no count in the bay are listed with no numbers rather than guessed.",
 ];
 
 export const FISH_NOTES = [
-  "Winter is the bottleneck: about 190 to 270 people's worth of food in Nov–Apr, against about 7,000 people living around the bay today.",
-  "Fat matters: mackerel, herring, alewives and eels are oily; most shellfish and flounder are very lean. Living mostly on lean meat makes people ill, so smoke or salt the oily summer fish for winter.",
+  "Winter is the bottleneck: January–April holds about a ninth to an eighth of what September–October does, mostly periwinkles, clams, mussels and scallops. Even September–October, if every animal were caught, is a year's food for about 2,000 active adults. About 7,000 people live around the bay.",
+  "Herring is the biggest food from May to December, and it swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).",
+  "Fat matters: mackerel, herring, alewives and eels are oily; most shellfish and flounder are very lean. Living mostly on lean meat makes people ill, so smoke or salt the oily fish for winter.",
   "Shellfish safety: red tide and other toxins are worst from spring to fall. Never eat shellfish from a closed area. Wild Atlantic salmon in the Dennys River are endangered: leave them.",
+  "Not in these numbers yet: cutoffs, fishing methods and cleaning time. They come next. The 44% drop in legal Cobscook scallops after five weeks of the 2024–25 season waits until methods are picked.",
 ];
 
 export const SEAWEED = [
@@ -88,20 +97,32 @@ export const SEAWEED = [
 ];
 
 export const FISH_SOURCES = [
+  ["Cobscook Bay food-web model (Chapman and others, 2020)", "https://repository.library.noaa.gov/view/noaa/29568/noaa_29568_DS1.pdf"],
   ["Cobscook Bay finfish survey, 2011–13 (Vieser, Zydlewski and McCleave, 2018)", "https://eaglehill.us/NENAonline/articles/NENA-25-4/12-Zydlewski.shtml"],
-  ["Maine DMR soft-shell clam landings by town, 2021–2025", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/2026-03/Soft%20Clam%20Landings%20Report.pdf"],
-  ["Maine DMR clam meat-to-shell conversion", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/softshellclam_table.pdf"],
+  ["NOAA SSRF 476: herring caught in Cobscook, 1947–58", "https://spo.nmfs.noaa.gov/sites/default/files/legacy-pdfs/SSRF476.pdf"],
+  ["Herring sonar in Cobscook Bay (Viehman, 2012)", "https://tethys.pnnl.gov/sites/default/files/publications/Viehman_2012.pdf"],
+  ["DFO 2016: New Brunswick weir herring catches", "https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/40621352.pdf"],
+  ["DFO 2025: Bay of Fundy herring update", "https://publications.gc.ca/collections/collection_2025/mpo-dfo/fs70-7/Fs70-7-2025-026-eng.pdf"],
+  ["DFO Passamaquoddy Bay trawl data, 2009–2019", "https://open.canada.ca/data/en/dataset/2dfa19db-a8cf-4460-97b9-710c2b856276"],
+  ["DFO report 3176: the Passamaquoddy Bay trawl", "https://publications.gc.ca/collections/collection_2016/mpo-dfo/Fs97-6-3176-eng.pdf"],
+  ["Maine DMR 2012 Cobscook scallop survey", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/docs/survey12.pdf"],
+  ["Maine DMR fall 2023 Cobscook scallop survey", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/Zone%203%202023%20Survey%20Report%20092624.pdf"],
   ["Bangor Daily News, 2014: Cobscook scallop harvest", "https://www.bangordailynews.com/2014/06/17/news/despite-two-good-scallop-years-lean-season-predicted-ahead/"],
-  ["Cobscook Bay Resource Center: facts and figures", "https://cobscook.org/facts"],
-  ["Maine DMR sea urchin landings", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/urchin_table.pdf"],
   ["Quoddy Tides: Pennamaquan alewife count and harvest", "https://www.quoddytides.com/harvesting-of-alewives-returns-to-pennamaquan-after-15-years/"],
   ["Dennys River alewife count", "https://archive.bdnblogs.com/?p=193909"],
+  ["Alewife fat in Maine spawning runs (Zenga, 2020)", "https://core.ac.uk/download/346214478.pdf"],
+  ["Periwinkle calories and meat share (Matvaretabellen)", "https://matvaretabellen.no/en/periwinkle-common-norwegian"],
+  ["Green crab meat (Skonberg and Perkins, 2002)", "https://pmc.ncbi.nlm.nih.gov/articles/PMC4945894/table/tbl0010"],
+  ["FAO 309: meat yield of fish and shellfish", "https://www.fao.org/4/t0219e/T0219E01.htm"],
+  ["NOAA: Atlantic mackerel", "https://www.fisheries.noaa.gov/species/atlantic-mackerel"],
+  ["Maine DMR soft-shell clam landings by town, 2021–2025", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/2026-03/Soft%20Clam%20Landings%20Report.pdf"],
+  ["Maine DMR clam meat-to-shell conversion", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/softshellclam_table.pdf"],
+  ["Cobscook Bay Resource Center: facts and figures", "https://cobscook.org/facts"],
+  ["Cobscook Bay Resource Center: green crabs and clams", "https://cobscook.org/clams"],
+  ["Maine DMR sea urchin landings", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/urchin_table.pdf"],
   ["Maine DMR rainbow smelt", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/docs/rainbowsmelt.pdf"],
-  ["Press Herald: mackerel season", "https://www.pressherald.com/?p=177821"],
   ["Maine Sea Grant: lobster", "https://seagrant.umaine.edu/maine-seafood-guide/lobster/"],
   ["Maine DMR shellfish limits", "https://maine.gov/dmr/fisheries/shellfish/shellfish-identification"],
-  ["FAO: mussel meat per bushel", "https://www.fao.org/4/x5894e/x5894e01.htm"],
-  ["Cobscook Bay Resource Center: green crabs and clams", "https://cobscook.org/clams"],
   ["Maine DMR elver fishery", "https://maine.gov/dmr/fisheries/commercial/fisheries-by-species/eels-and-elvers/the-maine-eel-and-elver-fisheries"],
   ["Seaweeds of Cobscook Bay (Mathieson and others)", "https://eaglehill.us/NENAonline/articles/NENA-mon-5/03-Mathieson.shtml"],
   ["Maine DMR Atlantic salmon", "https://www.maine.gov/dmr/fisheries/sea-run-fisheries/sea-run-species/atlantic-salmon"],
