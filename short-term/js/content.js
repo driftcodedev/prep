@@ -680,7 +680,7 @@ export const KEEPS_SOURCES = [
 
 // ---------- cooking, weigh-ins, storage, method ----------
 
-export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water, the pot and storage: a filter straw for each person, a bathtub bladder or drain cover so you can fill the tub the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries, and mylar bags, oxygen absorbers and buckets keep the rice and beans good for decades. Everything you don't already have is on the shopping list; the diverter kit is from Home Depot and the rest from Amazon.";
+export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water, the pot and storage: a filter straw for each person, a bathtub bladder or drain cover so you can fill the tub the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries, measuring cups and spoons keep every portion exact, and mylar bags, oxygen absorbers and buckets keep the rice and beans good for decades. Everything you don't already have is on the shopping list; the diverter kit is from Home Depot and the rest from Amazon.";
 
 export const COOK_NOTE = "Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.";
 

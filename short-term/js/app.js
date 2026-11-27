@@ -34,7 +34,7 @@ const EXAMPLE = [
 // state.have and only comes off the totals (see withHave in content.js).
 const OWNED_BY_LINE = {
   scale: "hasScale", lighters: "hasLighters", axe: "hasAxe", bladder: "hasBladder", drainCover: "hasBladder",
-  diverter: "hasDiverter", timer: "hasTimer", pot: "hasPot", tripod: "hasTripod", disc: "hasDisc",
+  diverter: "hasDiverter", timer: "hasTimer", pot: "hasPot", tripod: "hasTripod", disc: "hasDisc", measure: "hasMeasure",
 };
 const gearKeyFor = (lineKey) => (lineKey.startsWith("straw") ? "hasFilters" : OWNED_BY_LINE[lineKey]);
 const isOwned = (lineKey) => { const g = gearKeyFor(lineKey); return g ? !!state[g] : !!state.have[lineKey]; };
@@ -45,7 +45,7 @@ function setOwned(lineKey, on) {
   if (on) state.have[lineKey] = true; else delete state.have[lineKey];
 }
 
-let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, hasPot: false, hasTripod: false, hasDisc: false, people: [blankPerson()], ...(load() || {}) };
+let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, hasPot: false, hasTripod: false, hasDisc: false, hasMeasure: false, people: [blankPerson()], ...(load() || {}) };
 if (!STORE_PLANS[state.store]) state.store = "costco";
 if (!state.have || typeof state.have !== "object") state.have = {};
 // Bathtub water: the waterBOB bag or the V-TOP drain cover, picked in the list row.
@@ -490,7 +490,7 @@ function renderResults() {
     owned: {
       scale: !!state.hasScale, lighters: !!state.hasLighters, filters: !!state.hasFilters, axe: !!state.hasAxe,
       bladder: !!state.hasBladder, diverter: !!state.hasDiverter, timer: !!state.hasTimer,
-      pot: !!state.hasPot, tripod: !!state.hasTripod, disc: !!state.hasDisc,
+      pot: !!state.hasPot, tripod: !!state.hasTripod, disc: !!state.hasDisc, measure: !!state.hasMeasure,
     },
   });
   // Owned gear only drops lines and their cost, nothing else (cooking, the pot size and the

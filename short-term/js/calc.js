@@ -718,6 +718,7 @@ function shoppingFor(ctx, products) {
     if (!have.tripod) addLine("tripod", 1, "hangs the pot over the fire", "gear");
     if (!have.disc) addLine("disc", 1, "chatters when the pot boils", "gear");
     if (!have.timer) addLine("timer", 1, "timing the pot, no batteries", "gear");
+    if (!have.measure) addLine("measure", 1, "level cups and spoons for the daily amounts", "gear");
   }
 
   const total = lines.reduce((a, l) => a + l.cost, 0);

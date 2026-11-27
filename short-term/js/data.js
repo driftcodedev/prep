@@ -166,6 +166,12 @@ export const PRODUCTS = {
     size: 1, price: 42.95, priceNote: "Sold by a third-party seller",
     url: "https://www.amazon.com/dp/B001AXLUX2",
   },
+  // Level cups and spoons for the daily amounts on each card. No "Why?" panel.
+  measure: {
+    item: "Measuring cups and spoons", pack: "Bopei stainless steel, 5 cups + 5 spoons", store: "Amazon", where: "Online", gear: true,
+    size: 1, price: 15.99,
+    url: "https://www.amazon.com/dp/B08YY9LP9C",
+  },
   // The no-bag choice for bathtub water (picked under "Already have"): seal the drain and fill the tub itself.
   drainCover: {
     item: "Tub drain cover", pack: "V-TOP silicone, 6 in, 2-pack", store: "Amazon", where: "Online", gear: true,

@@ -113,8 +113,9 @@ test("Gear goes on the list unless the household already has it", () => {
   assert.ok(["lighters", "axe", "pot", "tripod", "disc"].every((k) => keys.includes(k)));
   // The 2-year-old is too young for a straw, so Brett gets a single.
   assert.equal(hh.lines.find((l) => l.key === "straw1").qty, 1);
-  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true, bladder: true, diverter: true, timer: true, pot: true, tripod: true, disc: true } });
+  const owned = planHousehold({ months: 6, people: kids, owned: { lighters: true, filters: true, axe: true, scale: true, bladder: true, diverter: true, timer: true, pot: true, tripod: true, disc: true, measure: true } });
   assert.ok(!owned.lines.some((l) => l.group === "gear" || l.key === "scale"));
+  assert.ok(keys.includes("measure"));
 });
 
 test("Walmart plan needs no Costco and keeps the same food amounts", () => {
