@@ -7,6 +7,31 @@ export const FISH_PAGE = {
   draft: "Draft for review, Nov 27, 2026.",
 };
 
+// The Netting view: the Fishing table cut down to the species you can catch with a net that have
+// at least one season marked as a target. NET_GEAR says which net, following the README's
+// "Nets and traps" page. Trap species (lobster, green crabs, whelks) and ones taken by hand or drag
+// (clams, mussels, periwinkles, scallops, urchins, sea cucumbers) aren't in it.
+export const NET_PAGE = {
+  heading: "Netting",
+  intro: "Your targets from the Fishing tab that you can catch with a net. A species shows here once any of its seasons is a target. Every season is shown, with your targets in green. Under each name is the net to use.",
+  hint: "Tap a season to sort by it, most to least. Tap a species for its notes. Tap a number to mark or unmark it as a target; the Fishing tab changes too.",
+  empty: "No netting targets yet. On the Fishing tab, tap a number to mark it as a target. The species you can net are herring, mackerel, alewives, smelt, silverside, flounder, the cod family, sculpin, pollock and elvers.",
+  notShown: "Not shown here: lobster, green crabs and whelks, which are caught in traps, and clams, mussels, periwinkles, scallops, urchins and sea cucumbers, which are taken by hand or drag.",
+  more: "Which nets, what size, how many and how to hide them: the Nets and traps page under the README button.",
+};
+export const NET_GEAR = {
+  herring: "Gill net, 2¼ in; cast net for small ones",
+  mackerel: "Gill net, 2¾ in",
+  alewives: "Fyke net or dip net at the streams; gill nets in the bay",
+  smelt: "Fyke net in the streams",
+  silverside: "Cast net",
+  flounder: "Fyke net or beach seine",
+  codfamily: "Gill net",
+  sculpin: "Gill net",
+  pollock: "Gill net",
+  elvers: "Fyke net or dip net in the streams",
+};
+
 // One color per species, in families: blues for fish, golds and browns for shellfish,
 // purples for urchins and sea cucumbers, red and green for lobster and crabs.
 export const SPECIES_COLORS = {

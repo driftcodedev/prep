@@ -264,9 +264,9 @@
   #lt-root .leaflet-zoom-anim .leaflet-zoom-animated { transition: none; }
 }
 
-/* ---------- Map / Fishing switch ---------- */
+/* ---------- Map / Fishing / Netting switch ---------- */
 
-#lt-root .lt-views { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin: 0 0 1.25rem; }
+#lt-root .lt-views { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0 0 1.25rem; }
 #lt-root .lt-view-tab {
   display: flex; align-items: center; gap: 0.6rem; min-height: 3.6rem; padding: 0.55rem 0.75rem;
   font: inherit; text-align: left; color: var(--lid); background: var(--card);
@@ -280,6 +280,14 @@
 #lt-root .lt-view-tab[aria-selected="true"] .lt-view-sub { color: #dbe9ef; }
 #lt-root .lt-view-tab:focus-visible { outline: 3px solid var(--lid-dark); outline-offset: 2px; }
 #lt-root .lt-panel[hidden] { display: none; }
+/* Phones: three tabs side by side, so the icon sits over the name and the second line is dropped. */
+@media (max-width: 36rem) {
+  #lt-root .lt-views { gap: 0.35rem; }
+  #lt-root .lt-view-tab { flex-direction: column; justify-content: center; gap: 0.2rem; padding: 0.45rem 0.25rem; text-align: center; min-height: 3.4rem; }
+  #lt-root .lt-view-tab svg { width: 1.45rem; height: 1.45rem; }
+  #lt-root .lt-view-label { font-size: 1.1rem; }
+  #lt-root .lt-view-sub { display: none; }
+}
 
 /* ---------- Fishing view ---------- */
 
@@ -347,6 +355,9 @@
 #lt-root .ltf-sp { display: block; width: 100%; padding: 0; font: inherit; font-weight: 600; text-align: left; color: var(--ink); background: none; border: 0; cursor: pointer; line-height: 1.2; }
 #lt-root .ltf-sp::after { content: "▸"; margin-left: 0.25rem; color: var(--lid); font-size: 0.8em; }
 #lt-root .ltf-sp[aria-expanded="true"]::after { content: "▾"; }
+#lt-root .ltf-sp-sub { display: block; margin: 0.1rem 0 0 0.8rem; font-size: 0.85em; font-weight: 400; color: var(--ink-2); line-height: 1.2; }
+#lt-root .ltn-empty { margin: 0; padding: 0.9rem 1rem; font-size: 0.92rem; color: var(--ink-2); }
+#lt-root .ltn-note { margin-top: 0.6rem; max-width: 62ch; }
 #lt-root .ltf-sp:focus-visible { outline: 2px solid var(--lid); outline-offset: 2px; border-radius: 3px; }
 #lt-root .ltf-tbl-row.is-open > th, #lt-root .ltf-tbl-row.is-open > td { border-bottom: 0; background: color-mix(in srgb, var(--lid) 6%, var(--card)); }
 #lt-root .ltf-tbl-detail > td { text-align: left; white-space: normal; padding: 0.3rem 0.6rem 0.7rem; background: color-mix(in srgb, var(--lid) 6%, var(--card)); }

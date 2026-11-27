@@ -16,7 +16,7 @@ index.html            page frame: tab bar and both panels          don't edit
 shell/                tabs.js (tabs + password lock), shell.css     don't edit
 short-term/           the finished Short Term plan                  don't edit
 long-term/            YOUR FOLDER
-  app.js              entry point: Map / Fishing switch, render(), mount(), unmount()
+  app.js              entry point: Map / Fishing / Netting switch, render(), mount(), unmount()
   style.css           styles; every rule starts with #lt-root
   data/plan.js        page words (heading, intro, notes)
   data/houses.js      houses for sale near Cobscook Bay, with sources
@@ -30,7 +30,7 @@ long-term/            YOUR FOLDER
   js/geo.js           pure helpers: distances, ring colors, filters, formatting
   js/popup.js         HTML for house popups and list cards
   js/map.js           the live Leaflet map (browser only)
-  js/fishing.js       the Fishing view: one sortable table of every species by season
+  js/fishing.js       the Fishing and Netting views: one sortable table of species by season
   js/currents.js      tidal currents and flats: tide clock, speeds, and the live map layers
   js/report.js        the paper copy: one list of blocks, and the printout HTML
   js/report-pdf.js    the same blocks as a pdfmake PDF (Download PDF)
@@ -154,8 +154,9 @@ and a **Flats that dry at low tide** checkbox. Nothing loads until one is used.
 
 ## The Fishing view
 
-The tab opens on a **Map / Fishing** switch (`render()` in `app.js`). The last view picked is kept
-in `localStorage` (`prep-lt-view`). The map's Leaflet code loads only the first time the Map view
+The tab opens on a **Map / Fishing / Netting** switch (`render()` in `app.js`). The last view picked
+is kept in `localStorage` (`prep-lt-view`). On phones the three tabs show the icon over the name and
+drop the second line. The map's Leaflet code loads only the first time the Map view
 is shown, so opening straight to Fishing doesn't download it.
 
 - **Numbers:** `data/fishing.js`, written by `python3 tools/fishing_model.py` (run from
@@ -190,6 +191,18 @@ is shown, so opening straight to Fishing doesn't download it.
   counts them and offers "Clear targets". Show, Numbers and targets (`picks`, as
   `{ speciesId: [season numbers] }`, cleaned by `cleanPicks()` on load) are kept in `localStorage`
   (`prep-lt-fish`), so they're per browser; the season starts on today's.
+- **The Netting view** (`renderNetting()`, `createFishing(panel, { mode: "net" })`) is the same table
+  cut down to the species you can catch with a net that have at least one season marked as a target
+  (`netRows()`). Every season of those species shows, targets in green, with the net to use under each
+  name (`NET_GEAR` in `data/fishing-notes.js`, following the README's "Nets and traps" page; its
+  words are in `NET_PAGE`). Trap species (lobster, green crabs, whelks) and hand or drag species
+  aren't in `NET_GEAR`. It shares the saved state with the Fishing view, so a target marked in one
+  shows in the other: each view re-reads it when shown (`refresh()`). Netting's rows are picked when
+  the view is shown, so unmarking a row's last target leaves the row until the next visit. Its foot
+  totals only the target cells ("Your netting targets", calories amounts only); "% of season" is still
+  the share of the whole bay's season. Its radio names and notes-row ids start `ltn-` so they don't
+  clash with the Fishing view's `ltf-` ones. The paper copy doesn't include it, since targets live
+  in one browser.
 - **Parked until fishing methods are picked:** cutoffs, catch per hour, cleaning time and the 2025
   scallop drop. The old per-trip numbers are gone (they're in git history before Nov 27, 2026).
 

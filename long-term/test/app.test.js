@@ -263,20 +263,28 @@ test("the weekly change record matches the house list", () => {
 
 import { VIEWS } from "../app.js";
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
-import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICENSES } from "../data/fishing-notes.js";
+import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_GEAR, NET_PAGE } from "../data/fishing-notes.js";
 import {
   counted, seasonTotal, adultsFed, fedText, seasonRanking, sortRows, bestOf, cellText, rankingText, donutSlices, herringCatch,
   meatText, round2, millions, thousands, caloriesText, poundsText, pct, drawTable, renderFishing, seasonOfDate,
   photoSrc, photoPage, photosHtml, cleanPicks, isPicked, togglePick, pickCount, pickText,
+  netRows, targetTotal, renderNetting,
 } from "../js/fishing.js";
 
-test("the tab has a Map and a Fishing view, Map first", () => {
+test("the tab has Map, Fishing and Netting views, Map first", () => {
   const html = render(PAGE, { household: null });
-  assert.deepEqual(VIEWS.map((v) => v[0]), ["map", "fish"]);
+  assert.deepEqual(VIEWS.map((v) => v[0]), ["map", "fish", "net"]);
   assert.match(html, /role="tablist"/);
   assert.match(html, /id="lt-panel-map"[^>]*data-panel="map"/);
   assert.match(html, /id="lt-panel-fish"[^>]*data-panel="fish" hidden/);
+  assert.match(html, /id="lt-panel-net"[^>]*data-panel="net" hidden/);
+  assert.match(html, /id="lt-tab-net"[^>]*>[\s\S]*?Netting/);
   assert.match(html, /Cobscook Bay fishing by season/);
+  // The two tables' controls don't share radio groups or ids.
+  const ids = [...html.matchAll(/\sid="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(new Set(ids).size, ids.length, "ids are unique across the views");
+  assert.match(html, /name="ltn-measure"/);
+  assert.match(html, /name="ltf-measure"/);
 });
 
 test("fishing data: six seasons, every species complete, colored, described and scored 1–5", () => {
@@ -530,4 +538,50 @@ test("targets: tap a number to mark it green; picks are kept tidy and survive so
   assert.match(pct, /is-picked"><button type="button" class="ltf-pick" data-pick="herring" data-b="3"/);
   // No picks: nothing is green.
   assert.ok(!drawTable({ measure: "kcal", view: "amount" }, 0).includes("is-picked"));
+});
+
+test("netting: only species you can net with a target season, every season shown, totals of the targets", () => {
+  // Every net species exists, and none of them is a trap or hand species.
+  const ids = new Set(SPECIES.map((sp) => sp.id));
+  for (const id of Object.keys(NET_GEAR)) assert.ok(ids.has(id), `${id} is a species`);
+  for (const id of ["lobster", "greencrabs", "whelks", "urchins", "shellfish", "scallops", "periwinkles", "cucumbers"]) assert.ok(!NET_GEAR[id], `${id} isn't netted`);
+  // Brett's targets from the screenshot (27 Nov 2026).
+  const picks = cleanPicks({
+    urchins: [0, 1, 2, 3, 4, 5], herring: [2, 3, 4, 5], shellfish: [0, 1, 2, 3, 4, 5], scallops: [0, 1, 2, 3, 4, 5],
+    periwinkles: [0, 1, 2, 3, 4, 5], mackerel: [2, 3, 4], greencrabs: [2, 3, 4, 5], alewives: [2], lobster: [1, 2, 3, 4, 5],
+  });
+  const rows = netRows(picks);
+  assert.deepEqual(rows.map((sp) => sp.id).sort(), ["alewives", "herring", "mackerel"]);
+  assert.deepEqual(netRows({}), []);
+  // The table shows those rows only, all six seasons, the targets green, the net under each name.
+  const tbl = drawTable({ measure: "kcal", view: "amount", picks }, 4, new Set(["herring"]), SPECIES, SEASONS, { rows, idPrefix: "ltn-d-", sub: NET_GEAR, foot: "targets" });
+  assert.equal((tbl.match(/class="ltf-tbl-row/g) || []).length, 3);
+  assert.equal((tbl.match(/class="ltf-pick"/g) || []).length, 3 * 6);
+  assert.equal((tbl.match(/is-picked"/g) || []).length, 4 + 3 + 1);
+  assert.ok(!/data-pick="(lobster|urchins|greencrabs)"/.test(tbl));
+  assert.match(tbl, /<span class="ltf-sp-sub">Gill net, 2¾ in<\/span>/);
+  assert.match(tbl, /id="ltn-d-herring"(?! hidden)/);
+  assert.ok(!tbl.includes('id="ltf-d-'), "the notes rows use the Netting ids");
+  // Herring first when sorted by Sep–Oct.
+  assert.ok(tbl.indexOf('data-pick="herring"') < tbl.indexOf('data-pick="mackerel"'));
+  // The foot adds up only the target cells: May–Jun herring 130 + mackerel 108 + alewives 47 = 285.
+  const sum = (b) => ["herring", "mackerel", "alewives"].reduce((s, id) => s + (isPicked(picks, id, b) ? SPECIES.find((sp) => sp.id === id).kcal[b] : 0), 0);
+  assert.equal(targetTotal(rows, picks, "kcal", 2), sum(2));
+  assert.equal(millions(sum(2)), "285");
+  assert.equal(targetTotal(rows, picks, "kcal", 0), 0);
+  assert.match(tbl, /Your netting targets<\/th><td>–<\/td><td>–<\/td><td>285<\/td><td>907<\/td><td class="is-on">1,842<\/td><td>177<\/td>/);
+  assert.match(tbl, /Active adults fed a year, if all were caught/);
+  // % of season is still the share of the whole bay's season, as on the Fishing tab.
+  const col = drawTable({ measure: "kcal", view: "col", picks }, 4, new Set(), SPECIES, SEASONS, { rows, idPrefix: "ltn-d-", sub: NET_GEAR, foot: "targets" });
+  const full = drawTable({ measure: "kcal", view: "col", picks }, 4);
+  const herringCells = (h) => h.match(/data-pick="herring" data-b="\d" aria-pressed="\w+" title="[^"]+">([^<]+)</g).join("|");
+  assert.equal(herringCells(col), herringCells(full));
+  assert.ok(!col.includes("<tfoot>"), "no bay-wide totals under a cut-down table");
+  // The page itself: words, the empty message and its own radio names.
+  const page = renderNetting();
+  assert.match(page, /id="ltn-heading"[^>]*>Netting</);
+  assert.match(page, /name="ltn-view"/);
+  assert.ok(!page.includes('name="ltf-'));
+  assert.match(NET_PAGE.empty, /herring, mackerel, alewives/);
+  assert.match(page, /Nets and traps page/);
 });

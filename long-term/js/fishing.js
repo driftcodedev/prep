@@ -9,11 +9,15 @@
 // by it, most to least. "Show" picks calories or pounds; "Numbers" picks amounts, each species'
 // share of the season (columns), or each season as a % of the species' own best season (rows).
 // Tapping a species opens its notes under its row.
+//
+// The Netting view (renderNetting(), createFishing(panel, { mode: "net" })) is the same table cut
+// down to the species you can net (NET_GEAR) that have a season marked as a target. Both views
+// share the saved state, so a target marked in one shows in the other.
 
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
 import {
   FISH_PAGE, SPECIES_COLORS, OTHER_COLOR, MEASURES, NUMBER_VIEWS, CONFIDENCE, PROFILES, HERRING_METHODS, HERRING_CATCH_NOTE,
-  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PHOTOS, PHOTO_LICENSES,
+  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_PAGE, NET_GEAR,
 } from "../data/fishing-notes.js";
 import { esc } from "./geo.js";
 
@@ -38,6 +42,13 @@ export function togglePick(picks, id, b) {
   if (bs.has(b)) bs.delete(b); else bs.add(b);
   if (bs.size) next[id] = [...bs].sort((x, y) => x - y); else delete next[id];
   return next;
+}
+// The Netting rows: species you can net with at least one season marked as a target.
+export const netRows = (picks, list = SPECIES, gear = NET_GEAR) => list.filter((sp) => gear[sp.id] && picks && picks[sp.id] && picks[sp.id].length);
+
+// One season's total over the target cells only (null counts as nothing).
+export function targetTotal(list, picks, measure, b) {
+  return list.reduce((sum, sp) => sum + (isPicked(picks, sp.id, b) ? valueOf(sp, measure, b) || 0 : 0), 0);
 }
 export const pickCount = (picks) => Object.values(picks || {}).reduce((n, bs) => n + bs.length, 0);
 
@@ -258,14 +269,18 @@ const CAPTIONS = {
   },
 };
 
-// The table. open = ids of species whose notes are showing.
-export function drawTable(state, season, open = new Set(), list = SPECIES, seasons = SEASONS) {
+// The table. open = ids of species whose notes are showing. list is every species (it sets the
+// season totals); opts.rows draws only some of them (the Netting view), opts.idPrefix keeps the
+// notes rows' ids apart from the other view's, opts.sub puts a line under each name, and
+// opts.foot "targets" totals only the target cells.
+export function drawTable(state, season, open = new Set(), list = SPECIES, seasons = SEASONS, opts = {}) {
+  const { rows: shown = list, idPrefix = "ltf-d-", sub = null } = opts;
   const measure = state.measure === "lb" ? "lb" : "kcal";
   const view = ["col", "row"].includes(state.view) ? state.view : "amount";
   const cols = seasons.length + 2;
   const heads = seasons.map((s, b) => `<th scope="col"${b === season ? ' class="is-on" aria-sort="descending"' : ""}><button type="button" data-season="${b}" aria-pressed="${b === season}" title="Sort by ${esc(s.long)}">${esc(s.label.replace("–", "–​"))}</button></th>`).join("");
 
-  const rows = sortRows(list, measure, season).map((sp) => {
+  const rows = sortRows(shown, measure, season).map((sp) => {
     const best = bestOf(sp, measure);
     const known = (measure === "lb" ? sp.lb : sp.kcal).filter((v) => v !== null);
     const flat = known.every((v) => v === best); // same every season: no best to mark
@@ -277,13 +292,22 @@ export function drawTable(state, season, open = new Set(), list = SPECIES, seaso
     }).join("");
     const name = measure === "lb" && sp.weight === "meat" ? `${sp.name} (meat)` : sp.name;
     const isOpen = open.has(sp.id);
-    return `<tr class="ltf-tbl-row${isOpen ? " is-open" : ""}"><th scope="row"><button type="button" class="ltf-sp" data-sp="${esc(sp.id)}" aria-expanded="${isOpen}" aria-controls="ltf-d-${esc(sp.id)}">${swatch(sp)}${esc(name)}</button></th>${cells}<td class="ltf-tbl-conf">${confChip(sp)}</td></tr>
-          <tr class="ltf-tbl-detail" id="ltf-d-${esc(sp.id)}"${isOpen ? "" : " hidden"}><td colspan="${cols}">${profileHtml(sp, season, seasons)}</td></tr>`;
+    const did = `${idPrefix}${sp.id}`;
+    const subLine = sub && sub[sp.id] ? `<span class="ltf-sp-sub">${esc(sub[sp.id])}</span>` : "";
+    return `<tr class="ltf-tbl-row${isOpen ? " is-open" : ""}"><th scope="row"><button type="button" class="ltf-sp" data-sp="${esc(sp.id)}" aria-expanded="${isOpen}" aria-controls="${esc(did)}">${swatch(sp)}${esc(name)}</button>${subLine}</th>${cells}<td class="ltf-tbl-conf">${confChip(sp)}</td></tr>
+          <tr class="ltf-tbl-detail" id="${esc(did)}"${isOpen ? "" : " hidden"}><td colspan="${cols}">${profileHtml(sp, season, seasons)}</td></tr>`;
   }).join("");
 
   const footCell = (text, b) => `<td${b === season ? ' class="is-on"' : ""}>${esc(text)}</td>`;
   let foot = "";
-  if (view === "amount" && measure === "kcal") {
+  if (opts.foot === "targets") {
+    if (view === "amount" && measure === "kcal") {
+      const totals = seasons.map((_, b) => targetTotal(shown, state.picks, "kcal", b));
+      foot = `
+          <tr><th scope="row">Your netting targets</th>${totals.map((t, b) => footCell(t ? millions(t) : "–", b)).join("")}<td></td></tr>
+          <tr><th scope="row">Active adults fed a year, if all were caught</th>${totals.map((t, b) => footCell(t ? fedText(t) : "–", b)).join("")}<td></td></tr>`;
+    }
+  } else if (view === "amount" && measure === "kcal") {
     foot = `
           <tr><th scope="row">Total</th>${seasons.map((_, b) => footCell(millions(seasonTotal(list, "kcal", b)), b)).join("")}<td></td></tr>
           <tr><th scope="row">Active adults fed a year, if all were caught</th>${seasons.map((_, b) => footCell(fedText(seasonTotal(list, "kcal", b)), b)).join("")}<td></td></tr>`;
@@ -381,6 +405,33 @@ export function renderFishing(page = FISH_PAGE) {
     </section>`;
 }
 
+// The Netting view's static page: heading, the same controls (their own radio names), the table area.
+export function renderNetting(page = NET_PAGE) {
+  const seg = (name, options) => options.map(([v, label], i) => `
+          <label class="ltm-seg-item"><input type="radio" name="${name}" value="${esc(v)}"${i === 0 ? " checked" : ""}><span>${esc(label)}</span></label>`).join("");
+  return `
+    <section class="ltf ltn" aria-labelledby="ltn-heading">
+      <h2 id="ltn-heading" class="section-title">${esc(page.heading)}</h2>
+      <p class="muted ltf-intro">${esc(page.intro)}</p>
+
+      <div class="ltf-controls">
+        <div class="ltm-group" role="radiogroup" aria-labelledby="ltn-measure-label">
+          <span id="ltn-measure-label" class="ltm-label">Show</span>
+          <div class="ltm-seg ltf-seg-2">${seg("ltn-measure", Object.entries(MEASURES).map(([k, m]) => [k, m.label]))}</div>
+        </div>
+        <div class="ltm-group" role="radiogroup" aria-labelledby="ltn-view-label">
+          <span id="ltn-view-label" class="ltm-label">Numbers</span>
+          <div class="ltm-seg ltf-seg-3">${seg("ltn-view", Object.entries(NUMBER_VIEWS))}</div>
+        </div>
+      </div>
+
+      <p class="ltf-hint ltf-tbl-hint">${esc(page.hint)}</p>
+      <div class="ltf-chart" data-table></div>
+      <p class="ltf-hint ltn-note">${esc(page.notShown)}</p>
+      <p class="ltf-hint ltn-note">${esc(page.more)}</p>
+    </section>`;
+}
+
 // ---------- browser ----------
 
 function readState() {
@@ -397,14 +448,22 @@ function saveState(state) {
   try { localStorage.setItem(STORE, JSON.stringify({ measure: state.measure, view: state.view, picks: state.picks })); } catch { /* private mode */ }
 }
 
-export function createFishing(panel) {
-  const state = readState();
+// mode "fish" is the full table; mode "net" is the Netting view. The Netting rows are picked when
+// the view is shown (refresh()), so a row stays put while you tap its numbers.
+export function createFishing(panel, { mode = "fish" } = {}) {
+  const net = mode === "net";
+  const pre = net ? "ltn" : "ltf";
+  let state = readState();
   let season = seasonOfDate();
   const open = new Set();
   const table = panel.querySelector("[data-table]");
+  let rowIds = new Set();
+  const pickRows = () => { rowIds = new Set(netRows(state.picks).map((sp) => sp.id)); };
 
-  for (const input of panel.querySelectorAll('input[name="ltf-measure"]')) input.checked = input.value === state.measure;
-  for (const input of panel.querySelectorAll('input[name="ltf-view"]')) input.checked = input.value === state.view;
+  function syncInputs() {
+    for (const input of panel.querySelectorAll(`input[name="${pre}-measure"]`)) input.checked = input.value === state.measure;
+    for (const input of panel.querySelectorAll(`input[name="${pre}-view"]`)) input.checked = input.value === state.view;
+  }
 
   const count = panel.querySelector("[data-picks-count]");
   const clear = panel.querySelector("[data-clear-picks]");
@@ -412,11 +471,21 @@ export function createFishing(panel) {
     if (count) count.textContent = pickText(state.picks);
     if (clear) clear.hidden = !pickCount(state.picks);
   }
-  function draw() { table.innerHTML = drawTable(state, season, open); showPicks(); }
+  function draw() {
+    if (net) {
+      const rows = SPECIES.filter((sp) => rowIds.has(sp.id));
+      table.innerHTML = rows.length
+        ? drawTable(state, season, open, SPECIES, SEASONS, { rows, idPrefix: "ltn-d-", sub: NET_GEAR, foot: "targets" })
+        : `<p class="ltn-empty">${esc(NET_PAGE.empty)}</p>`;
+    } else {
+      table.innerHTML = drawTable(state, season, open);
+    }
+    showPicks();
+  }
 
   function onChange(e) {
-    if (e.target.name === "ltf-measure") state.measure = e.target.value;
-    else if (e.target.name === "ltf-view") state.view = e.target.value;
+    if (e.target.name === `${pre}-measure`) state.measure = e.target.value;
+    else if (e.target.name === `${pre}-view`) state.view = e.target.value;
     else return;
     saveState(state);
     draw();
@@ -427,6 +496,13 @@ export function createFishing(panel) {
       const id = cell.dataset.pick;
       const b = Number(cell.dataset.b);
       state.picks = togglePick(state.picks, id, b);
+      if (net) {
+        // Redraw so the targets total updates; the row stays until the view is shown again.
+        saveState(state);
+        draw();
+        table.querySelector(`[data-pick="${CSS.escape(id)}"][data-b="${b}"]`)?.focus();
+        return;
+      }
       const on = isPicked(state.picks, id, b);
       cell.setAttribute("aria-pressed", String(on));
       cell.title = `${on ? "Unmark" : "Mark"}${cell.title.replace(/^(Unmark|Mark)/, "")}`;
@@ -449,7 +525,7 @@ export function createFishing(panel) {
       if (isOpen) open.add(id); else open.delete(id);
       sp.setAttribute("aria-expanded", String(isOpen));
       sp.closest("tr").classList.toggle("is-open", isOpen);
-      const detail = panel.querySelector(`#ltf-d-${CSS.escape(id)}`);
+      const detail = panel.querySelector(`#${pre}-d-${CSS.escape(id)}`);
       if (detail) detail.hidden = !isOpen;
       return;
     }
@@ -462,9 +538,18 @@ export function createFishing(panel) {
 
   panel.addEventListener("change", onChange);
   panel.addEventListener("click", onClick);
+  if (net) pickRows();
+  syncInputs();
   draw();
 
   return {
+    // Shown again: the other view may have changed the targets or Show and Numbers.
+    refresh() {
+      state = readState();
+      if (net) pickRows();
+      syncInputs();
+      draw();
+    },
     destroy() {
       panel.removeEventListener("change", onChange);
       panel.removeEventListener("click", onClick);
