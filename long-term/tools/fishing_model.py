@@ -47,6 +47,7 @@ HERRING_YEARS = [[1947, 49_000], [1948, 5_043_325], [1949, 1_342_600], [1950, 1_
 HERRING_MONTH_PCT = [0, 0, 0, 0, 0.1, 5.5, 6.7, 13.8, 30.1, 36.2, 6.9, 0.7]  # Jan..Dec
 HERRING_SEASON = [HERRING_MONTH_PCT[i] + HERRING_MONTH_PCT[i + 1] for i in range(0, 12, 2)]
 HERRING_AVG_LB = 900_000  # middle of three methods: model 1.6M, sonar 0.45M, 1950s catch x weirs 0.43-2.2M
+SHELLFISH_AVG_LB = 1_600_000  # clams, mussels and other shellfish: the least the clam harvest needs (see below)
 
 
 def from_avg(avg, idx):
@@ -77,18 +78,26 @@ SP = [
     dict(id="periwinkles", name="Periwinkles", short="periwinkles", group="shellfish", conf=3,
          lb=from_avg(6666 * MODEL_LB, [85, 90, 100, 100, 100, 90]), meat=0.16, kcal=395,
          source="Bay food-web model (from a Cobscook rockweed study)"),
-    dict(id="shellfish", name="Clams, mussels and other shellfish", short="clams and mussels", group="shellfish", conf=2,
-         lb=from_avg(3766 * MODEL_LB, [80, 90, 100, 100, 100, 90]), meat=0.2, kcal=390,
-         source="Bay food-web model (Beal, unpublished)"),
+    # Yearly average: the least the clam harvest needs. Lubec, Perry, Pembroke and Whiting land about
+    # 510,000 lb of legal clams a year (DMR, 2020-24); in the food-web model shellfish add 0.7 of their
+    # weight a year and other animals eat 46% of that, so supplying both takes 510,000 / (0.7 x 0.54),
+    # about 1.4-1.6 million lb. The model itself gives 3,766 kg per sq km (0.87 million lb) in one table
+    # and 11,000 (2.5 million lb) in another; 1.6 million is within 2x of both.
+    dict(id="shellfish", name="Clams, mussels and other shellfish", short="clams and mussels", group="shellfish", conf=3,
+         lb=from_avg(SHELLFISH_AVG_LB, [80, 90, 100, 100, 100, 90]), meat=0.2, kcal=390,
+         source="The least today's clam harvest needs (1.6 million lb a year on average); the food-web model gives 0.87–2.5 million"),
     dict(id="scallops", name="Sea scallops", short="scallops", group="shellfish", conf=3, weight="meat",
          lb=[148_860] * 6, meat=1.0, kcal=313,
          source="State survey, 2014–15: harvestable meat"),
     dict(id="alewives", name="Alewives", short="alewives", group="fish", conf=4,
          lb=from_peak(RUN * 0.45, [0, 5, 100, 5, 0, 0]), meat=0.4, kcal=470,
          source="Run counts: Pennamaquan about 500,000 (2023), Dennys 58,000+ (2024)"),
-    dict(id="flounder", name="Flounders", short="flounder", group="fish", conf=2,
-         lb=from_peak(surv(3371 + 2743) * 0.10 * 0.9, [49, 92, 100, 57, 24, 29]), meat=0.35, kcal=318,
-         source="Net survey, scaled up; the Canadian trawl found 1–5 times less"),
+    # May-December from the net survey. January-April are 0: adult winter flounder were rare or absent
+    # in Passamaquoddy Bay in winter and seldom present below 6 C (43 F) (MacDonald and others 1984);
+    # Eastport's water averages 37-41 F in January-April (NWS).
+    dict(id="flounder", name="Flounders", short="flounder", group="fish", conf=3,
+         lb=from_peak(surv(3371 + 2743) * 0.10 * 0.9, [0, 0, 100, 57, 24, 29]), meat=0.35, kcal=318,
+         source="Net survey, scaled up; the Canadian trawl agrees in Sep–Oct. Adults leave when the water is under 43°F (Jan–Apr)"),
     dict(id="codfamily", name="Cod family: hakes and haddock", short="cod family", group="fish", conf=3,
          # food-size fish at the peak, rounded to the nearest 1,000 as in the doc, x pounds per fish
          lb=add(from_peak(round(surv(223 + 252) * 0.3, -3) * 0.6, [0, 2, 67, 100, 15, 3]),     # silver hake
@@ -145,7 +154,7 @@ def write_js(path):
            "//   kcalPerLb   calories in a pound of meat",
            "//   confidence  1 to 5 (see CONFIDENCE in data/fishing-notes.js)",
            "",
-           'export const FISH_CHECKED = "2026-11-27";',
+           'export const FISH_CHECKED = "2026-11-26";',
            "",
            f"// Calories an active adult needs in a year ({ADULT_KCAL_DAY:,} a day).",
            f"export const ADULT_KCAL_YEAR = {ADULT_KCAL_DAY * 365};",

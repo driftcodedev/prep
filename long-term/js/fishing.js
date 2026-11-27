@@ -195,7 +195,7 @@ export function drawSeason(state, season, list = SPECIES, seasons = SEASONS) {
   return `
     <div class="ltf-stabs" role="group" aria-label="Season">${tabs}</div>
     <h3 class="sub-title ltf-detail-title">${esc(s.long)}</h3>
-    <p class="ltf-detail-lead">About <b>${esc(caloriesText(total))}</b> in the bay: a year's food for about <b>${esc(fedText(total))} active adults</b>, if every animal were caught.${top ? ` ${esc(top.sp.name)} is <b>${esc(pct(top.share))}</b> of it.` : ""}</p>
+    <p class="ltf-detail-lead">About <b>${esc(caloriesText(total))}</b> in the bay: a year's food for about <b>${esc(fedText(total))} active adults</b>, if every animal were caught.${top ? ` Biggest share: ${esc(top.sp.name)}, <b>${esc(pct(top.share))}</b>.` : ""}</p>
     <h4 class="ltf-h4">${kcal === "kcal" ? "Every species, largest share of the calories first" : "Every species, most pounds first"}</h4>
     <p class="ltf-hint">The number in the box is how sure the estimate is, from 1 (could be off more than 10 times) to 5 (likely within 25%). Tap a species for where its number comes from.</p>
     <ol class="ltf-bars">${items}</ol>`;

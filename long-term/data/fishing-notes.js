@@ -4,7 +4,7 @@
 export const FISH_PAGE = {
   heading: "Cobscook Bay fishing by season",
   intro: "How much food is in the bay in each two-month season: the whole amount there before anyone fishes. No cutoffs and no fishing method yet. Each species has a score from 1 to 5 for how sure the number is.",
-  draft: "Draft for review, Nov 27, 2026.",
+  draft: "Draft for review, Nov 26, 2026.",
 };
 
 // One color per species, in families: blues for fish, golds and browns for shellfish,
@@ -40,7 +40,7 @@ export const PROFILES = {
   shellfish: { best: "All year; clams best May–Oct", size: "Clams 2–3 in, about 14 per lb; mussels 2–3 in, about 20 per lb", yield: "Clams 20%, mussels about 14%", gear: "Clam hoe, or by hand at low tide", rules: "Clams: town license, 1 peck a day. Mussels: 2 in minimum, 2 bushels a day", safety: "Red tide closures; never dig a closed flat. Cobscook has been closed to mussels in toxin outbreaks" },
   scallops: { best: "All year (season Dec–Mar today)", size: "about 15 meats per lb", yield: "Meat only", gear: "Drag from a boat, diving, or the lowest tides", rules: "Noncommercial license: 1 gallon shucked or 1.5 bushels in shell a day", safety: "Eat only the white muscle; throw away the rest" },
   alewives: { best: "May–Jun", size: "10–11 in, about 0.45 lb", yield: "about 40%", gear: "Dip net at the river runs", rules: "Only town-approved harvests; Pembroke's reopened in 2025", safety: "Bony; smoke or salt; leave plenty to spawn" },
-  flounder: { best: "Mar–Jun", size: "12–14 in, about 0.9 lb", yield: "about 35%", gear: "Hook with worm or clam bait on mud", rules: "Check DMR bag limit", safety: "Very lean" },
+  flounder: { best: "May–Aug; gone Jan–Apr", size: "12–14 in, about 0.9 lb", yield: "about 35%", gear: "Hook with worm or clam bait on mud", rules: "Check DMR bag limit", safety: "Very lean. Adults move to deeper water when the bay is under 43°F" },
   codfamily: { best: "Jul–Oct", size: "Silver hake about 12 in; white hake 12–16 in; haddock about 1 lb (mostly young fish)", yield: "about 40%", gear: "Rod and bait on the bottom, often at night", rules: "Check DMR", safety: "Silver hake is soft; eat it fresh" },
   greencrabs: { best: "Jul–Aug", size: "2–3 in, about 12 per lb", yield: "about 12%", gear: "Baited trap, by hand under rocks", rules: "Invasive; taking them helps the clams", safety: "Little meat; best for soup and stock" },
   lobster: { best: "Sep–Oct", size: "about 1.25 lb", yield: "18–25%", gear: "Traps", rules: "Noncommercial license allows 5 traps", safety: "Don't eat the green tomalley (state advisory)" },
@@ -71,8 +71,10 @@ export const HERRING_CATCH_NOTE = "Caught by weirs and stop seines in the \"low 
 export const METHOD = [
   "Every number is the whole amount in the bay in that season, before anyone fishes. For species that stay all year (periwinkles, clams, scallops, flounder), each season assumes nothing was taken earlier, so don't add their seasons together.",
   "Most species: the year-round average weight from the bay food-web model (Chapman and others 2020), split into seasons by when the bay net survey caught them. Season pounds = average × that season's share ÷ the average share.",
+  "Clams, mussels and other shellfish: 1.6 million lb a year on average, the least today's clam harvest needs. Lubec, Perry, Pembroke and Whiting land about 510,000 lb of legal clams a year; in the food-web model shellfish add 0.7 of their weight a year and other animals eat 46% of that, so supplying both takes at least 1.4–1.6 million lb. The model itself gives 0.87 million lb in one table and 2.5 million in another.",
   "Herring: the middle of three separate methods, split into seasons by the bay's own 1947–58 catches (see above).",
   "Flounder, the cod family (silver hake, white hake, haddock), sculpin, smelt and silverside: the 2011–13 net survey scaled up by the counted alewife run (about 2,260 bay fish for each fish caught), then checked against the Canadian Passamaquoddy trawl.",
+  "Flounder: the Canadian trawl, corrected for the 60–90% of flounder in its path that a survey trawl catches, agrees with our September–October number and is 2.8–4.2 times below our July–August one (it fished only water 15–86 m deep). January–April are 0: adults were rare in Passamaquoddy Bay in winter and seldom present below 43°F, and Eastport's water averages 37–41°F then.",
   "Lobster: the Canadian trawl, July–October only, as a minimum. Alewives: run counts. Scallops: the state survey, 2014–15, as meat.",
   "The net survey only fished in May, June, August and September, so winter and late-fall amounts for those species are filled in from what's known of their habits.",
   "Calories = pounds × meat share × calories per pound of meat (checked against USDA and other food tables). Active adults fed a year = calories ÷ 3,000 a day ÷ 365.",
@@ -80,8 +82,8 @@ export const METHOD = [
 ];
 
 export const FISH_NOTES = [
-  "Winter is the bottleneck: January–April holds about a ninth to an eighth of what September–October does, mostly periwinkles, clams, mussels and scallops. Even September–October, if every animal were caught, is a year's food for about 2,000 active adults. About 7,000 people live around the bay.",
-  "Herring is the biggest food from May to December, and it swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).",
+  "Winter is the bottleneck: January–April holds about an eighth of what September–October does, almost all of it clams, mussels, periwinkles and scallops. Even September–October, if every animal were caught, is a year's food for about 2,000 active adults. About 7,000 people live around the bay.",
+  "Herring is the biggest food from July to December, and it swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).",
   "Fat matters: mackerel, herring, alewives and eels are oily; most shellfish and flounder are very lean. Living mostly on lean meat makes people ill, so smoke or salt the oily fish for winter.",
   "Shellfish safety: red tide and other toxins are worst from spring to fall. Never eat shellfish from a closed area. Wild Atlantic salmon in the Dennys River are endangered: leave them.",
   "Not in these numbers yet: cutoffs, fishing methods and cleaning time. They come next. The 44% drop in legal Cobscook scallops after five weeks of the 2024–25 season waits until methods are picked.",
@@ -107,6 +109,12 @@ export const FISH_SOURCES = [
   ["DFO report 3176: the Passamaquoddy Bay trawl", "https://publications.gc.ca/collections/collection_2016/mpo-dfo/Fs97-6-3176-eng.pdf"],
   ["Maine DMR 2012 Cobscook scallop survey", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/docs/survey12.pdf"],
   ["Maine DMR fall 2023 Cobscook scallop survey", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/Zone%203%202023%20Survey%20Report%20092624.pdf"],
+  ["Maine DMR soft-shell clam landings by town, 2020–2024", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/2025-03/Soft%20Clam%20Landings%20Report_5%20Yr%20Thru%202024_0.pdf"],
+  ["Downeast Institute: clam monitoring report, 2024", "https://downeastinstitute.org/wp-content/uploads/2022/09/crmn-technical-report2024_final6.27.25.pdf"],
+  ["Maine DMR: the blue mussel in Maine", "https://www.maine.gov/dmr/science-research/species/bluemussel.html"],
+  ["Fishes of Passamaquoddy Bay and their seasonal movements (MacDonald and others, 1984)", "https://spo.nmfs.noaa.gov/sites/default/files/macdonald.pdf"],
+  ["How well survey trawls catch flounder (Miller and others, 2023)", "https://repository.library.noaa.gov/view/noaa/48624/noaa_48624_DS1.pdf"],
+  ["National Weather Service: Eastport water temperatures", "https://www.weather.gov/gyx/water_temperature_normals.html"],
   ["Bangor Daily News, 2014: Cobscook scallop harvest", "https://www.bangordailynews.com/2014/06/17/news/despite-two-good-scallop-years-lean-season-predicted-ahead/"],
   ["Quoddy Tides: Pennamaquan alewife count and harvest", "https://www.quoddytides.com/harvesting-of-alewives-returns-to-pennamaquan-after-15-years/"],
   ["Dennys River alewife count", "https://archive.bdnblogs.com/?p=193909"],

@@ -304,21 +304,27 @@ test("fishing data: six seasons, every species complete, colored, described and 
 test("the scores agreed for each species", () => {
   const score = Object.fromEntries(SPECIES.map((sp) => [sp.id, sp.confidence]));
   assert.deepEqual(score, {
-    herring: 3, mackerel: 2, periwinkles: 3, shellfish: 2, scallops: 3, alewives: 4, flounder: 2, codfamily: 3,
+    herring: 3, mackerel: 2, periwinkles: 3, shellfish: 3, scallops: 3, alewives: 4, flounder: 3, codfamily: 3,
     greencrabs: 2, lobster: 2, sculpin: 2, smelt: 2, silverside: 2, urchins: 1, cucumbers: 1, whelks: 1, pollock: 1, elvers: 1,
   });
 });
 
 test("season totals match the sources-check doc", () => {
   const millionsBySeason = [0, 1, 2, 3, 4, 5].map((b) => Math.round(seasonTotal(SPECIES, "kcal", b) / 1e6));
-  assert.deepEqual(millionsBySeason, [237, 276, 595, 1235, 2149, 447]);
+  assert.deepEqual(millionsBySeason, [263, 288, 656, 1296, 2210, 502]);
   const fed = [0, 1, 2, 3, 4, 5].map((b) => fedText(seasonTotal(SPECIES, "kcal", b)));
-  assert.deepEqual(fed, ["220", "250", "540", "1,130", "1,960", "410"]);
+  assert.deepEqual(fed, ["240", "260", "600", "1,180", "2,020", "460"]);
   assert.ok(Math.abs(adultsFed(1095000) - 1) < 1e-9);
   const herring = SPECIES.find((sp) => sp.id === "herring");
   assert.deepEqual(herring.lb.map((v) => Math.round(v / 1000)), [0, 0, 302, 1107, 3580, 410]);
   // Herring's year-round average is the middle of the three methods.
   assert.equal(Math.round(herring.lb.reduce((s, v) => s + v, 0) / 6), HERRING_CATCH.avgUsed);
+  // Shellfish: 1.6 million lb a year on average (the least the clam harvest needs).
+  const shellfish = SPECIES.find((sp) => sp.id === "shellfish");
+  assert.equal(Math.round(shellfish.lb.reduce((s, v) => s + v, 0) / 6), 1600000);
+  // Flounder: adults leave when the water is under 43°F, so January–April are 0.
+  const flounder = SPECIES.find((sp) => sp.id === "flounder");
+  assert.deepEqual(flounder.lb.map((v) => Math.round(v / 1000)), [0, 0, 414, 236, 99, 120]);
   const lobster = SPECIES.find((sp) => sp.id === "lobster");
   assert.deepEqual(lobster.lb.map((v) => (v === null ? null : Math.round(v / 1000))), [null, null, null, 201, 345, null]);
 });
@@ -329,8 +335,8 @@ test("each season's ranking adds to 100% and matches the doc's order", () => {
     assert.ok(Math.abs(r.reduce((s, x) => s + x.share, 0) - 100) < 1e-6, `season ${b}`);
     assert.ok(r.every((x, i) => i === 0 || r[i - 1].value >= x.value), `season ${b} order`);
   }
-  assert.equal(rankingText(SPECIES, 0), "Periwinkles 37%, clams and mussels 25%, scallops 20%, flounder 10%, sculpin 6%, smelt 3%, the rest under 1%");
-  assert.equal(rankingText(SPECIES, 4), "Herring 72%, mackerel 14%, periwinkles 5%, clams and mussels 3%, scallops 2%, lobster 1%, the rest under 1%");
+  assert.equal(rankingText(SPECIES, 0), "Clams and mussels 41%, periwinkles 33%, scallops 18%, sculpin 5%, smelt 2%, the rest under 1%");
+  assert.equal(rankingText(SPECIES, 4), "Herring 70%, mackerel 14%, clams and mussels 6%, periwinkles 5%, scallops 2%, lobster 1%, the rest under 1%");
   assert.equal(seasonRanking(SPECIES, "kcal", 5)[0].sp.id, "herring");
 });
 
@@ -385,16 +391,16 @@ test("fishing numbers read plainly", () => {
 test("fishing drawings: a season with every species, and a table of every season", () => {
   const det = drawSeason({ measure: "kcal" }, 4);
   assert.match(det, /September–October/);
-  assert.match(det, /2\.1 billion calories/);
-  assert.match(det, /about <b>1,960 active adults<\/b>/);
-  assert.match(det, /Atlantic herring is <b>72%<\/b>/);
+  assert.match(det, /2\.2 billion calories/);
+  assert.match(det, /about <b>2,020 active adults<\/b>/);
+  assert.match(det, /Biggest share: Atlantic herring, <b>70%<\/b>/);
   assert.equal((det.match(/<details class="ltf-row/g) || []).length, SPECIES.length);
   assert.match(det, /no count yet/);
   assert.match(det, /data-season="4" data-local aria-pressed="true"/);
   const tbl = drawTable({ measure: "kcal" }, 4);
   assert.equal((tbl.match(/<tr><th scope="row"><span class="ltf-swatch"/g) || []).length, SPECIES.length);
   assert.match(tbl, /Active adults fed a year/);
-  assert.match(tbl, />2,149</);
+  assert.match(tbl, />2,210</);
   const lb = drawTable({ measure: "lb" }, 4);
   assert.match(lb, /Sea scallops \(meat\)/);
   assert.doesNotMatch(lb, /<tfoot>/);
