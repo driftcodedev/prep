@@ -161,9 +161,11 @@ is shown, so opening straight to Fishing doesn't download it.
 - **Numbers:** `data/fishing.js`, written by `python3 tools/fishing_model.py` (run from
   `long-term/`). Don't edit it by hand. Every number is the whole amount in the bay in that season,
   before anyone fishes: no cutoffs and no fishing method yet. The method, checks and sources are in
-  Brett's "Cobscook fishing data: sources check" doc (Nov 26–27, 2026). Six two-month seasons; for
+  Brett's "Cobscook fishing data: sources check" doc (Nov 26–27, 2026; every input was re-checked
+  against its source on Nov 27). Six two-month seasons; for
   each species: `lb` (pounds in the bay, live weight; scallops are meat), `kcal` (calories in the
-  meat), `meatShare`, `kcalPerLb`, `confidence` (1–5) and `source`. `null` means not counted:
+  meat), `meatShare`, `kcalPerLb`, `confidence` (1–5) and `source`; urchins also have `meatShares`,
+  the roe share in each season. `null` means not counted:
   species with no count in the bay are kept with no numbers rather than guessed. For species that
   stay all year, each season assumes nothing was taken earlier, so their seasons must never be
   added together. `HERRING_CATCH` holds the bay's 1947–58 herring catches, which set herring's

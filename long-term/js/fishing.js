@@ -165,6 +165,11 @@ const weightWord = (sp) => (sp.weight === "meat" ? "meat" : "live weight");
 export function meatText(sp, profile = PROFILES[sp.id] || {}) {
   const cal = `${commas(sp.kcalPerLb)} calories a pound of meat`;
   if (sp.weight === "meat") return `Meat only, ${cal}`;
+  if (sp.meatShares) {
+    // Changes by season (urchin roe): "4.5–8.1% of live weight by season, …"
+    const pc = (v) => String(Math.round(v * 1000) / 10);
+    return `${pc(Math.min(...sp.meatShares))}–${pc(Math.max(...sp.meatShares))}% of live weight by season, ${cal}`;
+  }
   if (sp.meatShare) return `${Math.round(sp.meatShare * 100)}% of live weight, ${cal}`;
   return profile.yield ? `${profile.yield}, ${cal}` : cal;
 }
