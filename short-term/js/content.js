@@ -555,12 +555,12 @@ function potItem(hh) {
 
 export function storeGroups(hh) {
   const plan = STORE_PLANS[hh.store];
-  const titles = { Costco: "Costco warehouse trip", Walmart: "Walmart order", Amazon: "Amazon order" };
+  const titles = { Costco: "Costco Warehouse Trip", Walmart: "Walmart Order", Amazon: "Amazon Order" };
   const groups = plan.stores.map((store) => ({
     title: titles[store],
     lines: hh.lines.filter((l) => l.store === store && l.group !== "gear"),
   }));
-  groups.push({ title: "Fire, water and cooking gear", lines: hh.lines.filter((l) => l.group === "gear") });
+  groups.push({ title: "Fire, Water And Cooking Gear", lines: hh.lines.filter((l) => l.group === "gear") });
   return groups.filter((g) => g.lines.length).map((g) => ({ ...g, total: g.lines.reduce((a, l) => a + l.cost, 0) }));
 }
 
@@ -700,7 +700,7 @@ export const CARE = [
   { lead: "Beans", text: "Soak overnight in 5 cups of water per cup of beans, drain, then cook in about 3 cups of fresh water per cup. Boil hard for at least 10 minutes, 30 to be safe, before simmering 1½–2 hours with the lid on. A pressure cooker saves a lot of fuel and water." },
   { lead: "Start the beans now", text: "Build up to each person's full amount over two to three weeks so stomachs can adjust." },
   { lead: "Rice", text: "Don't rinse it: rinsing washes off the added iron and B vitamins. Cook it in 2 cups of water per cup of rice with the lid on, so it soaks up all the water." },
-  { lead: "Water and fuel", text: "Cooking for everyone, above, shows how much water your household uses each day. Keep the lid on every pot to save water and firewood." },
+  { lead: "Water and fuel", text: "Cooking For Everyone, above, shows how much water your household uses each day. Keep the lid on every pot to save water and firewood." },
   { lead: "Vitamins every day", text: "Rice and beans have no vitamin C, and scurvy can start after about four weeks without it. Keep the vitamin C bottle as a backup." },
   { lead: "Keep your muscle", text: "Push-ups, squats and lunges two or three times a week help anyone who is losing weight hold onto muscle." },
   { lead: "Storage", text: "Rice and beans sealed in mylar with an oxygen absorber keep for decades. Oil, peanut butter, oats, dry milk and vitamins keep about a year, so replace them yearly. The shopping list shows how long each item keeps." },

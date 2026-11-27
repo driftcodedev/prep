@@ -353,14 +353,14 @@ function shoppingSection(hh, lines) {
   const shown = new Set();
   const counted = (l) => !isOwned(l.key);
   const tables = storeGroups({ ...hh, lines }).map((g) => `
-    <h3 class="sub-title">${esc(g.title)} <span class="sub-total">${money(g.lines.filter(counted).reduce((t, l) => t + l.cost, 0))}</span></h3>
+    <h3 class="sub-title"><span class="title-text">${esc(g.title)}</span> <span class="sub-total">${money(g.lines.filter(counted).reduce((t, l) => t + l.cost, 0))}</span></h3>
     ${shopTable(g.lines, cards, shown)}`).join("");
   // The rare explanation with no line (no LifeStraws when everyone is under 3) is folded after the notes.
   const offList = Object.values(cards).filter((it) => !shown.has(it.key) && it.key !== "storage");
   return `
   <section class="block shopping" aria-labelledby="shop-title">
-    <h2 id="shop-title" class="section-title">Shopping list</h2>
-    <p class="shop-summary">${esc(shoppingLead(hh))}: <strong>${money(hh.total)}</strong>.</p>
+    <h2 id="shop-title" class="section-title shop-title"><span class="title-text">Shopping List Grand Total</span> <span class="grand-total">${money(hh.total)}</span></h2>
+    <p class="shop-summary">${esc(shoppingLead(hh))}.</p>
     <p class="shop-compare">${esc(compareText(hh))} <button type="button" class="btn-link" data-switch-store>${hh.store === "costco" ? "Show the Walmart list" : "Show the Costco list"}</button></p>
     <p class="shop-have">Tick "Already have" under anything you own and it comes off the total.</p>
     ${tables}
@@ -434,11 +434,11 @@ function aboutBody() {
 
 // The guides at the very bottom, folded so the page stays short. Tap a heading to open it.
 const MORE = [
-  ["cook", "Cooking for everyone", cookingBody],
-  ["keeps", "How long it keeps", keepsBody],
-  ["rules", "Weekly weigh-in", rulesBody],
-  ["care", "Cooking and storage", careBody],
-  ["about", "How the numbers are worked out", aboutBody],
+  ["cook", "Cooking For Everyone", cookingBody],
+  ["keeps", "How Long It Keeps", keepsBody],
+  ["rules", "Weekly Weigh-In", rulesBody],
+  ["care", "Cooking And Storage", careBody],
+  ["about", "How The Numbers Are Worked Out", aboutBody],
 ];
 const openMore = new Set(); // which ones are open, so they stay open when the page redraws
 

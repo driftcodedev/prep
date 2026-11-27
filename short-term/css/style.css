@@ -10,6 +10,8 @@
   --lid-tint: #ddeaf0;
   --bean: #8a4632;       /* pinto bean speckle */
   --bean-tint: #f5e8e1;
+  --money: #2a7a3b;      /* the grand total */
+  --alert: #b3261e;      /* notes that must not be missed */
   --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
   --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
   --radius: 6px;
@@ -343,8 +345,11 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 .off-list summary { font-weight: 700; cursor: pointer; }
 .off-list .why-panel { position: static; width: auto; margin-top: 0.4rem; }
 
-.shop-summary { font-size: 1.2rem; margin-bottom: 0.4rem; }
-.shop-summary strong { font-size: 1.35rem; }
+/* Shopping list headings: the title underlined, the total on the right. */
+.title-text { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 0.2em; }
+.shop-title { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0.25rem 1rem; font-size: 1.85rem; }
+.grand-total { color: var(--money); font-variant-numeric: tabular-nums; }
+.shop-summary { font-size: 1.1rem; margin: 0 0 0.4rem; }
 .shop-compare { margin-top: 0; color: var(--ink-2); }
 .shop-compare .btn-link { color: var(--lid); font-weight: 700; }
 
@@ -374,8 +379,7 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 .more-body > .sub-title:first-child { margin-top: 0.5rem; }
 /* Numbers in the cooking guide that change with the household and plan. */
 mark.plan { background: #fff0a3; color: inherit; padding: 0 0.12em; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
-.plan-note { margin: 0 0 0.75rem; font-size: 0.9rem; color: var(--ink-2); }
-.plan-note::first-letter { color: var(--ink); }
+.more-body > p.plan-note { max-width: none; margin: 0 0 0.9rem; font-size: 1.05rem; font-weight: 700; line-height: 1.35; color: var(--alert); }
 
 .notes, .plain { padding-left: 1.2rem; max-width: 68ch; }
 .notes li, .plain li { margin-top: 0.5rem; }
