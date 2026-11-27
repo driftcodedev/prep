@@ -2,7 +2,7 @@
 // Prices were checked 18–23 November 2026. Costco prices are warehouse prices and vary by location.
 // Amazon gear and Walmart prices were checked 23 November 2026.
 
-export const PRICES_CHECKED = "18–24 November 2026";
+export const PRICES_CHECKED = "18–27 November 2026";
 
 // Dry-measure nutrition. Sources: USDA FoodData Central (rice, pinto beans, peanut butter),
 // Quaker label (oats), product labels (dry milk).
@@ -31,15 +31,18 @@ export const PRODUCTS = {
     sizeGrams: 22680, price: 22.99, priceNote: "$21.99–22.99",
     url: "https://app.warehouserunner.com/costco/1712219-eastside-rice-llc-long-grain-rice-50-lbs",
   },
+  // Beans come from Walmart in both plans: Amazon only lets you buy 3 of its 1-lb bags at a time,
+  // and Costco's 25-lb bags are only in some (mostly Western) warehouses. Checked 27 November 2026.
   beans: {
-    item: "Pinto beans", pack: "1-lb bag, Amazon Grocery", store: "Amazon", where: "Online",
-    sizeGrams: 453.6, price: 0.95,
-    url: "https://www.amazon.com/Amazon-Fresh-REGULAR-PINTO-WHOLE/dp/B09SHGC91R",
+    item: "Pinto beans", pack: "20-lb bag, Great Value", store: "Walmart", where: "Online or in store",
+    sizeGrams: 9072, price: 14.94,
+    url: "https://www.walmart.com/ip/Great-Value-Pinto-Beans-20-lb/10315741",
   },
+  // Oats, salt and the adult multivitamins come from Amazon in both plans (checked 27 November 2026).
   oats: {
-    item: "Rolled oats", pack: "10-lb box of Quaker oats", store: "Costco", where: "Warehouse",
-    sizeGrams: 4536, price: 8.69, priceNote: "$7.59–8.69",
-    url: "https://app.warehouserunner.com/costco/446586-quaker-rolled-oats-2-80-oz",
+    item: "Rolled oats", pack: "8-lb box (two 64-oz bags), Quaker Old Fashioned", store: "Amazon", where: "Online",
+    sizeGrams: 3629, price: 9.59, priceNote: "$6.68–9.59",
+    url: "https://www.amazon.com/dp/B01KV4H51G",
   },
   pb: {
     item: "Peanut butter", pack: "40-oz jar, Amazon Grocery creamy", store: "Amazon", where: "Online",
@@ -52,9 +55,9 @@ export const PRODUCTS = {
     url: "https://www.amazon.com/Amazon-Grocery-Vegetable-Previously-Packaging/dp/B07MK2XKKV",
   },
   salt: {
-    item: "Iodized salt", pack: "4-lb box, Diamond Crystal", store: "Costco", where: "Warehouse",
-    sizeGrams: 1814, price: 1.89,
-    url: "https://app.warehouserunner.com/costco/18001-diamond-crystal-iodized-salt-64-oz-4-lbs",
+    item: "Iodized salt", pack: "2 × 26-oz canisters, Morton", store: "Amazon", where: "Online",
+    sizeGrams: 1474, price: 3.58,
+    url: "https://www.amazon.com/s?k=Morton+Iodized+Salt+Round+Cans+All-Purpose+Pack+of+2+26+oz",
   },
   milk: {
     item: "Nonfat dry milk", pack: "64-oz bag, Yummmy instant", store: "Amazon", where: "Online",
@@ -67,19 +70,19 @@ export const PRODUCTS = {
     url: "https://app.warehouserunner.com/costco/1202923-nestle-nido-fortificada-77-6-ounces",
   },
   multiMen: {
-    item: "Men's multivitamin", pack: "300 tablets, One A Day Men's", store: "Costco", where: "Warehouse",
-    size: 300, price: 17.29, priceNote: "$13.29–17.29",
-    url: "https://app.warehouserunner.com/costco/853467-one-a-day-men-s-multivitamin-300-count",
+    item: "Men's multivitamin (no iron)", pack: "300 tablets, Nature Made Multi for Him", store: "Amazon", where: "Online",
+    size: 300, price: 21.58,
+    url: "https://www.amazon.com/dp/B004QHGPQQ",
   },
   multiWomen: {
-    item: "Women's multivitamin with iron", pack: "300 tablets, One A Day Women's", store: "Costco", where: "Warehouse",
-    size: 300, price: 18.99, priceNote: "$17.29–18.99",
-    url: "https://app.warehouserunner.com/costco/853472-one-a-day-women-s-multivitamin-300-count",
+    item: "Women's multivitamin with iron", pack: "300 tablets, Nature Made Multi for Her", store: "Amazon", where: "Online",
+    size: 300, price: 22.47, priceNote: "$21.35 with Subscribe & Save",
+    url: "https://www.amazon.com/dp/B002ZWZJG6",
   },
   multiWomen50: {
-    item: "Women's 50+ multivitamin", pack: "300 tablets, One A Day Women's 50+", store: "Costco", where: "Warehouse",
-    size: 300, price: 15.99, priceNote: "$15.79–20.99",
-    url: "https://app.warehouserunner.com/costco/1274752-one-a-day-women-s-50-healthy-advantage-300-tablets",
+    item: "Women's 50+ multivitamin", pack: "200 tablets, One A Day Women's 50+", store: "Amazon", where: "Online",
+    size: 200, price: 19.98, priceNote: "$12.79–19.98",
+    url: "https://www.amazon.com/dp/B09KFLWSXX",
   },
   formula: {
     item: "Infant formula (powder)", pack: "42-oz tub, Kirkland Signature ProCare", store: "Costco", where: "Warehouse",
@@ -198,21 +201,14 @@ export const POT_SIZES = [
 ];
 export const POT_FILL = 0.75; // fill no more than ¾ full so it can boil without spilling
 
-// The no-membership plan swaps the Costco items, and the Amazon food and vitamins, for Walmart.
-// Buckets, mylar, toddler drops, the scale and the gear stay on Amazon.
+// The no-membership plan swaps the Costco items, and some Amazon food and vitamins, for Walmart.
+// Oats, salt, the adult multivitamins, buckets, mylar, toddler drops, the scale and the gear stay
+// on Amazon, and the beans come from Walmart in both plans.
 // Walmart prices checked on walmart.com, 23 November 2026.
 const WALMART = {
   rice: {
     item: "White rice", pack: "20-lb bag, Great Value long grain", sizeGrams: 9072, price: 11.57,
     url: "https://www.walmart.com/ip/Great-Value-Long-Grain-Enriched-Rice-20-lb/10315883",
-  },
-  beans: {
-    item: "Pinto beans", pack: "20-lb bag, Great Value", sizeGrams: 9072, price: 14.98,
-    url: "https://www.walmart.com/ip/Great-Value-Pinto-Beans-20-lb/10315741",
-  },
-  oats: {
-    item: "Rolled oats", pack: "42-oz canister, Great Value old fashioned", sizeGrams: 1191, price: 4.18,
-    url: "https://www.walmart.com/ip/Great-Value-Instant-100-Whole-Grain-Old-Fashioned-Oats-Cup-42-oz/10314925",
   },
   pb: {
     item: "Peanut butter", pack: "40-oz jar, Great Value creamy", sizeGrams: 1134, price: 3.98,
@@ -222,10 +218,6 @@ const WALMART = {
     item: "Vegetable oil", pack: "1-gallon bottle, Great Value", sizeGrams: 256 * 13.6, price: 8.78,
     url: "https://www.walmart.com/ip/Great-Value-Vegetable-Oil-1-Gallon/10451011",
   },
-  salt: {
-    item: "Iodized salt", pack: "26-oz canister, Morton", sizeGrams: 737, price: 1.52,
-    url: "https://www.walmart.com/ip/Morton-Iodized-Salt-26-oz/10448936",
-  },
   milk: {
     item: "Nonfat dry milk", pack: "64-oz bag, Great Value instant", sizeGrams: 1814, price: 23.58,
     url: "https://www.walmart.com/ip/Great-Value-Instant-Nonfat-Dry-Milk-64-oz-Bag-Makes-20-Quarts-80-Servings-per-Container/10415475",
@@ -233,18 +225,6 @@ const WALMART = {
   whole: {
     item: "Whole dry milk (under age 2)", pack: "56.4-oz can, Nido Fortificada", sizeGrams: 1599, price: 19.93,
     url: "https://www.walmart.com/ip/NIDO-Fortificada-Dry-Whole-Milk-Powder-with-Vitamins-A-C-D-Iron-Calcium-56-4-oz-Canister/14869811",
-  },
-  multiMen: {
-    item: "Men's multivitamin", pack: "200 tablets, Equate One Daily Men's", size: 200, price: 9.82,
-    url: "https://www.walmart.com/ip/Equate-One-Daily-Men-s-Multivitamin-Multimineral-Supplement-Tablets-200-Count/10324918",
-  },
-  multiWomen: {
-    item: "Women's multivitamin with iron", pack: "200 tablets, Equate One Daily Women's", size: 200, price: 9.82,
-    url: "https://www.walmart.com/ip/Equate-One-Daily-Women-s-Multivitamin-Multimineral-Supplement-Tablets-for-Women-s-Health-200-Count/10324688",
-  },
-  multiWomen50: {
-    item: "Women's 50+ multivitamin", pack: "200 tablets, Equate Complete Women 50+", size: 200, price: 12.94,
-    url: "https://www.walmart.com/ip/Equate-Complete-Multivitamin-Multimineral-Supplement-Tablets-Women-50-200-Count/46521544",
   },
   multiKids: {
     item: "Children's chewable multivitamin", pack: "150 tablets, Equate Children's Chewable Complete", size: 150, price: 8.64,
@@ -269,7 +249,7 @@ const WALMART = {
 };
 
 export const STORE_PLANS = {
-  costco: { label: "Costco + Amazon", choice: "Costco and Amazon", stores: ["Costco", "Amazon"] },
+  costco: { label: "Costco + Walmart + Amazon", choice: "Costco, Walmart and Amazon", stores: ["Costco", "Walmart", "Amazon"] },
   walmart: { label: "Walmart + Amazon", choice: "Walmart and Amazon", stores: ["Walmart", "Amazon"] },
 };
 

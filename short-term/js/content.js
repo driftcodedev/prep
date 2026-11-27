@@ -27,7 +27,8 @@ export function todayText(d = new Date()) {
 }
 
 export function planSummary(hh) {
-  const shops = STORE_PLANS[hh.store].stores.join(" and ");
+  const st = STORE_PLANS[hh.store].stores;
+  const shops = st.length > 2 ? `${st.slice(0, -1).join(", ")} and ${st[st.length - 1]}` : st.join(" and ");
   return `Plan for ${plural(hh.plans.length, "person", "people")} for ${plural(hh.months, "month")}, shopping at ${shops}.`;
 }
 
@@ -535,7 +536,7 @@ export function compareText(hh) {
     const withMembership = hh.total + COSTCO_MEMBERSHIP;
     return `No Costco membership? The same list from Walmart and Amazon comes to ${money(hh.other.total)}. With the ${money(COSTCO_MEMBERSHIP)} membership, this Costco list comes to ${money(withMembership)}.`;
   }
-  return `With a Costco membership, the Costco and Amazon list would come to ${money(hh.other.total)}, plus ${money(COSTCO_MEMBERSHIP)} for the membership.`;
+  return `With a Costco membership, the Costco list would come to ${money(hh.other.total)}, plus ${money(COSTCO_MEMBERSHIP)} for the membership.`;
 }
 
 export function shoppingNotes(hh) {
@@ -544,12 +545,13 @@ export function shoppingNotes(hh) {
   const milk = hh.lines.find((l) => l.key === "milk");
   if (hh.store === "costco") {
     notes.push(`Costco prices are warehouse prices and vary a little by location. The total leaves out the ${money(COSTCO_MEMBERSHIP)} Costco membership.`);
-    notes.push("Amazon's Subscribe & Save takes about 15% off the beans, peanut butter and oil. You can cancel after the first delivery.");
-    if (beans && beans.qty > 40) notes.push(`That's ${beans.qty} one-pound bags of beans. Amazon may limit how many fit in one order, so split it up if needed. If your Costco stocks 25-lb pinto bags ($17–21 where sold), those cost less.`);
+    notes.push("Amazon's Subscribe & Save takes about 5–15% off the oats, peanut butter, oil and vitamins. You can cancel after the first delivery.");
+    if (beans) notes.push("The beans come from Walmart in 20-lb bags: Walmart.com ships orders of $35 or more free, or you can pick them up at your store. Some Costco warehouses, mostly in the West, carry 25-lb pinto bags for about $16–19, which cost a little less if yours has them.");
     if (milk && milk.qty >= 3) notes.push("Costco's Saco Mix'n Drink 8-lb bag of nonfat dry milk makes 40 quarts for about $35.49–35.99 where it's stocked, which is cheaper per cup than the Amazon bag.");
   } else {
     notes.push("No membership needed. Walmart.com ships orders of $35 or more free, or you can order for pickup at your store. Store prices can differ a little from online prices.");
     notes.push("Great Value and Equate are Walmart's store brands. Any brand of plain long grain rice, pinto beans, old fashioned oats and iodized salt works the same.");
+    notes.push("The oats, salt and adult multivitamins come from Amazon, which has bigger, cheaper boxes of oats and 300-tablet bottles of vitamins.");
   }
   notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag and one absorber per bucket, about ${LB_PER_BUCKET} lb each. The buckets are counted from the rice and beans you buy, and "Storage" near the bottom of the page shows how to seal them.`);
   notes.push("Prices change often, especially around sales. Check them at checkout.");
