@@ -123,7 +123,7 @@ export const PAGES = [
     html: `
 <p>The Fishing view on the Long Term tab used to say the bay could feed only about 270 people in November–December. About 7,000 people live around the bay, so on 26 November 2026 Brett asked: will Cobscook Bay still provide enough food for the people who live there? This page keeps the question and the answer. Updated 27 November 2026 to the Fishing view's current numbers, which count everything in the bay rather than a safe yearly catch.</p>
 <h3>The short answer</h3>
-<p><b>No.</b> Even if every animal in the bay were caught, the best season, September–October, is a year's food for about 2,450 active adults: about a third of the people who live around it. The leanest, January–February, is about 670, and only about 240 without urchins, the least certain big number. A catch the bay can keep up year after year would be a fraction of this. That doesn't mean Cobscook was a bad choice.</p>
+<p><b>No.</b> Even if every animal in the bay were caught, the best season, September–October, is a year's food for about 2,430 active adults: about a third of the people who live around it. The leanest, January–February, is about 870, and only about 300 without urchins, the least certain big number. A catch the bay can keep up year after year would be a fraction of this. That doesn't mean Cobscook was a bad choice.</p>
 <h3>What the numbers measure</h3>
 <ul>
 <li><b>Only seafood, only from inside the bay.</b> Fish, shellfish, urchins, crabs and lobster that live in or come into Cobscook Bay.</li>
@@ -135,16 +135,16 @@ export const PAGES = [
 <h3>Each season</h3>
 <table>
 <tr><th>Season</th><th>Calories (millions)</th><th>Adults fed a year, if all were caught</th><th>Without urchins</th></tr>
-<tr><td>January–February</td><td>731</td><td>about 670</td><td>about 240</td></tr>
-<tr><td>March–April</td><td>756</td><td>about 690</td><td>about 260</td></tr>
-<tr><td>May–June</td><td>1,140</td><td>about 1,040</td><td>about 610</td></tr>
-<tr><td>July–August</td><td>1,764</td><td>about 1,610</td><td>about 1,180</td></tr>
-<tr><td>September–October</td><td>2,678</td><td>about 2,450</td><td>about 2,020</td></tr>
-<tr><td>November–December</td><td>969</td><td>about 890</td><td>about 460</td></tr>
+<tr><td>January–February</td><td>958</td><td>about 870</td><td>about 300</td></tr>
+<tr><td>March–April</td><td>986</td><td>about 900</td><td>about 320</td></tr>
+<tr><td>May–June</td><td>1,084</td><td>about 990</td><td>about 670</td></tr>
+<tr><td>July–August</td><td>1,698</td><td>about 1,550</td><td>about 1,230</td></tr>
+<tr><td>September–October</td><td>2,661</td><td>about 2,430</td><td>about 2,110</td></tr>
+<tr><td>November–December</td><td>1,045</td><td>about 950</td><td>about 510</td></tr>
 </table>
-<p>The lean stretch is January to April, and January–February is the lowest. November–December is now in the middle, at about 890, because urchins make up about half of it and the end of the herring run adds about a fifth. Urchins score only 2 out of 5 for how sure the number is (it could be off 3–10 times), so the "without urchins" column is the cautious reading.</p>
+<p>The lean stretch runs from November to June, at about 870–990, and January–February is the lowest. Urchins are about two-thirds of the winter numbers, because their roe is fullest from December to April, and about half of November–December's. Urchins score only 2 out of 5 for how sure the number is (it could be off 3–10 times), so the "without urchins" column is the cautious reading: on that reading January–April is far the leanest.</p>
 <h3>Fall is the peak, and it doesn't keep</h3>
-<p>September–October holds more than 3½ times what January–February does. More than half of it is herring, with mackerel next, and both leave the bay by winter. Smoking and salting the fall catch is what carries a household into spring. Herring also swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).</p>
+<p>September–October holds almost 3 times what January–February does, and 7 times as much without urchins. More than half of it is herring, with urchins and mackerel next, and herring and mackerel leave the bay by winter. Smoking and salting the fall catch is what carries a household into spring. Herring also swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).</p>
 <h3>Catching it all works only once</h3>
 <p>These numbers are everything in the water at once. Hungry people could catch a big share of it for a season or two. Then the clam flats are dug out, the urchin beds are stripped and the fish runs stop coming back, the same pattern as on the <b>Species extinction</b> page. The bay's urchins have already about halved since 2015–19. Overfishing early makes the later years worse.</p>
 <h3>Why Cobscook still makes sense</h3>
@@ -161,7 +161,7 @@ export const PAGES = [
 <li>Cobscook's own urchin counts and roe, which DMR has and could share on request.</li>
 </ul>
 <h3>Where the numbers come from</h3>
-<p>The Fishing view on the Long Term tab. Its method and sources are at the bottom of that view, in the paper copy and in Brett's sources doc. Each species has a 1–5 score for how sure its number is: alewives are a 4; urchins, mackerel, green crabs, sculpin and silverside are 2s; the rest are 3s. The 7,000 people is the Cobscook Bay Resource Center's count for the nine communities around the bay (see <b>Why Cobscook Bay</b>).</p>
+<p>The Fishing view on the Long Term tab. Its method and sources are at the bottom of that view, in the paper copy and in Brett's sources doc. Each species has a 1–5 score for how sure its number is: alewives are a 4; urchins, mackerel, periwinkles, green crabs, the cod family, sculpin and silverside are 2s; the rest are 3s. The 7,000 people is the Cobscook Bay Resource Center's count for the nine communities around the bay (see <b>Why Cobscook Bay</b>).</p>
 `,
   },
   {
