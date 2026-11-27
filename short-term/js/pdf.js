@@ -2,7 +2,7 @@
 import { PRICES_CHECKED } from "./data.js";
 import {
   money, planSummary, personSummary, statusLine, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
-  storeGroups, shoppingLead, compareText, shoppingNotes, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
+  storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, VIDEOS, GEAR_INTRO,
 } from "./content.js";
 
@@ -139,7 +139,7 @@ function shopping(hh) {
       g.lines.map((l) => [
         { stack: [
           { text: t(l.item), link: l.url, color: C.lid, bold: true, decoration: "underline" },
-          l.keeps ? { text: t(`Keeps ${l.keeps}`), fontSize: 7, color: C.ink2, margin: [0, 1, 0, 0] } : "",
+          lineHint(l) ? { text: t(lineHint(l)), fontSize: 7, color: C.ink2, margin: [0, 1, 0, 0] } : "",
         ] },
         { text: t(l.pack), color: C.ink2 },
         { text: String(l.qty), alignment: "right" },
@@ -163,7 +163,7 @@ function shopping(hh) {
 
 function gear(hh) {
   const out = [
-    h2("Fire, water and cooking"),
+    h2("Fire, water, cooking and storage"),
     para(GEAR_INTRO),
   ];
   for (const it of gearItems(hh)) {
@@ -173,6 +173,7 @@ function gear(hh) {
       para([it.links.length > 1 ? "On Amazon: " : "", ...it.links.flatMap((l, i) => [
         { text: t(l.label), link: l.url, color: C.lid, decoration: "underline" }, i < it.links.length - 1 ? ", " : "",
       ])]),
+      ...(it.notes || []).map((n) => para([{ text: `${n.label}: `, bold: true }, t(n.text)])),
       para([{ text: "How long it lasts: ", bold: true }, t(it.lasts)]),
     ];
     if (it.sizes) {

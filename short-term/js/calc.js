@@ -1,6 +1,6 @@
 // Calculation engine. Pure functions only, so it runs the same in the browser and in tests.
 import {
-  FOODS, PRODUCTS, ACTIVITY, LB_PER_BUCKET, productsFor, KEEPS,
+  FOODS, PRODUCTS, ACTIVITY, MAX_LB_PER_BUCKET, productsFor, KEEPS,
   BIC_LIGHTS, LIGHTS_PER_FIRE, LIFESTRAW_GALLONS, STRAW_MIN_AGE, BLADDER_GALLONS, COOK_WATER, INFANT,
   POT_SIZES, POT_FILL,
 } from "./data.js";
@@ -560,9 +560,6 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   const grams = {};
   for (const k of Object.keys(sum)) grams[k] = sum[k] * FOODS[k].grams * reserve;
 
-  const riceLb = grams.rice / 453.6;
-  const beansLb = grams.beans / 453.6;
-  const buckets = (riceLb > 0 ? Math.ceil(riceLb / LB_PER_BUCKET) : 0) + (beansLb > 0 ? Math.ceil(beansLb / LB_PER_BUCKET) : 0);
   const strawPeople = plans.filter((pl) => pl.person.age >= STRAW_MIN_AGE).length;
 
   // Daily cooking totals (first-phase rations) and each person's share of the pot.
@@ -584,7 +581,7 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   const eaters = plans.filter((pl) => (pl.phase1.rice || 0) + (pl.phase1.beans || 0) > 0).length;
   const pot = potFor(cook, eaters);
 
-  const ctx = { plans, sum, supp, grams, reserve, buckets, strawPeople, have, pot };
+  const ctx = { plans, sum, supp, grams, reserve, strawPeople, have, pot };
   const shop = shoppingFor(ctx, productsFor(store));
   const otherStore = store === "walmart" ? "costco" : "walmart";
   const other = plans.length ? { store: otherStore, total: shoppingFor(ctx, productsFor(otherStore)).total } : null;
@@ -617,7 +614,7 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   return {
     days, months, reservePct, store, plans, invalidCount: people.length - valid.length,
     lines: shop.lines, total: shop.total, byStore: shop.byStore, byGroup: shop.byGroup,
-    buckets, cook, shares, gear, other, pot, onePot,
+    storage: shop.storage, buckets: shop.storage.buckets, cook, shares, gear, other, pot, onePot,
   };
 }
 
@@ -653,7 +650,7 @@ export function potFor(cook, eaters) {
 }
 
 function shoppingFor(ctx, products) {
-  const { plans, sum, supp, grams, reserve, buckets, strawPeople, have, pot } = ctx;
+  const { plans, sum, supp, grams, reserve, strawPeople, have, pot } = ctx;
   const lines = [];
   const addLine = (key, qty, amountText, group, extra = {}) => {
     if (qty <= 0) return;
@@ -683,9 +680,13 @@ function shoppingFor(ctx, products) {
   }
   if (plans.some((pl) => pl.person.age >= 4)) addLine("vitC", 1, "backup supply", "food");
 
-  if (buckets > 0) {
-    addLine("buckets", Math.ceil(buckets / products.buckets.size), `${buckets} buckets`, "storage");
-    addLine("mylar", Math.ceil(buckets / products.mylar.size), `${buckets} bags`, "storage");
+  // Buckets come from the rice and beans actually bought (whole bags), not just what the plan eats,
+  // so every pound goes into storage. Rice and beans get their own buckets: one mylar bag and one
+  // oxygen absorber in each.
+  const storage = storageFor(lines, products);
+  if (storage.buckets > 0) {
+    addLine("buckets", Math.ceil(storage.buckets / products.buckets.size), `${storage.buckets} buckets`, "storage");
+    addLine("mylar", Math.ceil(storage.buckets / products.mylar.size), `${storage.buckets} bags`, "storage");
   }
   if (!have.scale && plans.length) addLine("scale", 1, "for weekly weigh-ins", "storage");
 
@@ -714,7 +715,26 @@ function shoppingFor(ctx, products) {
     byStore[l.store] = (byStore[l.store] || 0) + l.cost;
     byGroup[l.group] = (byGroup[l.group] || 0) + l.cost;
   }
-  return { lines, total, byStore, byGroup, straws };
+  return { lines, total, byStore, byGroup, straws, storage };
+}
+
+// How many buckets the rice and beans on the list fill, at up to MAX_LB_PER_BUCKET each.
+export function storageFor(lines, products) {
+  const bought = (key) => {
+    const l = lines.find((x) => x.key === key);
+    return l ? (l.qty * products[key].sizeGrams) / 453.6 : 0;
+  };
+  const riceLb = bought("rice");
+  const beansLb = bought("beans");
+  const fill = (lb) => (lb > 0 ? Math.ceil(lb / MAX_LB_PER_BUCKET - 1e-9) : 0);
+  const riceBuckets = fill(riceLb);
+  const beansBuckets = fill(beansLb);
+  return {
+    riceLb, beansLb, riceBuckets, beansBuckets,
+    buckets: riceBuckets + beansBuckets,
+    riceEach: riceBuckets ? riceLb / riceBuckets : 0,
+    beansEach: beansBuckets ? beansLb / beansBuckets : 0,
+  };
 }
 
 // ---------- formatting ----------

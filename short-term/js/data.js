@@ -336,7 +336,15 @@ export const INFANT = {
 };
 
 export const COSTCO_MEMBERSHIP = 65;
-export const LB_PER_BUCKET = 33; // rice or beans per 5-gallon bucket, sealed in mylar
+// Rice or beans per 5-gallon bucket, sealed in one 5-gallon mylar bag: about 33 lb, and up to 35 if
+// you shake it down as you fill. The list counts buckets from the pounds actually bought, at up to
+// MAX_LB_PER_BUCKET each, so it doesn't buy a nearly empty bucket for the last pound or two.
+// (Food-storage guides give 30–35 lb of rice and about 35 lb of dry beans per bucket.)
+export const LB_PER_BUCKET = 33;
+export const MAX_LB_PER_BUCKET = 35;
+// One oxygen absorber per bag. A 5-gallon bag of rice needs about 2,000 cc and beans about 2,500 cc,
+// so the 2,500 cc absorbers that come with the mylar pack cover either.
+export const ABSORBER_CC = 2500;
 
 export const ACTIVITY = {
   sedentary: { label: "Mostly sitting", hint: "Little walking or physical work", factor: 1.2,   pal: "inactive" },

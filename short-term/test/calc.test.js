@@ -2,6 +2,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { splitRounded, planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse, infantDay } from "../js/calc.js";
 import { buildPdf } from "../js/pdf.js";
+import { gearItems } from "../js/content.js";
+import { MAX_LB_PER_BUCKET, PRODUCTS } from "../js/data.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
 
@@ -149,7 +151,7 @@ test("PDF definition covers the whole report and avoids missing glyphs", () => {
   const hh = planHousehold({ months: 6, people: [brett, { name: "Kid", sex: "male", age: 1, heightIn: 30, weightLb: 22, activity: "light", flags: {} }] });
   const doc = buildPdf(hh, { date: "November 23, 2026" });
   const text = JSON.stringify(doc.content);
-  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "All in one pot", "Shopping list", "Fire, water and cooking", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
+  for (const heading of ["Daily amounts", "Cooking for everyone", "Cooking over a fire", "All in one pot", "Shopping list", "Fire, water, cooking and storage", "Storage: mylar bags, oxygen absorbers and buckets", "How many absorbers", "Weekly weigh-in", "Cooking and storage", "How the numbers are worked out"]) {
     assert.ok(text.includes(heading), heading);
   }
   assert.ok(!/[⅓⅔]/.test(text));
@@ -346,4 +348,33 @@ test("All in one pot: shares follow each card's calories and add up", () => {
     assert.ok(Math.abs(s.cups - (kcal(pl) / total) * o.cups) <= 0.25, s.name);
   }
   assert.equal(o.servings.find((s) => s.name === "Leo").young, true);
+});
+
+test("Buckets are counted from the rice and beans actually bought", () => {
+  const kid = { name: "Kid", sex: "female", age: 8, heightIn: 50, weightLb: 56, activity: "light", flags: {} };
+  const mom = { name: "Mom", sex: "female", age: 34, heightIn: 64, weightLb: 150, activity: "light", flags: {} };
+  for (const store of ["costco", "walmart"]) {
+    for (const people of [[brett], [brett, mom], [brett, mom, kid, { ...kid, name: "Kid 2", age: 12, heightIn: 58, weightLb: 85 }]]) {
+      for (const months of [3, 6, 12]) {
+        const hh = planHousehold({ months, store, people });
+        const st = hh.storage;
+        const lb = (k) => { const l = hh.lines.find((x) => x.key === k); return l ? (l.qty * l.sizeGrams) / 453.6 : 0; };
+        const label = `${store}, ${people.length} people, ${months} months`;
+        assert.ok(Math.abs(st.riceLb - lb("rice")) < 1e-6 && Math.abs(st.beansLb - lb("beans")) < 1e-6, label);
+        // Every pound bought fits, no bucket is overfilled, and one fewer bucket wouldn't be enough.
+        for (const [pounds, n] of [[st.riceLb, st.riceBuckets], [st.beansLb, st.beansBuckets]]) {
+          assert.ok(pounds / n <= MAX_LB_PER_BUCKET + 1e-9, `${label}: ${pounds} lb in ${n} buckets`);
+          assert.ok(pounds / (n - 1) > MAX_LB_PER_BUCKET, `${label}: ${n} buckets is one too many`);
+        }
+        const buckets = hh.lines.find((l) => l.key === "buckets");
+        const mylar = hh.lines.find((l) => l.key === "mylar");
+        assert.equal(buckets.amountText, `${st.buckets} buckets`, label);
+        assert.ok(buckets.qty * PRODUCTS.buckets.size >= st.buckets && (buckets.qty - 1) * PRODUCTS.buckets.size < st.buckets, label);
+        assert.ok(mylar.qty * PRODUCTS.mylar.size >= st.buckets && (mylar.qty - 1) * PRODUCTS.mylar.size < st.buckets, label);
+        const card = gearItems(hh).find((it) => it.key === "storage");
+        assert.ok(card.buy.startsWith(`${st.buckets} buckets for the rice and beans you buy`), card.buy);
+        assert.ok(card.notes.some((n) => n.label === "How many absorbers" && n.text.startsWith("One per bucket")));
+      }
+    }
+  }
 });

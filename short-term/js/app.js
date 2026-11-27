@@ -2,7 +2,7 @@ import { ACTIVITY, PRICES_CHECKED, STORE_PLANS } from "./data.js";
 import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
-  storeGroups, shoppingLead, compareText, shoppingNotes, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
+  storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
   CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, GEAR_INTRO,
 } from "./content.js";
 
@@ -269,7 +269,7 @@ function onePotBlock(hh) {
 function shopTable(lines) {
   const body = lines.map((l) => `
       <tr>
-        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${l.keeps ? `<small class="keeps">Keeps ${esc(l.keeps)}</small>` : ""}</th>
+        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${lineHint(l) ? `<small class="keeps">${esc(lineHint(l))}</small>` : ""}</th>
         <td>${esc(l.pack)}</td>
         <td class="num">${l.qty}</td>
         <td>${esc(l.amountText)}</td>
@@ -314,10 +314,11 @@ function potSizes(it) {
 
 function gearSection(hh) {
   const items = gearItems(hh).map((it) => `
-    <article class="gear-item${it.sizes ? " gear-wide" : ""}">
+    <article class="gear-item${it.sizes || it.wide ? " gear-wide" : ""}">
       <h3 class="gear-title">${esc(it.title)}</h3>
       <p class="gear-buy">${esc(it.buy)}</p>
       <p class="gear-links">${it.links.length > 1 ? "On Amazon: " : ""}${it.links.map((l) => `<a href="${l.url}" target="_blank" rel="noopener">${esc(l.label)}</a>`).join(", ")}</p>
+      ${(it.notes || []).map((n) => `<p><strong>${esc(n.label)}:</strong> ${esc(n.text)}</p>`).join("")}
       <p><strong>How long it lasts:</strong> ${esc(it.lasts)}</p>
       ${it.sizes ? potSizes(it) : ""}
       ${it.drink ? `<p><strong>How much to drink:</strong> ${esc(it.drink)}</p>` : ""}
@@ -326,7 +327,7 @@ function gearSection(hh) {
     </article>`).join("");
   return `
   <section class="block gear" aria-labelledby="gear-title">
-    <h2 id="gear-title" class="section-title">Fire, water and cooking</h2>
+    <h2 id="gear-title" class="section-title">Fire, water, cooking and storage</h2>
     <p>${esc(GEAR_INTRO)} Tick off anything you own under "Already have".</p>
     <div class="gear-grid">${items}</div>
   </section>`;

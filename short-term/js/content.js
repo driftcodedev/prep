@@ -1,7 +1,7 @@
 // Words shared by the web page and the PDF, so both always say the same thing.
 // Plain text only. A "lead" is the bold start of a bullet.
 import {
-  PRODUCTS, COSTCO_MEMBERSHIP, LB_PER_BUCKET, STORE_PLANS, LIFESTRAW_GALLONS, BIC_LIGHTS,
+  PRODUCTS, COSTCO_MEMBERSHIP, LB_PER_BUCKET, MAX_LB_PER_BUCKET, ABSORBER_CC, STORE_PLANS, LIFESTRAW_GALLONS, BIC_LIGHTS,
   STRAW_MIN_AGE, ACTIVITY, BLADDER_WEEKS, COOK_WATER, POT_SIZES, POT_FILL,
 } from "./data.js";
 import { fraction, cupsText, spoonText, waterUse } from "./calc.js";
@@ -411,7 +411,63 @@ export function gearItems(hh) {
         "Leave it in a sunny window or wear it outside for a few hours a week to keep it charged.",
       ],
     },
+    storageItem(hh),
   ];
+}
+
+// The storage card: mylar bags, oxygen absorbers and buckets for the rice and beans on the list.
+function storageItem(hh) {
+  const P = PRODUCTS;
+  const st = hh.storage;
+  const line = (k) => hh.lines.find((l) => l.key === k);
+  const bucketLine = line("buckets");
+  const mylarLine = line("mylar");
+  const lb = (x) => `${num(x)} lb`;
+  let buy;
+  if (!st.buckets) {
+    buy = "There's no rice or beans on this list, so there are no buckets or bags to buy.";
+  } else {
+    const parts = [];
+    if (st.riceBuckets) parts.push(`${lb(st.riceLb)} of rice in ${plural(st.riceBuckets, "bucket")}`);
+    if (st.beansBuckets) parts.push(`${lb(st.beansLb)} of beans in ${plural(st.beansBuckets, "bucket")}`);
+    const each = [st.riceBuckets ? st.riceEach : null, st.beansBuckets ? st.beansEach : null].filter((x) => x !== null);
+    const eachText = each.length === 2 && Math.round(each[0]) !== Math.round(each[1])
+      ? `about ${num(each[0])} lb of rice and ${num(each[1])} lb of beans in each`
+      : `about ${num(each[0])} lb in each`;
+    const spareBuckets = bucketLine.qty * P.buckets.size - st.buckets;
+    const spareBags = mylarLine.qty * P.mylar.size - st.buckets;
+    const spares = [spareBuckets ? plural(spareBuckets, "spare bucket") : "", spareBags ? plural(spareBags, "spare bag") : ""].filter(Boolean).join(" and ");
+    buy = `${plural(st.buckets, "bucket")} for the rice and beans you buy: ${parts.join(" and ")}, ${eachText}. `
+      + `That's ${bucketLine.qty} × 6-pack of buckets and ${mylarLine.qty} × 10-pack of mylar bags with absorbers${spares ? `, leaving ${spares}` : ""}. `
+      + "One bag and one absorber go in each bucket.";
+  }
+  const storageCost = (bucketLine?.cost || 0) + (mylarLine?.cost || 0);
+  const foodCost = (line("rice")?.cost || 0) + (line("beans")?.cost || 0);
+  return {
+    key: "storage",
+    title: "Storage: mylar bags, oxygen absorbers and buckets",
+    product: P.mylar,
+    wide: true,
+    links: [
+      { label: "food-grade buckets (6-pack)", url: P.buckets.url },
+      { label: "mylar bags with absorbers (10-pack)", url: P.mylar.url },
+    ],
+    buy,
+    notes: [
+      { label: "What they do", text: "The mylar bag is thick foil that keeps out air, light and moisture. The oxygen absorber is a small packet of iron powder: sealed in the bag, the iron rusts and uses up the oxygen, leaving mostly nitrogen. With no oxygen, bugs and their eggs die and the food doesn't go stale. The bucket keeps mice out and keeps the bag from tearing. A plastic bucket on its own slowly lets oxygen in, which is why the sealed bag goes inside it." },
+      { label: "How many absorbers", text: `One per bucket. A 5-gallon bag of rice needs about 2,000 cc of absorber and beans about 2,500 cc, since beans leave more air between them. The ${num(ABSORBER_CC)} cc absorber that comes with each bag covers either. An extra one never hurts.` },
+      ...(st.buckets ? [{ label: "Why it may be worth it", text: `Together they cost ${cents(storageCost)}, ${storageCost < foodCost * 0.6 ? "well under" : storageCost <= foodCost * 1.15 ? "about as much as" : "more than"} the rice and beans themselves (${cents(foodCost)}). What that buys is time: if you shop now and the grid goes down years later, sealed rice and beans are still good, while food left in the store bags may have gone stale or let in bugs or mice. You buy them once, and the buckets can be reused. If you'd rather not spend it, skip them and instead cook from the rice and beans in everyday meals, buying fresh every year or so.` }] : []),
+    ],
+    lasts: "Sealed this way, white rice keeps 10 to 30 years or more and pinto beans up to 30, against about 2 years and 1 year in the store bags. Buckets and lids last for decades and can be reused. Absorbers work only once.",
+    tips: [
+      `Work in a dry room. Stand an open mylar bag in each bucket and fill it with rice or beans, about ${LB_PER_BUCKET} lb (up to ${MAX_LB_PER_BUCKET} if you shake it down as you go). Keep rice and beans in separate buckets.`,
+      "Open the absorbers last, just before sealing. In open air they start working within about 20 minutes and can be used up in a few hours, so fill all the bags first. Put any you don't use straight into a small jar with a tight lid.",
+      "Drop one absorber on top of the food, press out the extra air, and seal straight across the top of the bag with a clothes iron or hair straightener on high. Zip-top mylar bags need this heat seal too.",
+      "The packet gets warm as it works, and within a day or two the bag usually pulls in snug around the food. If a bag still looks puffy after a few days, the seal may leak: reseal it with a fresh absorber.",
+      "Snap the lid on, label it with what's inside and the date, and keep the buckets somewhere cool, dry and dark.",
+      "Seal only dry foods like rice and beans this way. Moist food sealed without oxygen can grow botulism.",
+    ],
+  };
 }
 
 const fullText = (f) => (f < 0.4 ? "about a third full" : f < 0.58 ? "about half full" : f < 0.7 ? "about two-thirds full" : "about ¾ full");
@@ -495,9 +551,18 @@ export function shoppingNotes(hh) {
     notes.push("No membership needed. Walmart.com ships orders of $35 or more free, or you can order for pickup at your store. Store prices can differ a little from online prices.");
     notes.push("Great Value and Equate are Walmart's store brands. Any brand of plain long grain rice, pinto beans, old fashioned oats and iodized salt works the same.");
   }
-  notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag per bucket. The list assumes about ${LB_PER_BUCKET} lb per bucket.`);
+  notes.push(`Seal the rice and beans in mylar bags with an oxygen absorber, one bag and one absorber per bucket, about ${LB_PER_BUCKET} lb each. The buckets are counted from the rice and beans you buy, and "Storage" near the bottom of the page shows how to seal them.`);
   notes.push("Prices change often, especially around sales. Check them at checkout.");
   return notes;
+}
+
+// The small line under an item's name on the shopping list: how long food keeps, or how the
+// storage items are used.
+export function lineHint(l) {
+  if (l.keeps) return `Keeps ${l.keeps}`;
+  if (l.key === "buckets") return `About ${LB_PER_BUCKET} lb of rice or beans in each. How to seal them is under "Storage" near the bottom.`;
+  if (l.key === "mylar") return `One bag and one ${num(ABSORBER_CC)} cc oxygen absorber in each bucket.`;
+  return "";
 }
 
 // How long the food keeps: the "Keeps ..." line under each item comes from KEEPS in data.js.
@@ -545,7 +610,7 @@ export const KEEPS_SOURCES = [
 
 // ---------- cooking, weigh-ins, storage, method ----------
 
-export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water and the pot: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
+export const GEAR_INTRO = "Food only helps if you can cook it and drink safely. These cover a flame, firewood, water, the pot and storage: a filter straw for each person, a bathtub bladder to fill the moment the power goes out, a rain catcher to keep water coming after that, a cast iron pot sized for your household, a tripod to hang it over the fire and a disc that tells you when it boils. A solar watch times the pot without batteries, and mylar bags, oxygen absorbers and buckets keep the rice and beans good for decades. All of it is on the shopping list above; the diverter kit is from Home Depot and the rest from Amazon.";
 
 export const COOK_NOTE = "Cook without salt and let each person salt their own bowl, so small children get little or none. Amounts change when someone reaches their goal weight; their card shows the new amounts.";
 
@@ -603,6 +668,11 @@ export const SOURCES = [
   ["waterBOB", "https://www.amazon.com/dp/B001AXLUX2"],
   ["EarthMinded DIY rain barrel kit", "https://www.homedepot.com/p/EarthMinded-DIY-Rain-Barrel-Diverter-and-Parts-Kit-RBK-0001/203256576"],
   ["BIC Classic lighters", "https://us.bic.com/en_us/bic-special-edition-pocket-lighters-black-8-count.html"],
+  ["Utah State on oxygen absorbers", "https://issuu.com/usuextension/docs/food_storage_booklet2_c2a41a03001e48/s/10352725"],
+  ["Oxygen absorber sizes", "https://survivalfreedom.com/how-many-ccs-you-need-oxygen-absorber-sizing-made-simple"],
+  ["How oxygen absorbers work", "https://foodal.com/knowledge/things-that-preserve/oxygen-absorbers/"],
+  ["Rice per 5-gallon bucket", "https://commonsensehome.com/how-to-store-rice/"],
+  ["Beans per 5-gallon bucket", "https://survivalblog.com/?p=12466"],
 ];
 
 export const DISCLAIMER = "These are estimates for healthy people, not medical advice. Anyone with a medical condition, a pregnancy or a daily medication should check with a doctor before starting a weight-loss ration.";
