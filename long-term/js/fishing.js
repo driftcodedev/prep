@@ -17,7 +17,7 @@
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
 import {
   FISH_PAGE, SPECIES_COLORS, OTHER_COLOR, MEASURES, NUMBER_VIEWS, CONFIDENCE, PROFILES, HERRING_METHODS, HERRING_CATCH_NOTE,
-  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_PAGE, NET_GEAR,
+  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_PAGE, NET_GEAR, NET_FINDINGS,
 } from "../data/fishing-notes.js";
 import { esc } from "./geo.js";
 
@@ -405,6 +405,20 @@ export function renderFishing(page = FISH_PAGE) {
     </section>`;
 }
 
+// Under the Netting table: one collapsed section per species in it, "Atlantic herring netting",
+// holding what we've found out about netting it (NET_FINDINGS).
+export function drawFindings(rows, findings = NET_FINDINGS, page = NET_PAGE) {
+  return rows.map((sp) => {
+    const items = findings[sp.id] || [];
+    const body = items.length ? items.map((p) => `<p>${esc(p)}</p>`).join("") : `<p class="muted">${esc(page.noFindings)}</p>`;
+    return `
+      <details class="ltm-notes ltn-findings" data-findings-for="${esc(sp.id)}">
+        <summary>${esc(`${sp.name} netting`)}</summary>
+        ${body}
+      </details>`;
+  }).join("");
+}
+
 // The Netting view's static page: heading, the same controls (their own radio names), the table area.
 export function renderNetting(page = NET_PAGE) {
   const seg = (name, options) => options.map(([v, label], i) => `
@@ -427,6 +441,7 @@ export function renderNetting(page = NET_PAGE) {
 
       <p class="ltf-hint ltf-tbl-hint">${esc(page.hint)}</p>
       <div class="ltf-chart" data-table></div>
+      <div class="ltn-findings-list" data-findings></div>
       <p class="ltf-hint ltn-note">${esc(page.notShown)}</p>
       <p class="ltf-hint ltn-note">${esc(page.more)}</p>
     </section>`;
@@ -458,7 +473,13 @@ export function createFishing(panel, { mode = "fish" } = {}) {
   const open = new Set();
   const table = panel.querySelector("[data-table]");
   let rowIds = new Set();
-  const pickRows = () => { rowIds = new Set(netRows(state.picks).map((sp) => sp.id)); };
+  const findingsBox = panel.querySelector("[data-findings]");
+  // The findings sections follow the rows, and are drawn only when the rows are picked, so sorting
+  // and tapping targets don't close a section you've opened.
+  const pickRows = () => {
+    rowIds = new Set(netRows(state.picks).map((sp) => sp.id));
+    if (findingsBox) findingsBox.innerHTML = drawFindings(SPECIES.filter((sp) => rowIds.has(sp.id)));
+  };
 
   function syncInputs() {
     for (const input of panel.querySelectorAll(`input[name="${pre}-measure"]`)) input.checked = input.value === state.measure;

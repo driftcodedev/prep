@@ -263,12 +263,12 @@ test("the weekly change record matches the house list", () => {
 
 import { VIEWS } from "../app.js";
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
-import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_GEAR, NET_PAGE } from "../data/fishing-notes.js";
+import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_GEAR, NET_PAGE, NET_FINDINGS } from "../data/fishing-notes.js";
 import {
   counted, seasonTotal, adultsFed, fedText, seasonRanking, sortRows, bestOf, cellText, rankingText, donutSlices, herringCatch,
   meatText, round2, millions, thousands, caloriesText, poundsText, pct, drawTable, renderFishing, seasonOfDate,
   photoSrc, photoPage, photosHtml, cleanPicks, isPicked, togglePick, pickCount, pickText,
-  netRows, targetTotal, renderNetting,
+  netRows, targetTotal, renderNetting, drawFindings,
 } from "../js/fishing.js";
 
 test("the tab has Map, Fishing and Netting views, Map first", () => {
@@ -584,4 +584,26 @@ test("netting: only species you can net with a target season, every season shown
   assert.ok(!page.includes('name="ltf-'));
   assert.match(NET_PAGE.empty, /herring, mackerel, alewives/);
   assert.match(page, /Nets and traps page/);
+});
+
+test("netting findings: a collapsed section per species in the table, titled with its name and netting", () => {
+  // Every species you can net has a findings list, and nothing else does.
+  assert.deepEqual(Object.keys(NET_FINDINGS).sort(), Object.keys(NET_GEAR).sort());
+  const rows = netRows({ herring: [3], mackerel: [3], alewives: [2], lobster: [3] });
+  const html = drawFindings(rows);
+  assert.equal((html.match(/<details class="ltm-notes ltn-findings"/g) || []).length, 3);
+  assert.ok(!html.includes(" open"), "sections start closed");
+  assert.match(html, /<summary>Atlantic herring netting<\/summary>/);
+  assert.match(html, /<summary>Atlantic mackerel netting<\/summary>/);
+  assert.match(html, /<summary>Alewives netting<\/summary>/);
+  assert.ok(html.indexOf("Atlantic herring netting") < html.indexOf("Alewives netting"), "in the species list's order");
+  // Empty for now: each says so. Findings, once added, are escaped paragraphs.
+  assert.equal((html.match(/No findings yet\./g) || []).length, 3);
+  const filled = drawFindings(rows.slice(0, 1), { herring: ["Cast net <b>"] });
+  assert.match(filled, /<p>Cast net &lt;b&gt;<\/p>/);
+  assert.ok(!filled.includes("No findings yet"));
+  assert.equal(drawFindings([]), "");
+  // The page has a place for them under the table, before the notes.
+  const page = renderNetting();
+  assert.ok(page.indexOf("data-table") < page.indexOf("data-findings") && page.indexOf("data-findings") < page.indexOf("Not shown here"));
 });

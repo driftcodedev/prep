@@ -18,6 +18,23 @@ export const NET_PAGE = {
   empty: "No netting targets yet. On the Fishing tab, tap a number to mark it as a target. The species you can net are herring, mackerel, alewives, smelt, silverside, flounder, the cod family, sculpin, pollock and elvers.",
   notShown: "Not shown here: lobster, green crabs and whelks, which are caught in traps, and clams, mussels, periwinkles, scallops, urchins and sea cucumbers, which are taken by hand or drag.",
   more: "Which nets, what size, how many and how to hide them: the Nets and traps page under the README button.",
+  noFindings: "No findings yet.",
+};
+
+// What we find out about netting each species. Under the Netting table, each species in it gets a
+// collapsed section titled with its name and "netting" ("Atlantic herring netting"). Each entry is a
+// list of paragraphs; an empty list shows "No findings yet."
+export const NET_FINDINGS = {
+  herring: [],
+  mackerel: [],
+  alewives: [],
+  smelt: [],
+  silverside: [],
+  flounder: [],
+  codfamily: [],
+  sculpin: [],
+  pollock: [],
+  elvers: [],
 };
 export const NET_GEAR = {
   herring: "Gill net, 2¼ in; cast net for small ones",

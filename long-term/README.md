@@ -203,6 +203,11 @@ is shown, so opening straight to Fishing doesn't download it.
   the share of the whole bay's season. Its radio names and notes-row ids start `ltn-` so they don't
   clash with the Fishing view's `ltf-` ones. The paper copy doesn't include it, since targets live
   in one browser.
+- **Netting findings:** under the Netting table, each species in it gets a collapsed section titled
+  with its name and "netting" ("Atlantic herring netting"), in the species list's order
+  (`drawFindings()`). What goes in each is `NET_FINDINGS` in `data/fishing-notes.js`: a list of
+  paragraphs per species, empty for now, which shows "No findings yet." The sections are drawn only
+  when the rows are picked, so sorting or tapping targets doesn't close one you've opened.
 - **Parked until fishing methods are picked:** cutoffs, catch per hour, cleaning time and the 2025
   scallop drop. The old per-trip numbers are gone (they're in git history before Nov 27, 2026).
 
