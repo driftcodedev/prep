@@ -17,7 +17,7 @@
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
 import {
   FISH_PAGE, SPECIES_COLORS, OTHER_COLOR, MEASURES, NUMBER_VIEWS, CONFIDENCE, PROFILES, HERRING_METHODS, HERRING_CATCH_NOTE,
-  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_PAGE, NET_GEAR, NET_FINDINGS,
+  METHOD, FISH_NOTES, SEAWEED, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_PAGE, NET_GEAR, NET_FINDINGS, NET_STUDIES,
 } from "../data/fishing-notes.js";
 import { esc } from "./geo.js";
 
@@ -419,6 +419,33 @@ export function drawFindings(rows, findings = NET_FINDINGS, page = NET_PAGE) {
   }).join("");
 }
 
+// Under the species sections: one collapsed section per fyke net study (NET_STUDIES), with its facts
+// as label and text rows, its catch table and its links. These don't depend on your targets, so
+// they're drawn once with the page and stay open while you work the table.
+const factRows = (facts) => (facts || []).map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join("");
+export function drawStudies(studies = NET_STUDIES) {
+  return studies.map((s) => {
+    const t = s.table;
+    const table = t ? `
+        <div class="ltn-study-tbl-wrap"><table class="ltn-study-tbl">
+          <caption>${esc(t.caption)}</caption>
+          <thead><tr>${t.head.map((h) => `<th scope="col">${esc(h)}</th>`).join("")}</tr></thead>
+          <tbody>${t.rows.map(([name, ...cells]) => `<tr><th scope="row">${esc(name)}</th>${cells.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>
+        </table></div>` : "";
+    const links = s.links && s.links.length
+      ? `<div><dt>Links</dt><dd><ul>${s.links.map(([title, url]) => `<li><a href="${esc(url)}" target="_blank" rel="noopener">${esc(title)}</a></li>`).join("")}</ul></dd></div>`
+      : "";
+    const after = factRows(s.after) + links;
+    return `
+      <details class="ltm-notes ltn-study" data-study="${esc(s.id)}">
+        <summary>${esc(s.title)}</summary>
+        <p>${esc(s.about)}</p>
+        <dl class="ltn-facts">${factRows(s.facts)}</dl>${table}${after ? `
+        <dl class="ltn-facts">${after}</dl>` : ""}
+      </details>`;
+  }).join("");
+}
+
 // A YouTube video that plays on the page. youtube-nocookie keeps YouTube's cookies off until it's
 // played; loading="lazy" means nothing loads until the Netting tab is shown. The page's referrer is
 // left on, since YouTube's player refuses to play without it.
@@ -457,6 +484,7 @@ export function renderNetting(page = NET_PAGE) {
       <p class="ltf-hint ltf-tbl-hint">${esc(page.hint)}</p>
       <div class="ltf-chart" data-table></div>
       <div class="ltn-findings-list" data-findings></div>
+      <div class="ltn-studies" data-studies>${drawStudies()}</div>
       <p class="ltf-hint ltn-note">${esc(page.notShown)}</p>
       <p class="ltf-hint ltn-note">${esc(page.more)}</p>
     </section>`;

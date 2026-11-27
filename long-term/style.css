@@ -362,6 +362,21 @@
 #lt-root .ltn-video figcaption { margin-top: 0.35rem; font-size: 0.78rem; color: var(--ink-2); }
 #lt-root .ltn-empty { margin: 0; padding: 0.9rem 1rem; font-size: 0.92rem; color: var(--ink-2); }
 #lt-root .ltn-note { margin-top: 0.6rem; max-width: 62ch; }
+/* fyke net studies, under the species sections */
+#lt-root .ltn-studies .ltm-notes > p { max-width: 70ch; }
+#lt-root .ltn-facts { margin: 0.6rem 0 0; font-size: 0.88rem; }
+#lt-root .ltn-facts > div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.75rem; padding: 0.4rem 0; border-top: 1px solid color-mix(in srgb, var(--line) 60%, var(--card)); }
+#lt-root .ltn-facts dt { font-weight: 700; }
+#lt-root .ltn-facts dd { margin: 0; max-width: 70ch; color: var(--ink-2); }
+#lt-root .ltn-facts dd ul { margin: 0; padding-left: 1.1rem; font-size: inherit; }
+#lt-root .ltn-facts dd li + li { margin-top: 0.3rem; }
+#lt-root .ltn-study-tbl-wrap { margin: 0.75rem 0 0.4rem; overflow-x: auto; }
+#lt-root .ltn-study-tbl { border-collapse: collapse; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+#lt-root .ltn-study-tbl caption { caption-side: top; text-align: left; max-width: 70ch; padding-bottom: 0.4rem; font-size: 0.8rem; color: var(--ink-2); }
+#lt-root .ltn-study-tbl th, #lt-root .ltn-study-tbl td { padding: 0.3rem 0.7rem; text-align: right; white-space: nowrap; border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, var(--card)); }
+#lt-root .ltn-study-tbl th:first-child { text-align: left; padding-left: 0; }
+#lt-root .ltn-study-tbl tbody th { font-weight: 600; }
+@media (max-width: 36rem) { #lt-root .ltn-facts > div { grid-template-columns: 1fr; gap: 0.1rem; } }
 #lt-root .ltf-sp:focus-visible { outline: 2px solid var(--lid); outline-offset: 2px; border-radius: 3px; }
 #lt-root .ltf-tbl-row.is-open > th, #lt-root .ltf-tbl-row.is-open > td { border-bottom: 0; background: color-mix(in srgb, var(--lid) 6%, var(--card)); }
 #lt-root .ltf-tbl-detail > td { text-align: left; white-space: normal; padding: 0.3rem 0.6rem 0.7rem; background: color-mix(in srgb, var(--lid) 6%, var(--card)); }

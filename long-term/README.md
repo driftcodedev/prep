@@ -213,6 +213,13 @@ is shown, so opening straight to Fishing doesn't download it.
   (`drawFindings()`). What goes in each is `NET_FINDINGS` in `data/fishing-notes.js`: a list of
   paragraphs per species, empty for now, which shows "No findings yet." The sections are drawn only
   when the rows are picked, so sorting or tapping targets doesn't close one you've opened.
+- **Netting studies:** under the species sections, one collapsed section per fyke net study, for
+  Brett's review (`drawStudies()`): the 2008–2011 Gulf of Maine smelt fyke survey (with East Bay
+  Brook, the Cobscook stream) and the 2011–2013 Cobscook Bay finfish survey (Vieser's thesis). Each
+  is `NET_STUDIES` in `data/fishing-notes.js`: an intro line, label and text rows (net, size, wings,
+  length, where, time in the water, season, years, fish), a catch table, more rows and links. Only
+  what the studies say goes in, with "Not given" where they don't. They don't depend on targets, so
+  they're drawn once with the page and stay open while you work the table.
 - **Parked until fishing methods are picked:** cutoffs, catch per hour, cleaning time and the 2025
   scallop drop. The old per-trip numbers are gone (they're in git history before Nov 27, 2026).
 

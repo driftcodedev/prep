@@ -38,6 +38,107 @@ export const NET_FINDINGS = {
   pollock: [],
   elvers: [],
 };
+
+// Fyke net studies, under the species sections on the Netting tab: one collapsed section each, for
+// Brett to review. Only what the studies say, with "Not given" where they don't. facts and after are
+// [label, text] rows, before and after the table; table is { caption, head, rows } (the first cell
+// of each row is its name); links are [title, url]. Gathered Nov 27, 2026.
+export const NET_STUDIES = [
+  {
+    id: "smelt-survey",
+    title: "Study: Gulf of Maine smelt fyke survey, 2008–2011",
+    about: "Maine, New Hampshire and Massachusetts set small fyke nets in the streams where smelt spawn, to count the spring runs. One of the Maine streams, East Bay Brook, runs into Cobscook's East Bay.",
+    facts: [
+      ["Who", "Maine Department of Marine Resources, New Hampshire Fish and Game and the Massachusetts Division of Marine Fisheries. Written up by Enterline and others in 2012."],
+      ["Net", "A small fyke (hoop) net, one per stream. Its mouth faces downstream, so smelt heading upstream to spawn swim in."],
+      ["Net size", "A 4 × 4 ft square frame at the mouth, then six hoops 2.5 ft across. Funnels at the 2nd and 4th hoops. ¼ in mesh throughout."],
+      ["Wings", "A 4 × 4 ft square wing on each side of the mouth. Soft wings 16 ft long and 4 ft high, with floats and a lead line, can be added. Wing poles 2.5 m (about 8 ft) apart."],
+      ["Net length", "Not given."],
+      ["Stations", "17 streams: 8 in Massachusetts, 3 in New Hampshire and 6 in Maine. East Bay Brook is the only one in Cobscook."],
+      ["Where in the stream", "Mid-channel in the tidal part of the stream, just below where smelt lay their eggs, to catch fish coming up on the flood tide. It blocks about 75% of the channel's width. Maine's plan says to set it \"where the mean high tide line is approximately 4-5ft.\""],
+      ["Anchoring", "Four 8 ft lengths of ½ to ⅝ in rebar: two for the frame and two for the box wings. Shorter rebar on rocky bottoms."],
+      ["Time in the water", "One night: set at the evening low tide and hauled at the next morning low tide."],
+      ["How often", "Three nights a week for at least 8 weeks (Maine's 2013 plan). The nights followed the tides, the moon and the crew, not a random pick."],
+      ["Season", "Massachusetts: 11 weeks, from early March to the third week of May. Maine's 2013 plan: late March to late May in the south, and mid-April to late June on the Penobscot and Downeast. Downeast runs mostly start in mid-May, and most Maine runs last 4 to 5 weeks. Sampling could stop once no smelt had come for a week after the peak."],
+      ["Years", "2008–2011, after trial sets in 2007–2008."],
+      ["Fish reported", "Rainbow smelt: counted, sexed, measured and let go. Other fish were counted too, but the 2012 report doesn't list them. Maine DMR lists that data as available."],
+      ["Catch measure", "Smelt per overnight haul. Each year's figure is the geometric mean of the weekly averages, which runs lower than a plain average."],
+      ["East Bay smelt", "Mostly 2-year-olds, with few or no 1-year-olds. 2-year-old males averaged 166 mm (6½ in). Fewer than 2 males per female, against 4 to 1 across the whole survey."],
+    ],
+    table: {
+      caption: "Smelt per overnight haul, Maine streams (Table 1.3.3 of the 2012 report). A dash means no data that year.",
+      head: ["Stream", "2008", "2009", "2010", "2011", "All years"],
+      rows: [
+        ["East Bay Brook (Cobscook)", "15.48", "4.42", "21.66", "11.86", "13.35"],
+        ["Long Creek", "–", "18.69", "5.56", "9.93", "11.39"],
+        ["Mast Landing", "52.00", "29.84", "8.81", "13.80", "26.11"],
+        ["Deer Meadow Brook", "11.11", "100.82", "24.86", "95.46", "58.07"],
+        ["Tannery Brook", "15.28", "28.26", "41.87", "14.03", "24.86"],
+        ["Schoppee Brook", "–", "–", "38.42", "37.25", "37.83"],
+      ],
+    },
+    after: [
+      ["Other states, all years", "Massachusetts ran from 20.42 (Fore River) down to 1.01 (Westport River). New Hampshire: Oyster River 5.62 and Winnicut River 1.64."],
+      ["What the authors found", "Smelt were under less stress further north, and Maine's eastern runs were the healthiest. Catches varied too much, and the study was too short, to show trends, so the numbers are a reference point. The sex ratio is skewed because males stay on the spawning grounds longer than females."],
+      ["Same net, New Hampshire 2021", "March 17 to April 15, with 15 trips per river. Smelt caught: Squamscott 989 (8.27 a day), Winnicut 260 (2.54 a day) and Oyster 140 (4.68 a day). The other fish were mostly sticklebacks, mummichogs and white suckers, with 12 to 14 species per river."],
+      ["Net test, Fore River", "A 2021 NOAA paper set this net beside a bigger one that blocked the whole channel. The small net's catch rose with the number of fish, but was very uneven on days with few fish. Sizes and sex ratios were mostly the same. The authors say fyke nets may be poor for very small runs or wide rivers."],
+    ],
+    links: [
+      ["Regional smelt conservation plan, Enterline and others, 2012 (fyke results in Table 1.3.3)", "https://repository.library.noaa.gov/view/noaa/37958"],
+      ["Maine smelt fyke net sampling plan, 2013 (net design and setting)", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/docs/fykeplan.pdf"],
+      ["New Hampshire smelt spawning report, 2021", "https://www.wildlife.nh.gov/sites/g/files/ehbemt746/files/inline-images/rbw-smelt-spawning-monitoring.pdf"],
+      ["Fore River fyke net comparison, NOAA, 2021", "https://repository.library.noaa.gov/view/noaa/57102"],
+    ],
+  },
+  {
+    id: "cobscook-finfish",
+    title: "Study: Cobscook Bay finfish survey, 2011–2013 (Vieser thesis)",
+    about: "The University of Maine sampled Cobscook's fish with local fishermen, alongside the tidal power project. It was Jeffrey Vieser's 2014 master's thesis, published as a journal paper in 2018. Fyke nets were one of four kinds of net used.",
+    facts: [
+      ["Who", "Jeffrey Vieser, Gayle Zydlewski and James McCleave, University of Maine School of Marine Sciences, working with local fishermen."],
+      ["Net", "Fyke nets, set 2 at a time. 72 fyke sets in all."],
+      ["Net size", "1.2 m (4 ft) high. 2.5 cm (1 in) mesh throughout the net, wings and cod end."],
+      ["Wings", "Two of different lengths on each net: 9.1 m (30 ft) and 18.3 m (60 ft)."],
+      ["Net length", "Not given. The cod end has 3 sections, each behind a tapered funnel with a 30.5 cm (12 in) opening."],
+      ["Where", "Intertidal only, at the northern site in each of the bay's 3 parts (inner, central and outer), but not at the Pennamaquan River. Sites were picked for slope, bottom and vehicle access, not at random."],
+      ["How set", "By hand at low tide. The cod end lay parallel to the shore, with the wings angled away from it in a Y."],
+      ["Time in the water", "Mid-flood to mid-ebb, so about 6 hours around high tide."],
+      ["Season", "May, June, August and September."],
+      ["Years", "The methods say 2012 and 2013. The paper's own table, and a 2012 talk that counted 22 fyke sets in 2011, show fyke sets in 2011 too."],
+      ["Why fykes", "To catch larger fish."],
+      ["Fish in the fykes", "9 species, in the table below. Atlantic tomcod was the most common in the fykes."],
+    ],
+    table: {
+      caption: "Fish caught in the fyke nets. The paper gives a fyke count only for tomcod. For the rest it marks fykes as one of the nets that caught them, and gives the total from all nets. \"A third or more\" means fykes caught at least a third of that total.",
+      head: ["Species", "In fykes", "All nets"],
+      rows: [
+        ["Atlantic tomcod", "121", "274"],
+        ["Atlantic herring", "Not given", "18,086"],
+        ["Winter flounder", "Not given", "8,302"],
+        ["Alewife", "Not given", "3,347"],
+        ["Mummichog", "Not given", "2,467"],
+        ["Rainbow smelt", "Not given", "567"],
+        ["Pollock", "A third or more", "43"],
+        ["Blueback herring", "Not given", "10"],
+        ["White perch", "1", "1"],
+      ],
+    },
+    after: [
+      ["Catch rate", "None for the fykes. Catches were low and effort varied, so fyke data were used only for the species list."],
+      ["Whole survey", "60,476 fish of 46 species, from 390 seine hauls, 112 bottom trawls, 111 midwater trawls and 72 fyke sets."],
+      ["Limits", "A 2014 talk on the survey said the netting missed large fish and fish in fast currents, which reach 1.8 m/s (about 3½ knots)."],
+      ["The thesis", "Vieser, 2014: \"Collaborative Research on Finfish, Their Distribution, and Diversity in Cobscook Bay, Maine.\" It isn't online yet, as the University of Maine library is moving its theses to a new system. Special collections: um.library.spc@maine.edu. The 2018 paper is the published version."],
+    ],
+    links: [
+      ["The paper: Finfish diversity and distribution in a boreal, macrotidal bay, Northeastern Naturalist, 2018", "https://eaglehill.us/NENAonline/articles/NENA-25-4/12-Zydlewski.shtml"],
+      ["The same paper at BioOne (doi 10.1656/045.025.0403)", "https://doi.org/10.1656/045.025.0403"],
+      ["The thesis record, 2014 (Tethys)", "https://tethys.pnnl.gov/publications/collaborative-research-finfish-their-distribution-diversity-cobscook-bay"],
+      ["2014 talk on the survey's netting, American Fisheries Society", "https://afs.confex.com/afs/2014/webprogram/Paper16137.html"],
+      ["2012 talk with the 2011 counts, American Fisheries Society", "https://afs.confex.com/afs/2012/webprogram/Paper10763.html"],
+    ],
+  },
+];
+
 export const NET_GEAR = {
   herring: "Gill net, 2¼ in; cast net for small ones",
   mackerel: "Gill net, 2¾ in",

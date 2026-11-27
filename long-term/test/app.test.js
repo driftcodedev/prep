@@ -263,12 +263,12 @@ test("the weekly change record matches the house list", () => {
 
 import { VIEWS } from "../app.js";
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
-import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_GEAR, NET_PAGE, NET_FINDINGS } from "../data/fishing-notes.js";
+import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES, PHOTOS, PHOTO_LICENSES, NET_GEAR, NET_PAGE, NET_FINDINGS, NET_STUDIES } from "../data/fishing-notes.js";
 import {
   counted, seasonTotal, adultsFed, fedText, seasonRanking, sortRows, bestOf, cellText, rankingText, donutSlices, herringCatch,
   meatText, round2, millions, thousands, caloriesText, poundsText, pct, drawTable, renderFishing, seasonOfDate,
   photoSrc, photoPage, photosHtml, cleanPicks, isPicked, togglePick, pickCount, pickText,
-  netRows, targetTotal, renderNetting, drawFindings, videoHtml,
+  netRows, targetTotal, renderNetting, drawFindings, drawStudies, videoHtml,
 } from "../js/fishing.js";
 
 test("the tab has Map, Fishing and Netting views, Map first", () => {
@@ -606,6 +606,42 @@ test("netting findings: a collapsed section per species in the table, titled wit
   // The page has a place for them under the table, before the notes.
   const page = renderNetting();
   assert.ok(page.indexOf("data-table") < page.indexOf("data-findings") && page.indexOf("data-findings") < page.indexOf("Not shown here"));
+});
+
+test("netting studies: a collapsed section per fyke net study, under the species sections", () => {
+  assert.deepEqual(NET_STUDIES.map((s) => s.id), ["smelt-survey", "cobscook-finfish"]);
+  const html = drawStudies();
+  assert.equal((html.match(/<details class="ltm-notes ltn-study"/g) || []).length, 2);
+  assert.ok(!/<details[^>]*\sopen/.test(html), "sections start closed");
+  assert.match(html, /<summary>Study: Gulf of Maine smelt fyke survey, 2008–2011<\/summary>/);
+  assert.match(html, /<summary>Study: Cobscook Bay finfish survey, 2011–2013 \(Vieser thesis\)<\/summary>/);
+  // Each covers the net, its size, wings, length, where, season and time in the water, has a
+  // well-formed table and https links that open in a new tab.
+  for (const s of NET_STUDIES) {
+    const labels = [...s.facts, ...(s.after || [])].map(([k]) => k);
+    for (const need of ["Who", "Net", "Net size", "Wings", "Net length", "Time in the water", "Season", "Years"]) {
+      assert.ok(labels.includes(need), `${s.id} has ${need}`);
+    }
+    assert.ok(labels.some((k) => k.startsWith("Where")), `${s.id} says where`);
+    assert.equal(new Set(labels).size, labels.length, `${s.id} labels are unique`);
+    assert.ok(s.table.rows.length && s.table.rows.every((r) => r.length === s.table.head.length), `${s.id} table rows fit the header`);
+    assert.ok(s.links.length >= 2);
+    for (const [title, url] of s.links) { assert.ok(title); assert.match(url, /^https:\/\/[^\s"<>]+$/); }
+  }
+  assert.equal((html.match(/target="_blank" rel="noopener"/g) || []).length, NET_STUDIES.reduce((n, s) => n + s.links.length, 0));
+  // East Bay Brook, the Cobscook stream, leads the smelt survey's table.
+  assert.match(html, /<th scope="row">East Bay Brook \(Cobscook\)<\/th><td>15\.48<\/td><td>4\.42<\/td><td>21\.66<\/td><td>11\.86<\/td><td>13\.35<\/td>/);
+  assert.match(html, /<th scope="row">Atlantic tomcod<\/th><td>121<\/td><td>274<\/td>/);
+  // Text is escaped; a study without a table, later rows or links still draws.
+  const odd = drawStudies([{ id: "x", title: "<b>", about: "a & b", facts: [["k", "<i>"]] }]);
+  assert.match(odd, /<summary>&lt;b&gt;<\/summary>/);
+  assert.match(odd, /<dd>&lt;i&gt;<\/dd>/);
+  assert.ok(!odd.includes("<table") && !odd.includes("Links"));
+  assert.equal(drawStudies([]), "");
+  // On the page: drawn once, after the species sections and before the notes.
+  const page = renderNetting();
+  assert.ok(page.indexOf("data-findings") < page.indexOf("data-studies") && page.indexOf("data-studies") < page.indexOf("Not shown here"));
+  assert.ok(page.includes(html.trim()));
 });
 
 test("netting video: plays on the page, above the heading, and loads only when shown", () => {
