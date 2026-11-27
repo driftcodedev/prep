@@ -178,9 +178,15 @@ test("Bathtub water: the list has the waterBOB or the V-TOP drain cover, whichev
   assert.ok(keys(bob).includes("bladder") && !keys(bob).includes("drainCover"));
   assert.ok(keys(cover).includes("drainCover") && !keys(cover).includes("bladder"));
   assert.ok(!keys(have).includes("bladder") && !keys(have).includes("drainCover"));
-  // Each line points to the other choice.
-  assert.match(lineHint(bob.lines.find((l) => l.key === "bladder")), /V-TOP drain cover/);
-  assert.match(lineHint(cover.lines.find((l) => l.key === "drainCover")), /waterBOB/);
+  // One row: the picked choice is counted, and the other is shown with it as "or".
+  const bobLine = bob.lines.find((l) => l.key === "bladder");
+  const coverLine = cover.lines.find((l) => l.key === "drainCover");
+  assert.equal(bobLine.alt.key, "drainCover");
+  assert.equal(bobLine.alt.url, PRODUCTS.drainCover.url);
+  assert.equal(coverLine.alt.key, "bladder");
+  assert.equal(bob.total - bobLine.cost + PRODUCTS.drainCover.price, cover.total);
+  assert.match(lineHint(bobLine, true), /V-TOP drain cover/);
+  assert.match(lineHint(coverLine, true), /waterBOB/);
   for (const hh of [bob, cover]) {
     const card = gearItems(hh).find((it) => it.key === "bladder");
     assert.equal(card.title, "Water: waterBOB bathtub bladder or V-TOP drain cover");

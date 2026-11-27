@@ -584,10 +584,12 @@ export function lineHint(l, pdf = false) {
   if (l.keeps) return `Keeps ${l.keeps}`;
   if (l.key === "buckets") return `About ${LB_PER_BUCKET} lb of rice or beans in each.${pdf ? ' How to seal them is under "Storage" near the end.' : ""}`;
   if (l.key === "mylar") return `One bag and one ${num(ABSORBER_CC)} cc oxygen absorber in each bucket.`;
-  if (l.key === "bladder") return `Or a V-TOP drain cover. Pick one at the top under "Already have".`;
-  if (l.key === "drainCover") return `Or a waterBOB bag. Pick one at the top under "Already have".`;
+  if (l.alt) return pdf ? `Or a ${TUB_NAMES[l.alt.key]}: ${l.alt.pack}, ${cents(l.alt.price)}.` : `Pick one at the top under "Already have".`;
   return "";
 }
+
+// Short names for the two bathtub water choices, for the "or" in their shared row.
+export const TUB_NAMES = { bladder: "waterBOB bag", drainCover: "V-TOP drain cover" };
 
 // Which gear explanation (from gearItems) goes with a shopping-list line. On the page it opens
 // under the line's "Why?" button; lines without one (food, the scale) get no button.

@@ -3,7 +3,7 @@ import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor, TUB_NAMES,
 } from "./content.js";
 
 const STORAGE_KEY = "prep-household-v1";
@@ -273,13 +273,16 @@ function shopTable(lines, cards, shown) {
     const why = card
       ? ` <button type="button" class="why-btn" data-why="${cardKey}" aria-expanded="${open}" aria-controls="why-${cardKey}">${open ? "Hide" : "Why?"}</button>`
       : "";
+    // The bathtub water row also shows the other choice ("or ..."), which isn't counted in the total.
+    const a = l.alt;
+    const altItem = a ? `<small class="keeps alt">or <a href="${a.url}" target="_blank" rel="noopener">${esc(TUB_NAMES[a.key])}</a></small>` : "";
     return `
       <tr>
-        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${why}${lineHint(l) ? `<small class="keeps">${esc(lineHint(l))}</small>` : ""}</th>
-        <td>${esc(l.pack)}</td>
+        <th scope="row"><a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${why}${altItem}${lineHint(l) ? `<small class="keeps">${esc(lineHint(l))}</small>` : ""}</th>
+        <td>${esc(l.pack)}${a ? `<small class="alt">or ${esc(a.pack)}</small>` : ""}</td>
         <td class="num">${l.qty}</td>
         <td>${esc(l.amountText)}</td>
-        <td class="num">${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)}</small>` : ""}</td>
+        <td class="num">${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)}</small>` : ""}${a ? `<small class="alt">or ${money(a.price)}</small>` : ""}</td>
       </tr>${card ? `
       <tr class="why-row" id="why-${cardKey}"${open ? "" : " hidden"}><td colspan="5"><div class="why-panel">${gearBody(card)}</div></td></tr>` : ""}`;
   }).join("");

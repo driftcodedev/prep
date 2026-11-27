@@ -311,6 +311,12 @@ table.data { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 .data td small { display: block; color: var(--ink-2); font-size: 0.8rem; }
 .shop td:nth-child(2) { color: var(--ink-2); }
 .shop th small.keeps { display: block; margin-top: 0.15rem; font-weight: 400; font-size: 0.8rem; line-height: 1.35; color: var(--ink-2); }
+/* The other bathtub water choice, shown in the same row as "or ...". */
+.shop small.alt { margin-top: 0.35rem; font-size: 0.9rem; font-weight: 600; color: var(--ink-2); }
+.shop th small.keeps.alt { margin-top: 0.3rem; font-size: 0.9rem; font-weight: 600; }
+.shop th small.alt a { color: var(--lid); }
+/* Price notes ("Sold by a third-party seller") wrap instead of running past the edge. */
+.data td.num small { white-space: normal; }
 /* Same column widths in every store table so they line up down the page. */
 table.shop { table-layout: fixed; min-width: 38rem; }
 .shop th:nth-child(1) { width: 27%; }
