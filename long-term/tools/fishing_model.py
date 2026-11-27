@@ -40,6 +40,10 @@ def surv(n3yrs):
 # assuming an 8 m net width, a 1.41 km tow, and 70 sq km below low tide. A minimum.
 TRAWL_LB_PER_KG_TOW = 70 / (1.41 * 0.008) * 2.2046
 
+# Canadian trawl lobster catch, kg per tow, 2013-19: 104 tows in July-August, 52 in September-October.
+LOBSTER_KG_TOW_JULAUG = 41.98
+LOBSTER_KG_TOW_SEPOCT = 75.53
+
 # Maine-New Hampshire inshore trawl survey, lobster kg per tow (stratified means, regions 1-5), 2009-12.
 MENH_LOBSTER_SPRING = (31.02 + 26.80 + 52.90 + 50.57) / 4
 MENH_LOBSTER_FALL = (54.62 + 59.57 + 70.25 + 53.20) / 4
@@ -121,12 +125,14 @@ SP = [
     dict(id="greencrabs", name="Green crabs", short="green crabs", group="crabs", conf=2,
          lb=from_avg(1333 * MODEL_LB, [5, 15, 60, 100, 80, 30]), meat=0.12, kcal=340,
          source="Bay food-web model (from southern Maine data)"),
-    # July-October from the Canadian trawl. May-June: the Canadian fall number x Maine's own inshore
-    # trawl survey spring/fall ratio (2009-12), which scales Maine's spring survey to local water.
-    # Maine's fall survey, sized to Cobscook, is 1.5-2.2x the Canadian number: the check behind the 3.
+    # July-October from the Canadian trawl, 2013-19 (the years DFO says compare): every lobster caught,
+    # all sizes, averaged over every tow. May-June: the Canadian fall number x Maine's own inshore trawl
+    # survey spring/fall ratio (2009-12), which scales Maine's spring survey to local water. Maine's
+    # fall survey, sized to Cobscook, is 0.5-0.75x the Canadian number: the check behind the 3.
+    # (Corrected Nov 27, 2026: these kg a tow had been a third of the trawl's real catch.)
     dict(id="lobster", name="Lobster", short="lobster", group="crabs", conf=3,
-         lb=[None, None, 25.19 * TRAWL_LB_PER_KG_TOW * MENH_LOBSTER_SPRING / MENH_LOBSTER_FALL,
-             14.69 * TRAWL_LB_PER_KG_TOW, 25.19 * TRAWL_LB_PER_KG_TOW, None], meat=0.2, kcal=349,
+         lb=[None, None, LOBSTER_KG_TOW_SEPOCT * TRAWL_LB_PER_KG_TOW * MENH_LOBSTER_SPRING / MENH_LOBSTER_FALL,
+             LOBSTER_KG_TOW_JULAUG * TRAWL_LB_PER_KG_TOW, LOBSTER_KG_TOW_SEPOCT * TRAWL_LB_PER_KG_TOW, None], meat=0.2, kcal=349,
          source="Canadian trawl for July–October, checked by Maine's own trawl survey; May–June from Maine's spring survey scaled to local water. Minimums"),
     dict(id="sculpin", name="Longhorn sculpin", short="sculpin", group="fish", conf=2,
          lb=from_peak(surv(254 + 222) * 0.6 / 0.85 * 0.6, [100, 93, 85, 43, 14, 93]), meat=0.25, kcal=363,

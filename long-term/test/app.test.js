@@ -311,9 +311,9 @@ test("the scores agreed for each species", () => {
 
 test("season totals match the sources-check doc", () => {
   const millionsBySeason = [0, 1, 2, 3, 4, 5].map((b) => Math.round(seasonTotal(SPECIES, "kcal", b) / 1e6));
-  assert.deepEqual(millionsBySeason, [731, 756, 1140, 1764, 2678, 969]);
+  assert.deepEqual(millionsBySeason, [731, 756, 1172, 1790, 2726, 969]);
   const fed = [0, 1, 2, 3, 4, 5].map((b) => fedText(seasonTotal(SPECIES, "kcal", b)));
-  assert.deepEqual(fed, ["670", "690", "1,040", "1,610", "2,450", "890"]);
+  assert.deepEqual(fed, ["670", "690", "1,070", "1,630", "2,490", "890"]);
   assert.ok(Math.abs(adultsFed(1095000) - 1) < 1e-9);
   const herring = SPECIES.find((sp) => sp.id === "herring");
   assert.deepEqual(herring.lb.map((v) => Math.round(v / 1000)), [0, 0, 302, 1107, 3580, 410]);
@@ -327,7 +327,7 @@ test("season totals match the sources-check doc", () => {
   assert.deepEqual(flounder.lb.map((v) => Math.round(v / 1000)), [0, 0, 414, 236, 99, 120]);
   const lobster = SPECIES.find((sp) => sp.id === "lobster");
   // Lobster: May–June is Maine's spring survey scaled to local water by the fall comparison.
-  assert.deepEqual(lobster.lb.map((v) => (v === null ? null : Math.round(v / 1000))), [null, null, 234, 201, 345, null]);
+  assert.deepEqual(lobster.lb.map((v) => (v === null ? null : Math.round(v / 1000))), [null, null, 701, 574, 1033, null]);
 });
 
 test("each season's ranking adds to 100% and matches the doc's order", () => {
@@ -337,7 +337,7 @@ test("each season's ranking adds to 100% and matches the doc's order", () => {
     assert.ok(r.every((x, i) => i === 0 || r[i - 1].value >= x.value), `season ${b} order`);
   }
   assert.equal(rankingText(SPECIES, 0), "Urchins 64%, clams and mussels 15%, periwinkles 12%, scallops 6%, sculpin 2%, the rest under 1%");
-  assert.equal(rankingText(SPECIES, 4), "Herring 58%, urchins 17%, mackerel 11%, clams and mussels 5%, periwinkles 4%, scallops 2%, the rest under 1%");
+  assert.equal(rankingText(SPECIES, 4), "Herring 57%, urchins 17%, mackerel 11%, clams and mussels 5%, periwinkles 4%, lobster 3%, scallops 2%, the rest under 1%");
   assert.equal(seasonRanking(SPECIES, "kcal", 5)[0].sp.id, "urchins");
 });
 
@@ -363,7 +363,7 @@ test("percent views: share of the season (columns) and % of the species' own bes
   assert.equal(cellText(sp("shellfish"), "kcal", "col", 0), "15%");
   assert.equal(cellText(sp("scallops"), "kcal", "col", 0), "6%");
   assert.equal(cellText(sp("urchins"), "kcal", "col", 0), "64%");
-  assert.equal(cellText(sp("herring"), "kcal", "col", 4), "58%");
+  assert.equal(cellText(sp("herring"), "kcal", "col", 4), "57%");
   // Rows: each season against the species' own best.
   assert.equal(cellText(sp("herring"), "kcal", "row", 4), "100%");
   assert.equal(cellText(sp("herring"), "kcal", "row", 0), "0%");
@@ -428,7 +428,7 @@ test("fishing table: a row per species with its notes, sorted by the picked seas
   assert.match(tbl, /data-season="4" aria-pressed="true"/);
   assert.match(tbl, /aria-sort="descending"/);
   assert.match(tbl, /Active adults fed a year/);
-  assert.match(tbl, />2,678</);
+  assert.match(tbl, />2,726</);
   assert.ok(tbl.indexOf('data-sp="herring"') < tbl.indexOf('data-sp="mackerel"'), "Sep–Oct: herring first");
   const open = drawTable({ measure: "kcal", view: "amount" }, 0, new Set(["flounder"]));
   assert.match(open, /data-sp="flounder" aria-expanded="true"/);

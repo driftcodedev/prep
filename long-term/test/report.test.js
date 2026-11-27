@@ -42,11 +42,11 @@ test("every house is in the house list, numbered by distance to the bay", () => 
 test("the fishing part: calories and pounds by season, a ring per season, and every species scored", () => {
   const rings = blocks.find((b) => b.t === "rings");
   assert.equal(rings.items.length, SEASONS.length);
-  assert.equal(rings.items[4].sub, "A year's food for about 2,450 active adults");
+  assert.equal(rings.items[4].sub, "A year's food for about 2,490 active adults");
   const cal = blocks.find((b) => b.t === "table" && b.head.at(-1) === "Sure (1–5)");
   assert.equal(cal.rows.length, SPECIES.length + 2);
-  assert.deepEqual(cal.rows.at(-2).slice(1, 7).map((c) => c.text), ["731", "756", "1,140", "1,764", "2,678", "969"]);
-  assert.deepEqual(cal.rows.at(-1).slice(1, 7).map((c) => c.text), ["670", "690", "1,040", "1,610", "2,450", "890"]);
+  assert.deepEqual(cal.rows.at(-2).slice(1, 7).map((c) => c.text), ["731", "756", "1,172", "1,790", "2,726", "969"]);
+  assert.deepEqual(cal.rows.at(-1).slice(1, 7).map((c) => c.text), ["670", "690", "1,070", "1,630", "2,490", "890"]);
   assert.ok(keepsWithNext({ t: "h3" }, cal), "the calories table stays with its heading");
   const lb = blocks.find((b) => b.t === "table" && b.head.at(-1) === "Where the number comes from");
   assert.equal(lb.rows.length, SPECIES.length);
