@@ -174,28 +174,46 @@ export function cardNotes(pl, hh) {
 
 // ---------- cooking for everyone ----------
 
+// Plan-dependent numbers in the cooking text are wrapped in these two marks. The page shows them
+// highlighted in yellow; the PDF drops the marks. (Table cells stay plain: every amount there changes.)
+export const HL_START = "\uE000";
+export const HL_END = "\uE001";
+const hl = (x) => `${HL_START}${x}${HL_END}`;
+// Plain versions, for use inside the cooking functions where the short names are highlighted.
+const cupsOf = (x) => cupsText(x);
+const fractionOf = (x) => fraction(x);
+const numOf = (x) => num(x);
+const gallonsOf = (x) => gallonsText(x);
+// "½ cup", "1 cup", "4½ cups": a fraction of cups with the right word.
+const cupsWord = (x) => `${fraction(x)} ${x > 0 && x <= 1 ? "cup" : "cups"}`;
+export const PLAN_NOTE = "* Numbers highlighted in yellow change depending on your plan, and so does every amount in the table.";
+
 export function cookingData(hh) {
   const c = hh.cook;
+  const cupsText = (x) => hl(cupsOf(x));
+  const fraction = (x) => hl(fractionOf(x));
+  const num = (x) => hl(numOf(x));
+  const gallonsText = (x) => hl(gallonsOf(x));
   // Each cell: the cooked amount to serve, and the dry amount it comes from (matching the cards).
-  const cell = (cooked, dry) => (dry > 0 ? { cooked: cooked > 0 ? `${cupsText(cooked)} cooked` : "a spoonful cooked", dry: `from ${cupsText(dry)} dry` } : { cooked: "none", dry: "" });
+  const cell = (cooked, dry) => (dry > 0 ? { cooked: cooked > 0 ? `${cupsOf(cooked)} cooked` : "a spoonful cooked", dry: `from ${cupsOf(dry)} dry` } : { cooked: "none", dry: "" });
   const rows = hh.plans.map((pl, i) => {
     const s = hh.shares[i];
     return {
       name: pl.person.name,
       rice: cell(s.riceCooked, pl.phase1.rice),
       beans: cell(s.beansCooked, pl.phase1.beans),
-      oats: pl.phase1.oats > 0 ? `${cupsText(pl.phase1.oats)} dry` : "none",
+      oats: pl.phase1.oats > 0 ? `${cupsOf(pl.phase1.oats)} dry` : "none",
     };
   });
   const total = {
     name: "Whole household",
     rice: cell(c.riceCooked, c.rice),
     beans: cell(c.beansCooked, c.beans),
-    oats: c.oats > 0 ? `${cupsText(c.oats)} dry` : "none",
+    oats: c.oats > 0 ? `${cupsOf(c.oats)} dry` : "none",
   };
   const milkBits = [];
-  if (c.milk > 0) milkBits.push(`${fraction(c.milk)} cups of nonfat milk (${cupsText(c.milk / 3)} powder)`);
-  if (c.whole > 0) milkBits.push(`${fraction(c.whole)} cups of whole milk for the under-2s (${cupsText(c.whole / 4)} powder)`);
+  if (c.milk > 0) milkBits.push(`${hl(cupsWord(c.milk))} of nonfat milk (${cupsText(c.milk / 3)} powder)`);
+  if (c.whole > 0) milkBits.push(`${hl(cupsWord(c.whole))} of whole milk for the under-2s (${cupsText(c.whole / 4)} powder)`);
   const u = hh.gear.use;
   const water = [
     { label: "What a simmer looks like", text: "small, lazy bubbles breaking the surface every second or two, with steam rising. A boil is big bubbles churning the whole pot. Over a fire, hang the pot low on the tripod chain to bring it to a boil, then raise it a few links to hold a simmer. With no tripod, slide the pot to the edge of the fire or let it burn down to glowing coals. If it starts boiling hard again, raise the pot; if the bubbles stop, lower it." },
@@ -211,7 +229,7 @@ export function cookingData(hh) {
     water.push({ label: "Milk", text: `${cupsText(c.milk + c.whole)} of water${parts.length > 1 ? `: ${parts.join(" and ")}` : ""}. Use boiled water that has cooled, or water from the waterBOB.` });
   }
   const formulaOz = hh.plans.reduce((a, pl) => a + (pl.phase1.formula || 0), 0);
-  if (formulaOz > 0) water.push({ label: "Formula", text: `about ${num(formulaOz)} fl oz a day takes ${fraction(Math.round(formulaOz * 0.9 / 8 * 4) / 4)} cups of water. Boil it for 1 minute, then mix exactly as the can says. Make one bottle at a time and use it within 2 hours.` });
+  if (formulaOz > 0) water.push({ label: "Formula", text: `about ${hl(`${numOf(formulaOz)} fl oz`)} a day takes ${hl(cupsWord(Math.round(formulaOz * 0.9 / 8 * 4) / 4))} of water. Boil it for 1 minute, then mix exactly as the can says. Make one bottle at a time and use it within 2 hours.` });
   water.push({ label: "Save wood", text: "once rice has boiled for a minute, or beans have boiled hard for 10, you can take the lidded pot off the fire and wrap it tightly in a blanket or sleeping bag. It keeps cooking in its own heat with no simmering to watch. Check after an hour for rice and 3 hours for beans; if they're not done, bring them back to a boil and wrap again. Eat it hot." });
   return {
     rice: `${cupsText(c.rice)} of dry rice`,
@@ -223,8 +241,8 @@ export function cookingData(hh) {
     milk: milkBits.length ? `Mix ${milkBits.join(" and ")} a day.` : "",
     water,
     fireLead: `These amounts are for your whole household for one day: the same totals as the bottom row of the table above. ${hh.pot.batches > 1
-      ? `The beans and their water come to about ${num(hh.pot.needCups * POT_FILL)} cups, more than ${aQuart(hh.pot.qt)} pot (${hh.pot.cups} cups) holds safely, so cook them in ${hh.pot.batches} batches or use two pots.`
-      : `Each batch fits in ${aQuart(hh.pot.qt)} pot (${hh.pot.cups} cups), one at a time.`}`,
+      ? `The beans and their water come to about ${hl(`${numOf(hh.pot.needCups * POT_FILL)} cups`)}, more than ${aQuart(hh.pot.qt).replace(/\d+-quart/, (q) => hl(q))} pot (${hl(`${hh.pot.cups} cups`)}) holds safely, so cook them in ${hl(`${hh.pot.batches} batches`)} or use two pots.`
+      : `Each batch fits in ${aQuart(hh.pot.qt).replace(/\d+-quart/, (q) => hl(q))} pot (${hl(`${hh.pot.cups} cups`)}), one at a time.`}`,
     waterTotal: (() => {
       // Every part is rounded to ¼ cup and the totals are sums of the parts shown, so it adds up.
       const q = (x) => Math.round(x * 4) / 4;
@@ -243,7 +261,7 @@ export function cookingData(hh) {
       const list = (items) => items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
       const who = drinkers.map((x) => `${x.name} ${fraction(x.cups)}${x.milk ? " plus milk" : ""}`).join(", ");
       const what = list(cook.map(([x, food]) => `${fraction(x)} for ${food}`));
-      return `All together, your household uses about ${fraction(d + k + s)} cups (${gallonsText((d + k + s) / 16)}) of water a day: ${fraction(d)} cups to drink (${who}), ${fraction(k)} for cooking (${what}) and ${fraction(s)} to soak the next day's beans.`;
+      return `All together, your household uses about ${hl(cupsWord(d + k + s))} (${gallonsText((d + k + s) / 16)}) of water a day: ${hl(cupsWord(d))} to drink (${who}), ${fraction(k)} for cooking (${what}) and ${fraction(s)} to soak the next day's beans.`;
     })(),
   };
 }
@@ -251,6 +269,9 @@ export function cookingData(hh) {
 // All the day's beans, rice and oats in one pot, and how much to serve each person.
 export function onePotData(hh) {
   const c = hh.cook;
+  const cupsText = (x) => hl(cupsOf(x));
+  const fraction = (x) => hl(fractionOf(x));
+  const num = (x) => hl(numOf(x));
   const o = hh.onePot;
   if (!o.cups || !c.beans || !c.rice) return null;
   const W = COOK_WATER;
@@ -263,13 +284,11 @@ export function onePotData(hh) {
     `Add ${cupsText(c.rice)} of dry rice, lower the pot to bring it back to a boil and stir once. Put the lid on, raise the pot to a simmer and set a 20-minute timer. Don't lift the lid.`,
   ];
   if (c.oats > 0) steps.push(`Stir in ${cupsText(c.oats)} of oats and ${cupsText(c.oats * W.oats)} of water. Simmer about 5 minutes, stirring, until thick.`);
-  steps.push(`Take the pot off the heat, fish out the disc and let it sit for 5 minutes. You'll have about ${fraction(o.cups)} cups.`);
-  const onList = hh.lines.some((l) => l.key === "pot");
-  const fit = !onList
-    ? `Use a pot that holds at least ${num(Math.ceil(o.cups / POT_FILL))} cups, so it's no more than ¾ full.`
-    : o.cups <= pot.fillCups
-      ? `It all fits in the ${pot.qt}-quart pot.`
-      : `That's more than the ${pot.qt}-quart pot holds safely (${fraction(pot.fillCups)} cups), so use two pots or make it twice with half of each amount.`;
+  steps.push(`Take the pot off the heat, fish out the disc and let it sit for 5 minutes. You'll have about ${hl(cupsWord(o.cups))}.`);
+  // Owning a pot (ticked "Already have") doesn't change this: it names the size the plan picked.
+  const fit = o.cups <= pot.fillCups
+    ? `It all fits in ${aQuart(pot.qt).replace(/\d+-quart/, (q) => hl(q))} pot.`
+    : `That's more than ${aQuart(pot.qt).replace(/\d+-quart/, (q) => hl(q))} pot holds safely (${hl(cupsWord(pot.fillCups))}), so use two pots or make it twice with half of each amount.`;
   return {
     lead: `Rather cook everything together? This makes the whole day's beans, rice and oats in one pot: about 2¼ hours, plus soaking the beans overnight. It comes out thick, like a stew. ${fit}`,
     steps,
@@ -277,8 +296,8 @@ export function onePotData(hh) {
     // On the page the shares sit in the cooking table's last column instead of their own table.
     servingLeadTable: "Then serve each person their amount from the \"Or all in one pot\" column in the table above, spread over the day. The shares follow each person's card by calories, so everyone still gets their planned amount.",
     head: ["Person", "Serve, cooked"],
-    rows: o.servings.map((s) => [s.name, `${cupsText(s.cups)}${s.young ? ", mashed" : ""}`]),
-    total: ["Whole pot", `about ${fraction(o.cups)} cups`],
+    rows: o.servings.map((s) => [s.name, `${cupsOf(s.cups)}${s.young ? ", mashed" : ""}`]),
+    total: ["Whole pot", `about ${fractionOf(o.cups)} cups`],
     note: "Keep the pot covered and hot over the coals between meals. Cooked rice left warm for more than 2 hours can make people sick, and heating it up again doesn't make it safe.",
   };
 }
@@ -558,8 +577,30 @@ export function compareText(hh) {
   return `With a Costco membership, the Costco list would come to ${money(hh.other.total)}, plus ${money(COSTCO_MEMBERSHIP)} for the membership.`;
 }
 
+// Food and storage ticked "Already have" on the page (have: a Set of line keys). They stay listed
+// there but come off the totals, here and for the other store's comparison; nothing else changes.
+// shopLines leaves them out, for the PDF's list. Owned gear is dropped by planHousehold itself.
+export function withHave(hh, have) {
+  if (!have || !have.size) return hh;
+  const owned = (l) => have.has(l.key);
+  const minus = (lines) => lines.filter(owned).reduce((t, l) => t + l.cost, 0);
+  return {
+    ...hh,
+    total: hh.total - minus(hh.lines),
+    shopLines: hh.lines.filter((l) => !owned(l)),
+    other: hh.other && { ...hh.other, total: hh.other.total - minus(hh.other.lines) },
+  };
+}
+
 export function shoppingNotes(hh) {
   const notes = [];
+  // Slow to arrive (they often ship from far away), so they go first in the notes.
+  const slow = [["straw", "LifeStraws"], ["mylar", "mylar bags"], ["buckets", "food buckets"], ["diverter", "the rain diverter kit"]]
+    .filter(([k]) => hh.lines.some((l) => l.key.startsWith(k))).map(([, name]) => name);
+  if (slow.length) {
+    const names = slow.length > 1 ? `${slow.slice(0, -1).join(", ")} and ${slow[slow.length - 1]}` : slow[0];
+    notes.push(`${names.replace(/^./, (ch) => ch.toUpperCase())} can take a month or more to arrive, so order them first.`);
+  }
   const beans = hh.lines.find((l) => l.key === "beans");
   if (hh.store === "costco") {
     notes.push(`Costco prices are warehouse prices and vary a little by location. The total leaves out the ${money(COSTCO_MEMBERSHIP)} Costco membership.`);

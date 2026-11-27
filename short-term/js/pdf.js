@@ -9,7 +9,8 @@ import {
 const C = { ink: "#1c2a29", ink2: "#4a5957", line: "#c6cfcb", lid: "#1f5f7a", bean: "#8a4632", beanTint: "#f5e8e1", lidTint: "#ddeaf0" };
 
 // Roboto has no glyph for thirds.
-const t = (s) => String(s ?? "").replace(/⅓/g, "1/3").replace(/⅔/g, "2/3");
+// The highlight marks around plan numbers (see HL_START in content.js) are page-only.
+const t = (s) => String(s ?? "").replace(/[\uE000\uE001]/g, "").replace(/⅓/g, "1/3").replace(/⅔/g, "2/3");
 
 const h2 = (text, opts = {}) => ({ text: t(text), style: "h2", headlineLevel: 1, ...opts });
 const para = (text, opts = {}) => ({ text: typeof text === "string" ? t(text) : text, style: "p", ...opts });
@@ -132,7 +133,7 @@ function shopping(hh) {
     para([`${t(shoppingLead(hh))}: `, { text: money(hh.total), bold: true, fontSize: 13 }], { fontSize: 11 }),
     para(compareText(hh), { color: C.ink2 }),
   ];
-  for (const g of storeGroups(hh)) {
+  for (const g of storeGroups({ ...hh, lines: hh.shopLines || hh.lines })) {
     out.push({ columns: [{ text: t(g.title), style: "h3" }, { text: money(g.total), style: "h3", alignment: "right", width: 80 }], margin: [0, 8, 0, 2], headlineLevel: 1 });
     out.push(dataTable(
       ["Item", "Buy", "How many", "Covers", "Cost"],

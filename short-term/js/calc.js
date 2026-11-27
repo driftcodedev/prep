@@ -588,7 +588,8 @@ export function planHousehold({ months, reservePct = 20, store = "costco", owned
   const ctx = { plans, sum, supp, grams, reserve, strawPeople, have, pot, tub: tubKey };
   const shop = shoppingFor(ctx, productsFor(store));
   const otherStore = store === "walmart" ? "costco" : "walmart";
-  const other = plans.length ? { store: otherStore, total: shoppingFor(ctx, productsFor(otherStore)).total } : null;
+  const otherShop = plans.length ? shoppingFor(ctx, productsFor(otherStore)) : null;
+  const other = otherShop ? { store: otherStore, total: otherShop.total, lines: otherShop.lines } : null;
 
   // Gear lifespans.
   const firesPerLighter = BIC_LIGHTS / LIGHTS_PER_FIRE;

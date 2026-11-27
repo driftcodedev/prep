@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { splitRounded, planPerson, planHousehold, childEER, adultMaintenance, toKg, cupsText, validatePerson, strawPacks, waterCups, waterUse, infantDay } from "../js/calc.js";
 import { buildPdf } from "../js/pdf.js";
-import { gearItems, lineHint } from "../js/content.js";
+import { gearItems, lineHint, withHave, shoppingNotes, cookingData, onePotData, HL_START } from "../js/content.js";
 import { MAX_LB_PER_BUCKET, PRODUCTS } from "../js/data.js";
 
 const brett = { name: "Brett", sex: "male", age: 30, heightIn: 72, weightLb: 200, activity: "light", flags: {} };
@@ -194,6 +194,39 @@ test("Bathtub water: the list has the waterBOB or the V-TOP drain cover, whichev
     assert.match(card.notes[0].text, /LifeStraw/);
   }
   assert.match(gearItems(cover).find((it) => it.key === "bladder").buy, /^One 2-pack/);
+});
+
+test("Food ticked Already have comes off the totals and nothing else changes", () => {
+  const hh = planHousehold({ months: 6, people: [brett] });
+  const rice = hh.lines.find((l) => l.key === "rice");
+  const v = withHave(hh, new Set(["rice"]));
+  assert.equal(v.total, hh.total - rice.cost);
+  assert.equal(v.other.total, hh.other.total - hh.other.lines.find((l) => l.key === "rice").cost);
+  assert.ok(!v.shopLines.some((l) => l.key === "rice"));
+  assert.ok(v.lines.some((l) => l.key === "rice"), "still listed on the page");
+  assert.equal(v.buckets, hh.buckets, "buckets still count the rice");
+  assert.equal(withHave(hh, new Set()), hh);
+});
+
+test("Owning the pot doesn't change the cooking or one-pot text", () => {
+  const a = planHousehold({ months: 6, people: [brett] });
+  const b = planHousehold({ months: 6, people: [brett], owned: { pot: true, tripod: true, disc: true } });
+  assert.deepEqual(cookingData(b), cookingData(a));
+  assert.deepEqual(onePotData(b), onePotData(a));
+});
+
+test("Plan numbers in the cooking text are marked for the page, never in the PDF", () => {
+  const hh = planHousehold({ months: 6, people: [brett] });
+  assert.ok(cookingData(hh).rice.includes(HL_START));
+  assert.ok(!JSON.stringify(cookingData(hh).rows).includes(HL_START), "table cells stay plain");
+  assert.ok(!JSON.stringify(buildPdf(hh, { date: "today" })).includes(HL_START));
+});
+
+test("The notes say which gear is slow to arrive", () => {
+  const hh = planHousehold({ months: 6, people: [brett] });
+  assert.ok(shoppingNotes(hh).some((n) => /^LifeStraws, mylar bags, food buckets and the rain diverter kit can take a month or more/.test(n)));
+  const owned = planHousehold({ months: 6, people: [brett], owned: { filters: true, diverter: true } });
+  assert.ok(shoppingNotes(owned).some((n) => n.startsWith("Mylar bags and food buckets can take")));
 });
 
 test("Drinking water: ½ gallon for adults, less for small children", () => {

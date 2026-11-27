@@ -372,6 +372,10 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 .more-body { padding-bottom: 1.5rem; }
 .more-body > p, .more-body .sources { max-width: 68ch; }
 .more-body > .sub-title:first-child { margin-top: 0.5rem; }
+/* Numbers in the cooking guide that change with the household and plan. */
+mark.plan { background: #fff0a3; color: inherit; padding: 0 0.12em; border-radius: 2px; box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+.plan-note { margin: 0 0 0.75rem; font-size: 0.9rem; color: var(--ink-2); }
+.plan-note::first-letter { color: var(--ink); }
 
 .notes, .plain { padding-left: 1.2rem; max-width: 68ch; }
 .notes li, .plain li { margin-top: 0.5rem; }
@@ -414,6 +418,8 @@ table.shop { table-layout: fixed; min-width: 38rem; }
   body { background: #fff; font-size: 10.5pt; }
   .setup, .people-actions, .privacy, .intro, .report-actions, .report-foot, .shop-compare .btn-link, .goal-toggle { display: none !important; }
   .why-btn { display: none !important; }
+  mark.plan { background: none; padding: 0; }
+  .plan-note { display: none; }
   .shop label.have, .shop input.pick, .shop-have { display: none !important; }
   .more-item > summary::after { display: none; }
   .more-item > summary { padding: 0; margin-top: 1.25rem; }

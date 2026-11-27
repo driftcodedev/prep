@@ -3,7 +3,7 @@ import { planHousehold, validatePerson } from "./calc.js";
 import {
   money, todayText, planSummary, personSummary, statusLine, goalChoice, cardRows, cardEnergy, cardNotes, cookingData, onePotData, gearItems,
   storeGroups, shoppingLead, compareText, shoppingNotes, lineHint, KEEPS_LEAD, keepsNotes, KEEPS_SOURCES, COOK_NOTE, WEIGH_INTRO, WEIGH_RULES, WEIGH_KIDS,
-  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor, TUB_NAMES,
+  CARE, ABOUT, SOURCES, DISCLAIMER, SITE_URL, cardKeyFor, TUB_NAMES, withHave, HL_START, HL_END, PLAN_NOTE,
 } from "./content.js";
 
 const STORAGE_KEY = "prep-household-v1";
@@ -29,15 +29,25 @@ const EXAMPLE = [
   { name: "Leo", sex: "male", age: "1", ft: "2", inch: "6", weight: "22", activity: "light", flags: {} },
 ];
 
-// "Already have" tick boxes sit in the shopping list rows. Each gear line maps to one saved setting.
+// "Already have" tick boxes sit in every shopping list row. Gear lines map to one saved setting each,
+// which planHousehold uses to drop the line; anything else (food, vitamins, buckets) is kept in
+// state.have and only comes off the totals (see withHave in content.js).
 const OWNED_BY_LINE = {
   scale: "hasScale", lighters: "hasLighters", axe: "hasAxe", bladder: "hasBladder", drainCover: "hasBladder",
   diverter: "hasDiverter", timer: "hasTimer", pot: "hasPot", tripod: "hasTripod", disc: "hasDisc",
 };
-const ownedKeyFor = (lineKey) => (lineKey.startsWith("straw") ? "hasFilters" : OWNED_BY_LINE[lineKey]);
+const gearKeyFor = (lineKey) => (lineKey.startsWith("straw") ? "hasFilters" : OWNED_BY_LINE[lineKey]);
+const isOwned = (lineKey) => { const g = gearKeyFor(lineKey); return g ? !!state[g] : !!state.have[lineKey]; };
+function setOwned(lineKey, on) {
+  const g = gearKeyFor(lineKey);
+  if (g) { state[g] = on; return; }
+  state.have = { ...state.have };
+  if (on) state.have[lineKey] = true; else delete state.have[lineKey];
+}
 
 let state = { months: 6, reserve: 20, store: "costco", hasScale: false, hasLighters: false, hasFilters: false, hasAxe: false, hasBladder: false, hasDiverter: false, hasTimer: false, hasPot: false, hasTripod: false, hasDisc: false, people: [blankPerson()], ...(load() || {}) };
 if (!STORE_PLANS[state.store]) state.store = "costco";
+if (!state.have || typeof state.have !== "object") state.have = {};
 // Bathtub water: the waterBOB bag or the V-TOP drain cover, picked in the list row.
 // (A save from the short-lived three-way choice may say "have".)
 if (state.tub === "have") { state.tub = "bladder"; state.hasBladder = true; }
@@ -229,27 +239,31 @@ function cookRow(r, pot) {
 
 // Cooking for everyone and All in one pot share one table: each person's rice, beans and oats,
 // then their share if it's all cooked in one pot.
+// Escape, then turn the plan-number marks from content.js into yellow highlights.
+const markPlan = (text) => esc(text).split(HL_START).join('<mark class="plan">').split(HL_END).join("</mark>");
+
 function cookingBody(hh) {
   const c = cookingData(hh);
   const d = onePotData(hh);
   const share = d ? new Map(d.rows) : null;
   const potCell = (name) => (share ? share.get(name) || "none" : undefined);
   return `
-    <p>Each day, cook <strong>${esc(c.rice)}</strong> and <strong>${esc(c.beans)}</strong> ${esc(c.rest)}</p>
+    <p class="plan-note">${esc(PLAN_NOTE)}</p>
+    <p>Each day, cook <strong>${markPlan(c.rice)}</strong> and <strong>${markPlan(c.beans)}</strong> ${markPlan(c.rest)}</p>
     <div class="table-scroll"><table class="data cook">
       <thead><tr>${c.head.map((h) => `<th scope="col">${h}</th>`).join("")}${d ? '<th scope="col">Or all in one pot</th>' : ""}</tr></thead>
       <tbody>${c.rows.map((r) => cookRow(r, potCell(r.name))).join("")}</tbody>
       <tfoot>${cookRow(c.total, d ? d.total[1] : undefined)}</tfoot>
     </table></div>
-    ${c.milk ? `<p>${esc(c.milk)}</p>` : ""}
+    ${c.milk ? `<p>${markPlan(c.milk)}</p>` : ""}
     <h3 class="sub-title">Cooking over a fire</h3>
-    <p>${esc(c.fireLead)}</p>
-    <ul class="plain">${c.water.map((w) => `<li><strong>${esc(w.label)}:</strong> ${esc(w.text)}</li>`).join("")}</ul>
-    <p>${esc(c.waterTotal)}</p>
+    <p>${markPlan(c.fireLead)}</p>
+    <ul class="plain">${c.water.map((w) => `<li><strong>${esc(w.label)}:</strong> ${markPlan(w.text)}</li>`).join("")}</ul>
+    <p>${markPlan(c.waterTotal)}</p>
     ${d ? `
     <h3 class="sub-title">Or all in one pot</h3>
-    <p>${esc(d.lead)}</p>
-    <ol class="steps">${d.steps.map((st) => `<li>${esc(st)}</li>`).join("")}</ol>
+    <p>${markPlan(d.lead)}</p>
+    <ol class="steps">${d.steps.map((st) => `<li>${markPlan(st)}</li>`).join("")}</ol>
     <p>${esc(d.servingLeadTable)}</p>
     <p>${esc(d.note)}</p>` : ""}
     <p class="muted">${esc(COOK_NOTE)}</p>`;
@@ -289,11 +303,14 @@ function shopTable(lines, cards, shown) {
     const card = key && !shown.has(key) ? cards[key] : null;
     if (card) shown.add(key);
     const open = card && openWhy.has(key);
-    const ownKey = ownedKeyFor(ls[0].key);
-    const owned = ownKey && !!state[ownKey];
+    // Gear rows in a group share one box (the LifeStraw packs, the two bathtub choices); every
+    // other row (food, buckets, mylar) has its own.
+    const gearKey = gearKeyFor(ls[0].key);
+    const choice = ls.some((x) => x.choice);
     const rows = ls.map((l, i) => {
       const first = i === 0;
       const lastRow = i === ls.length - 1;
+      const owned = isOwned(l.key);
       const off = owned || (l.choice && !l.picked);
       const cls = [lastRow ? "" : "joined", i ? "cont" : "", off ? "off" : "", owned ? "owned" : ""].filter(Boolean).join(" ");
       const why = first && card
@@ -303,9 +320,9 @@ function shopTable(lines, cards, shown) {
         ? `<input type="radio" class="pick" name="tub" value="${l.key}"${l.picked ? " checked" : ""} aria-label="Buy the ${esc(TUB_NAMES[l.key])}">`
         : "";
       // The bathtub's box covers both choices, so it goes under the second one.
-      const choice = ls.some((x) => x.choice);
-      const have = ownKey && (choice ? lastRow : first)
-        ? `<label class="have"><input type="checkbox" data-owned="${ownKey}"${owned ? " checked" : ""}> Already have${choice ? " one" : ""}</label>`
+      const boxHere = gearKey ? (choice ? lastRow : first) : true;
+      const have = boxHere
+        ? `<label class="have"><input type="checkbox" data-own="${l.key}"${owned ? " checked" : ""}> Already have${choice ? " one" : ""}</label>`
         : "";
       const hint = lineHint(l);
       const cost = owned || (l.choice && !l.picked)
@@ -334,7 +351,7 @@ function shopTable(lines, cards, shown) {
 function shoppingSection(hh, lines) {
   const cards = Object.fromEntries(gearItems(hh).map((it) => [it.key, it]));
   const shown = new Set();
-  const counted = (l) => !(ownedKeyFor(l.key) && state[ownedKeyFor(l.key)]);
+  const counted = (l) => !isOwned(l.key);
   const tables = storeGroups({ ...hh, lines }).map((g) => `
     <h3 class="sub-title">${esc(g.title)} <span class="sub-total">${money(g.lines.filter(counted).reduce((t, l) => t + l.cost, 0))}</span></h3>
     ${shopTable(g.lines, cards, shown)}`).join("");
@@ -465,7 +482,8 @@ function renderResults() {
   // one-pot steps stay the same), so the page lists every line from a plan with nothing owned
   // and greys out the ones ticked "Already have".
   allLines = planHousehold(base).lines;
-  lastHousehold = hh;
+  const view = withHave(hh, new Set(Object.keys(state.have)));
+  lastHousehold = view;
   const el = $("#results");
   if (!hh.plans.length) {
     el.innerHTML = `<div class="empty"><p>Fill in sex, age, height and weight for at least one person, and the daily amounts and shopping list will appear here.</p></div>`;
@@ -484,7 +502,7 @@ function renderResults() {
     ${incomplete}
     <p class="results-intro">Measure dry food with level cups and spoons. Each card shows one person's day.</p>
     <div class="cards">${hh.plans.map((pl) => card(pl, hh)).join("")}</div>
-    ${shoppingSection(hh, allLines)}
+    ${shoppingSection(view, allLines)}
     ${moreSection(hh)}
     <div class="report-foot">
       <p>Keep a paper copy. Print the whole report, or save it as a PDF to print later.</p>
@@ -578,7 +596,7 @@ function init() {
     const t = e.target;
     let focus = null;
     if (t.name === "tub") { state.tub = t.value; focus = `input[name="tub"][value="${t.value}"]`; }
-    else if (t.dataset.owned) { state[t.dataset.owned] = t.checked; focus = `[data-owned="${t.dataset.owned}"]`; }
+    else if (t.dataset.own) { setOwned(t.dataset.own, t.checked); focus = `[data-own="${t.dataset.own}"]`; }
     else return;
     save(); renderResults();
     $(focus)?.focus({ preventScroll: true });
