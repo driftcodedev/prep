@@ -298,7 +298,7 @@ export function renderFishing(page = FISH_PAGE) {
         </div>
       </div>
 
-      <p class="ltf-hint ltf-tbl-hint">Tap a season to sort by it, most to least. Tap a species for its notes. For species that stay all year, like periwinkles, clams and scallops, each season shows the same animals, so don't add the seasons together.</p>
+      <p class="ltf-hint ltf-tbl-hint">Tap a season to sort by it, most to least. Tap a species for its notes. For species that stay all year, like urchins, periwinkles, clams and scallops, each season shows the same animals, so don't add the seasons together.</p>
       <div class="ltf-chart" data-table></div>
 
       <details class="ltm-notes" open>

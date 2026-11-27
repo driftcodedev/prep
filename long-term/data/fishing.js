@@ -13,7 +13,7 @@
 //   kcalPerLb   calories in a pound of meat
 //   confidence  1 to 5 (see CONFIDENCE in data/fishing-notes.js)
 
-export const FISH_CHECKED = "2026-11-26";
+export const FISH_CHECKED = "2026-11-27";
 
 // Calories an active adult needs in a year (3,000 a day).
 export const ADULT_KCAL_YEAR = 1095000;
@@ -38,8 +38,8 @@ export const SPECIES = [
   {"id": "sculpin", "name": "Longhorn sculpin", "short": "sculpin", "group": "fish", "confidence": 2, "weight": "live", "meatShare": 0.25, "kcalPerLb": 363, "lb": [151812, 141185, 129040, 65279, 21254, 141185], "kcal": [13777000, 12813000, 11710000, 5924000, 1929000, 12813000], "source": "Net survey, scaled up; the Canadian trawl found 1–5 times less"},
   {"id": "smelt", "name": "Rainbow smelt", "short": "smelt", "group": "fish", "confidence": 3, "weight": "live", "meatShare": 0.7, "kcalPerLb": 440, "lb": [19567, 27953, 16772, 5311, 5870, 13976], "kcal": [6027000, 8609000, 5166000, 1636000, 1808000, 4305000], "source": "Net survey, scaled up; the Canadian trawl agrees in July–October. Smelt gather in estuaries in winter and run up streams in spring"},
   {"id": "silverside", "name": "Atlantic silverside", "short": "silverside", "group": "fish", "confidence": 2, "weight": "live", "meatShare": 0.8, "kcalPerLb": 454, "lb": [0, 258, 1809, 1034, 25844, 4394], "kcal": [0, 94000, 657000, 375000, 9387000, 1596000], "source": "Net survey, scaled up"},
-  {"id": "urchins", "name": "Green sea urchins", "short": "urchins", "group": "urchins", "confidence": 1, "weight": "live", "meatShare": null, "kcalPerLb": 544, "lb": [null, null, null, null, null, null], "kcal": [null, null, null, null, null, null], "source": "No count in the bay. Maine landed 520,530 lb in 2024; the 2025 dive survey has no Cobscook numbers"},
-  {"id": "cucumbers", "name": "Sea cucumbers", "short": "sea cucumbers", "group": "urchins", "confidence": 1, "weight": "live", "meatShare": null, "kcalPerLb": 160, "lb": [null, null, null, null, null, null], "kcal": [null, null, null, null, null, null], "source": "No count in the bay. Maine's main beds are in Frenchman and Narraguagus Bays"},
+  {"id": "urchins", "name": "Green sea urchins", "short": "urchins", "group": "urchins", "confidence": 2, "weight": "live", "meatShare": 0.06, "kcalPerLb": 544, "lb": [14328096, 14328096, 14328096, 14328096, 14328096, 14328096], "kcal": [467669000, 467669000, 467669000, 467669000, 467669000, 467669000], "source": "DMR dive survey, 2024–25: about 14 million lb (11–18 million) on rocky bottom down to 15 m. Calories could be 190 million to 1.1 billion a season, since the roe is 3–12% of the weight"},
+  {"id": "cucumbers", "name": "Sea cucumbers", "short": "sea cucumbers", "group": "urchins", "confidence": 1, "weight": "live", "meatShare": null, "kcalPerLb": 160, "lb": [null, null, null, null, null, null], "kcal": [null, null, null, null, null, null], "source": "At least about 1 million lb in shallow water; the main beds are deeper and uncounted"},
   {"id": "whelks", "name": "Whelks", "short": "whelks", "group": "shellfish", "confidence": 1, "weight": "live", "meatShare": null, "kcalPerLb": 330, "lb": [null, null, null, null, null, null], "kcal": [null, null, null, null, null, null], "source": "No count in the bay"},
   {"id": "pollock", "name": "Pollock", "short": "pollock", "group": "fish", "confidence": 1, "weight": "live", "meatShare": null, "kcalPerLb": 417, "lb": [null, null, null, null, null, null], "kcal": [null, null, null, null, null, null], "source": "No count in the bay"},
   {"id": "elvers", "name": "Elvers (baby eels)", "short": "elvers", "group": "fish", "confidence": 1, "weight": "live", "meatShare": null, "kcalPerLb": 680, "lb": [null, null, null, null, null, null], "kcal": [null, null, null, null, null, null], "source": "No count in the bay"},

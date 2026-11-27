@@ -333,7 +333,7 @@ export function fishingBlocks(list = SPECIES, seasons = SEASONS) {
   const conf = (sp) => ({ text: String(sp.confidence), b: true });
   const sixAlign = ["left", "right", "right", "right", "right", "right", "right"];
 
-  out.push(p(`${FISH_PAGE.intro} For species that stay all year, like periwinkles, clams and scallops, each season shows the same animals, so don't add the seasons together.`));
+  out.push(p(`${FISH_PAGE.intro} For species that stay all year, like urchins, periwinkles, clams and scallops, each season shows the same animals, so don't add the seasons together.`));
   out.push({ t: "note", runs: FISH_PAGE.draft });
 
   out.push(h3("Calories in the bay (millions)"));

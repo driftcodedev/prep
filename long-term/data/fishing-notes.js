@@ -4,7 +4,7 @@
 export const FISH_PAGE = {
   heading: "Cobscook Bay fishing by season",
   intro: "How much food is in the bay in each two-month season: the whole amount there before anyone fishes. No cutoffs and no fishing method yet. Each species has a score from 1 to 5 for how sure the number is.",
-  draft: "Draft for review, Nov 26, 2026.",
+  draft: "Draft for review, Nov 27, 2026.",
 };
 
 // One color per species, in families: blues for fish, golds and browns for shellfish,
@@ -54,8 +54,8 @@ export const PROFILES = {
   sculpin: { best: "Nov–Jun", size: "10–14 in", yield: "about 25% (est.)", gear: "Rod, any bait", rules: "Check DMR", safety: "Spiny, mostly head; eat the tail meat" },
   smelt: { best: "Mar–Apr runs; fall and winter", size: "6–8 in", yield: "about 70%, eaten whole", gear: "Dip net on night spring runs; light hook in fall", rules: "Washington County: nets allowed Jan 1–Apr 1", safety: "Runs are declining; let the first week of a run go by" },
   silverside: { best: "Sep–Oct", size: "3–5 in", yield: "about 80%, eaten whole", gear: "Fine-mesh seine in shallows", rules: "Check DMR", safety: "Fry whole" },
-  urchins: { best: "Roe best Nov–Feb", size: "2–3 in across", yield: "Roe 4–12% by season", gear: "Rake, dive or drag; some at the lowest tides", rules: "License; no urchin fishing Apr–Aug; Whiting and Dennys Bays have their own short season", safety: "Roe is poor after spring spawning" },
-  cucumbers: { best: "All year", size: "0.5–1 lb", yield: "25–50%", gear: "Drag from a boat", rules: "Closed, limited-entry drag fishery", safety: "Lean; very low calories" },
+  urchins: { best: "Roe best Nov–Feb", size: "2–3 in across", yield: "Roe 3–12% by season", gear: "Rake, dive or drag; some at the lowest tides", rules: "License; no urchin fishing Apr–Aug; Whiting and Dennys Bays have their own short season", safety: "Roe is poor after spring spawning. The bay's urchins have dropped by about half since 2015–19" },
+  cucumbers: { best: "All year", size: "About 0.4–0.5 lb next door in Canada, smaller than in 2004", yield: "Skin and muscle, about 13–32%", gear: "Drag from a boat", rules: "Closed, limited-entry drag fishery", safety: "Lean; very low calories. Most live in deep, fast channels (20–100 m)" },
   whelks: { best: "May–Aug", size: "2–4 in", yield: "about 30% (est.)", gear: "By hand at low tide, baited trap", rules: "Check with DMR", safety: "Can carry toxins from the shellfish they eat" },
   pollock: { best: "Sep–Oct; around all year", size: "10–14 in (young)", yield: "about 40%", gear: "Rod and jig from breakwaters", rules: "No size or bag limit in Maine waters", safety: "" },
   elvers: { best: "Apr–May", size: "2–3 in, about 2,500 per lb", yield: "100%", gear: "Dip net or fyke net in rivers at night", rules: "License by lottery; quota; Mar 22–Jun 7", safety: "Worth hundreds of dollars a pound today" },
@@ -76,7 +76,7 @@ export const HERRING_METHODS = {
 export const HERRING_CATCH_NOTE = "Caught by weirs and stop seines in the \"low pool\": Cobscook Bay and its shores to West Quoddy Head (NOAA SSRF 476). Herring's seasons above follow these months. Nothing was recorded in January–April, partly because weirs weren't fished then and Maine banned sardine canning from December 1 to April 15, so some herring may be there.";
 
 export const METHOD = [
-  "Every number is the whole amount in the bay in that season, before anyone fishes. For species that stay all year (periwinkles, clams, scallops, flounder), each season assumes nothing was taken earlier, so don't add their seasons together.",
+  "Every number is the whole amount in the bay in that season, before anyone fishes. For species that stay all year (periwinkles, clams, scallops, urchins, flounder), each season assumes nothing was taken earlier, so don't add their seasons together.",
   "Most species: the year-round average weight from the bay food-web model (Chapman and others 2020), split into seasons by when the bay net survey caught them. Season pounds = average × that season's share ÷ the average share.",
   "Clams, mussels and other shellfish: 1.6 million lb a year on average, the least today's clam harvest needs. Lubec, Perry, Pembroke and Whiting land about 510,000 lb of legal clams a year; in the food-web model shellfish add 0.7 of their weight a year and other animals eat 46% of that, so supplying both takes at least 1.4–1.6 million lb. The model itself gives 0.87 million lb in one table and 2.5 million in another.",
   "Herring: the middle of three separate methods, split into seasons by the bay's own 1947–58 catches (see above).",
@@ -84,6 +84,8 @@ export const METHOD = [
   "Flounder: the Canadian trawl, corrected for the 60–90% of flounder in its path that a survey trawl catches, agrees with our September–October number and is 2.8–4.2 times below our July–August one (it fished only water 15–86 m deep). January–April are 0: adults were rare in Passamaquoddy Bay in winter and seldom present below 43°F, and Eastport's water averages 37–41°F then.",
   "Lobster: the Canadian trawl for July–October. Maine's own inshore trawl survey, sized to Cobscook, lands within 2 times of it in the fall. May–June comes from Maine's spring survey scaled to local water: the Canadian fall number × Maine's spring-to-fall ratio (40 ÷ 59 kg a tow). Both trawls miss lobsters on rock, so these are minimums; November–April are unknown.",
   "Rainbow smelt: the Canadian trawl agrees with the net survey in July–October. The January–April peak comes from the survey's May catch: smelt gather in estuaries in winter and run up Cobscook's streams in spring, but how many is still unchecked.",
+  "Green sea urchins: DMR's spring dive survey for the Cobscook–Passamaquoddy area, which covers rock and gravel down to 15 m (52 million sq m). About 3 of every 4 of its dive sites each year are inside Cobscook, and its randomly placed sites put Cobscook at 62–73% of that bottom. DMR's weight per sq m was about 210 g in 2024 and 160 g in 2025 (read off their chart), so Cobscook holds about 14 million lb (11–18 million). Urchins stay put, so every season gets that amount. Calories use roe at 6% of the weight; it runs 3–12% by season and site, so calories could be 190 million to 1.1 billion a season. That spread, and no second method, keep urchins at 2.",
+  "Sea cucumbers: the same dive survey finds only 0.02–0.1 per sq m down to 15 m, about 1 million lb (0.4–2.2 million) in shallow water. Most live in deep, fast channels (20–100 m), as in the Canadian fishery next door, and no one has counted those in Cobscook, so the table leaves them blank.",
   "Alewives: run counts. Scallops: the state survey, 2014–15, as meat.",
   "The net survey only fished in May, June, August and September, so winter and late-fall amounts for those species are filled in from what's known of their habits.",
   "Calories = pounds × meat share × calories per pound of meat (checked against USDA and other food tables). Active adults fed a year = calories ÷ 3,000 a day ÷ 365.",
@@ -91,8 +93,9 @@ export const METHOD = [
 ];
 
 export const FISH_NOTES = [
-  "Winter is the bottleneck: January–April holds about an eighth of what September–October does, almost all of it clams, mussels, periwinkles and scallops. Even September–October, if every animal were caught, is a year's food for about 2,000 active adults. About 7,000 people live around the bay.",
-  "Herring is the biggest food from July to December, and it swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).",
+  "Winter is the bottleneck: January–April holds about a quarter of what September–October does, and almost two-thirds of it is urchins. Without urchins it's about an eighth, almost all clams, mussels, periwinkles and scallops. Even September–October, if every animal were caught, is a year's food for about 2,450 active adults. About 7,000 people live around the bay.",
+  "Urchins are the biggest food from November to June, but they're a 2: their calories hang on the roe, which is 3–12% of the weight, so a season could hold anywhere from 190 million to 1.1 billion. Roe is best in November–February and poor after spring spawning.",
+  "Herring is the biggest food in September–October and about ties urchins in July–August. It swings a lot from year to year: the bay's catch ran from 49,000 lb (1947) to over 6 million lb (1954).",
   "Fat matters: mackerel, herring, alewives and eels are oily; most shellfish and flounder are very lean. Living mostly on lean meat makes people ill, so smoke or salt the oily fish for winter.",
   "Shellfish safety: red tide and other toxins are worst from spring to fall. Never eat shellfish from a closed area. Wild Atlantic salmon in the Dennys River are endangered: leave them.",
   "Not in these numbers yet: cutoffs, fishing methods and cleaning time. They come next. The 44% drop in legal Cobscook scallops after five weeks of the 2024–25 season waits until methods are picked.",
@@ -140,6 +143,11 @@ export const FISH_SOURCES = [
   ["Cobscook Bay Resource Center: facts and figures", "https://cobscook.org/facts"],
   ["Cobscook Bay Resource Center: green crabs and clams", "https://cobscook.org/clams"],
   ["Maine DMR sea urchin landings", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/urchin_table.pdf"],
+  ["Maine BEACON dive survey explorer (DMR): urchin weight, cucumber counts and dive sites", "https://mainedmr.shinyapps.io/UrchinDiveShiny/"],
+  ["Maine DMR 2025 spring dive survey report", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/2025%20MEDMR%20Spring%20Dive%20Survey%20Report.pdf"],
+  ["Status of the Maine sea cucumber fishery (Feindel, 2002)", "https://lldc.mainelegislature.org/Open/Rpts/sh399_t8f4_2002.pdf"],
+  ["DFO 2009: southwest New Brunswick sea cucumber fishery", "https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/337030.pdf"],
+  ["DFO 2023: southwest New Brunswick sea cucumber status", "https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/41209709.pdf"],
   ["Maine DMR rainbow smelt", "https://www.maine.gov/dmr/sites/maine.gov.dmr/files/docs/rainbowsmelt.pdf"],
   ["Maine Sea Grant: lobster", "https://seagrant.umaine.edu/maine-seafood-guide/lobster/"],
   ["Maine DMR shellfish limits", "https://maine.gov/dmr/fisheries/shellfish/shellfish-identification"],

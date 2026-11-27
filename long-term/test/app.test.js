@@ -298,22 +298,22 @@ test("fishing data: six seasons, every species complete, colored, described and 
     // No count means no numbers at all and the lowest score: blank, not guessed.
     if (!counted(sp)) assert.equal(sp.confidence, 1, `${sp.id} has no count`);
   }
-  assert.deepEqual(SPECIES.filter((sp) => !counted(sp)).map((sp) => sp.id), ["urchins", "cucumbers", "whelks", "pollock", "elvers"]);
+  assert.deepEqual(SPECIES.filter((sp) => !counted(sp)).map((sp) => sp.id), ["cucumbers", "whelks", "pollock", "elvers"]);
 });
 
 test("the scores agreed for each species", () => {
   const score = Object.fromEntries(SPECIES.map((sp) => [sp.id, sp.confidence]));
   assert.deepEqual(score, {
     herring: 3, mackerel: 2, periwinkles: 3, shellfish: 3, scallops: 3, alewives: 4, flounder: 3, codfamily: 3,
-    greencrabs: 2, lobster: 3, sculpin: 2, smelt: 3, silverside: 2, urchins: 1, cucumbers: 1, whelks: 1, pollock: 1, elvers: 1,
+    greencrabs: 2, lobster: 3, sculpin: 2, smelt: 3, silverside: 2, urchins: 2, cucumbers: 1, whelks: 1, pollock: 1, elvers: 1,
   });
 });
 
 test("season totals match the sources-check doc", () => {
   const millionsBySeason = [0, 1, 2, 3, 4, 5].map((b) => Math.round(seasonTotal(SPECIES, "kcal", b) / 1e6));
-  assert.deepEqual(millionsBySeason, [263, 288, 672, 1296, 2210, 502]);
+  assert.deepEqual(millionsBySeason, [731, 756, 1140, 1764, 2678, 969]);
   const fed = [0, 1, 2, 3, 4, 5].map((b) => fedText(seasonTotal(SPECIES, "kcal", b)));
-  assert.deepEqual(fed, ["240", "260", "610", "1,180", "2,020", "460"]);
+  assert.deepEqual(fed, ["670", "690", "1,040", "1,610", "2,450", "890"]);
   assert.ok(Math.abs(adultsFed(1095000) - 1) < 1e-9);
   const herring = SPECIES.find((sp) => sp.id === "herring");
   assert.deepEqual(herring.lb.map((v) => Math.round(v / 1000)), [0, 0, 302, 1107, 3580, 410]);
@@ -336,9 +336,9 @@ test("each season's ranking adds to 100% and matches the doc's order", () => {
     assert.ok(Math.abs(r.reduce((s, x) => s + x.share, 0) - 100) < 1e-6, `season ${b}`);
     assert.ok(r.every((x, i) => i === 0 || r[i - 1].value >= x.value), `season ${b} order`);
   }
-  assert.equal(rankingText(SPECIES, 0), "Clams and mussels 41%, periwinkles 33%, scallops 18%, sculpin 5%, smelt 2%, the rest under 1%");
-  assert.equal(rankingText(SPECIES, 4), "Herring 70%, mackerel 14%, clams and mussels 6%, periwinkles 5%, scallops 2%, lobster 1%, the rest under 1%");
-  assert.equal(seasonRanking(SPECIES, "kcal", 5)[0].sp.id, "herring");
+  assert.equal(rankingText(SPECIES, 0), "Urchins 64%, clams and mussels 15%, periwinkles 12%, scallops 6%, sculpin 2%, the rest under 1%");
+  assert.equal(rankingText(SPECIES, 4), "Herring 58%, urchins 17%, mackerel 11%, clams and mussels 5%, periwinkles 4%, scallops 2%, the rest under 1%");
+  assert.equal(seasonRanking(SPECIES, "kcal", 5)[0].sp.id, "urchins");
 });
 
 test("rows sort by the picked season: most to least, then none counted, not counted, no count", () => {
@@ -350,19 +350,20 @@ test("rows sort by the picked season: most to least, then none counted, not coun
     assert.ok(vals.every((v, i) => i === 0 || vals[i - 1] >= v), `season ${b} order`);
   }
   const jan = sortRows(SPECIES, "kcal", 0).map((sp) => sp.id);
-  assert.deepEqual(jan.slice(0, 3), ["shellfish", "periwinkles", "scallops"]);
+  assert.deepEqual(jan.slice(0, 3), ["urchins", "shellfish", "periwinkles"]);
   assert.ok(jan.indexOf("herring") < jan.indexOf("lobster"), "none counted comes before not counted this season");
-  assert.ok(jan.indexOf("lobster") < jan.indexOf("urchins"), "not counted this season comes before no count");
+  assert.ok(jan.indexOf("lobster") < jan.indexOf("cucumbers"), "not counted this season comes before no count");
   assert.equal(sortRows(SPECIES, "kcal", 4)[0].id, "herring");
-  assert.equal(sortRows(SPECIES, "lb", 0)[0].id, "periwinkles"); // by pounds, periwinkles edge out clams
+  assert.deepEqual(sortRows(SPECIES, "lb", 0).slice(0, 3).map((sp) => sp.id), ["urchins", "periwinkles", "shellfish"]); // by pounds, periwinkles edge out clams
 });
 
 test("percent views: share of the season (columns) and % of the species' own best season (rows)", () => {
   const sp = (id) => SPECIES.find((x) => x.id === id);
   // Columns: Jan–Feb shellfish against scallops.
-  assert.equal(cellText(sp("shellfish"), "kcal", "col", 0), "41%");
-  assert.equal(cellText(sp("scallops"), "kcal", "col", 0), "18%");
-  assert.equal(cellText(sp("herring"), "kcal", "col", 4), "70%");
+  assert.equal(cellText(sp("shellfish"), "kcal", "col", 0), "15%");
+  assert.equal(cellText(sp("scallops"), "kcal", "col", 0), "6%");
+  assert.equal(cellText(sp("urchins"), "kcal", "col", 0), "64%");
+  assert.equal(cellText(sp("herring"), "kcal", "col", 4), "58%");
   // Rows: each season against the species' own best.
   assert.equal(cellText(sp("herring"), "kcal", "row", 4), "100%");
   assert.equal(cellText(sp("herring"), "kcal", "row", 0), "0%");
@@ -373,7 +374,10 @@ test("percent views: share of the season (columns) and % of the species' own bes
   for (const view of ["amount", "col", "row"]) assert.equal(cellText(sp("lobster"), "kcal", view, 0), "?");
   assert.equal(cellText(sp("herring"), "kcal", "amount", 4), "1,540");
   assert.equal(cellText(sp("herring"), "lb", "amount", 4), "3,580");
-  assert.equal(bestOf(sp("urchins"), "kcal"), 0);
+  assert.equal(bestOf(sp("cucumbers"), "kcal"), 0);
+  // Urchins stay put: the same amount every season, so every season is 100% of the best.
+  assert.equal(cellText(sp("urchins"), "kcal", "row", 0), "100%");
+  assert.equal(cellText(sp("urchins"), "lb", "amount", 0), "14,328");
   // Each season's column shares add to 100%.
   for (let b = 0; b < 6; b++) {
     const sum = SPECIES.reduce((s, x) => s + (x.kcal[b] || 0), 0) / seasonTotal(SPECIES, "kcal", b);
@@ -424,7 +428,7 @@ test("fishing table: a row per species with its notes, sorted by the picked seas
   assert.match(tbl, /data-season="4" aria-pressed="true"/);
   assert.match(tbl, /aria-sort="descending"/);
   assert.match(tbl, /Active adults fed a year/);
-  assert.match(tbl, />2,210</);
+  assert.match(tbl, />2,678</);
   assert.ok(tbl.indexOf('data-sp="herring"') < tbl.indexOf('data-sp="mackerel"'), "Sep–Oct: herring first");
   const open = drawTable({ measure: "kcal", view: "amount" }, 0, new Set(["flounder"]));
   assert.match(open, /data-sp="flounder" aria-expanded="true"/);
@@ -432,7 +436,7 @@ test("fishing table: a row per species with its notes, sorted by the picked seas
   assert.match(open, /Calories in Jan–Feb/);
   assert.match(open, /Adults leave when the water is under 43°F/);
   const col = drawTable({ measure: "kcal", view: "col" }, 0);
-  assert.match(col, />41%</);
+  assert.match(col, />64%</);
   assert.match(col, /<th scope="row">Total<\/th>(<td[^>]*>100%<\/td>){6}/);
   const row = drawTable({ measure: "kcal", view: "row" }, 4);
   assert.match(row, /class="is-on is-best">100%</);

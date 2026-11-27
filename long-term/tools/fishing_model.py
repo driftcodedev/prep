@@ -53,6 +53,15 @@ HERRING_SEASON = [HERRING_MONTH_PCT[i] + HERRING_MONTH_PCT[i + 1] for i in range
 HERRING_AVG_LB = 900_000  # middle of three methods: model 1.6M, sonar 0.45M, 1950s catch x weirs 0.43-2.2M
 SHELLFISH_AVG_LB = 1_600_000  # clams, mussels and other shellfish: the least the clam harvest needs (see below)
 
+# Green sea urchins: DMR's spring dive survey (BEACON), Region 9 "Cobscook Bay-Passamaquoddy Bay".
+# 52,045,499 sq m of rock and gravel 0-15 m deep in the region. 62-73% of the region's random dive
+# sites (2001-25) fall inside Cobscook, so that's its share of the rocky bottom. DMR's official
+# biomass (read off their chart, about 10%): 2024 about 210 g per sq m, 2025 about 160.
+URCHIN_REGION_M2 = 52_045_499
+URCHIN_COBSCOOK_SHARE = (0.62 + 0.73) / 2
+URCHIN_G_PER_M2 = (210 + 160) / 2
+URCHIN_LB = URCHIN_REGION_M2 * URCHIN_COBSCOOK_SHARE * URCHIN_G_PER_M2 / 1000 * 2.2046  # about 14.3 million
+
 
 def from_avg(avg, idx):
     mean = sum(idx) / 6
@@ -128,11 +137,17 @@ SP = [
     dict(id="silverside", name="Atlantic silverside", short="silverside", group="fish", conf=2,
          lb=from_peak(surv(2375 + 1200) * 0.8 * 0.012, [0, 1, 7, 4, 100, 17]), meat=0.8, kcal=454,
          source="Net survey, scaled up"),
+    # Urchins stay put, so every season gets the spring survey's amount. Edible roe runs 3-12% of live
+    # weight by season and site; 6% is used. Range: 11-18 million lb, 190 million-1.1 billion calories.
+    # A 2, not a 3: one method, and the roe share alone spans 4x.
+    dict(id="urchins", name="Green sea urchins", short="urchins", group="urchins", conf=2,
+         lb=[URCHIN_LB] * 6, meat=0.06, kcal=544,
+         source="DMR dive survey, 2024–25: about 14 million lb (11–18 million) on rocky bottom down to 15 m. Calories could be 190 million to 1.1 billion a season, since the roe is 3–12% of the weight"),
     # No count in the bay: kept, with no numbers, rather than guessed.
-    dict(id="urchins", name="Green sea urchins", short="urchins", group="urchins", conf=1, lb=NONE, meat=None, kcal=544,
-         source="No count in the bay. Maine landed 520,530 lb in 2024; the 2025 dive survey has no Cobscook numbers"),
+    # Sea cucumbers: DMR divers (0-15 m) find 0.02-0.1 per sq m in Region 9, which gives about 1 million lb
+    # (0.4-2.2) in shallow water. Most live in deep, fast channels (20-100 m) that no one has counted here.
     dict(id="cucumbers", name="Sea cucumbers", short="sea cucumbers", group="urchins", conf=1, lb=NONE, meat=None, kcal=160,
-         source="No count in the bay. Maine's main beds are in Frenchman and Narraguagus Bays"),
+         source="At least about 1 million lb in shallow water; the main beds are deeper and uncounted"),
     dict(id="whelks", name="Whelks", short="whelks", group="shellfish", conf=1, lb=NONE, meat=None, kcal=330,
          source="No count in the bay"),
     dict(id="pollock", name="Pollock", short="pollock", group="fish", conf=1, lb=NONE, meat=None, kcal=417,
@@ -162,7 +177,7 @@ def write_js(path):
            "//   kcalPerLb   calories in a pound of meat",
            "//   confidence  1 to 5 (see CONFIDENCE in data/fishing-notes.js)",
            "",
-           'export const FISH_CHECKED = "2026-11-26";',
+           'export const FISH_CHECKED = "2026-11-27";',
            "",
            f"// Calories an active adult needs in a year ({ADULT_KCAL_DAY:,} a day).",
            f"export const ADULT_KCAL_YEAR = {ADULT_KCAL_DAY * 365};",
