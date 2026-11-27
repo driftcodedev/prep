@@ -287,7 +287,7 @@ function withTubChoice(lines) {
 }
 
 // Lines that share an explanation sit together as one row: the LifeStraw packs, the buckets and
-// mylar bags, and the two bathtub water choices. The first gets the "Why?" button and the
+// mylar bags, and the two bathtub water choices. Each row has the "Why?" button; the first has the
 // "Already have" box (the bathtub's goes under both choices); the explanation opens under the last.
 function clusters(lines) {
   const out = [];
@@ -315,8 +315,9 @@ function shopTable(lines, cards, shown) {
       const owned = isOwned(l.key);
       const off = owned || (l.choice && !l.picked);
       const cls = [lastRow ? "" : "joined", i ? "cont" : "", off ? "off" : "", owned ? "owned" : ""].filter(Boolean).join(" ");
-      const why = first && card
-        ? ` <button type="button" class="why-btn" data-why="${key}" aria-expanded="${open}" aria-controls="why-${key}">${open ? "Hide" : "Why?"}</button>`
+      // Every row with an explanation gets the button (buckets and mylar bags open the same one).
+      const why = card
+        ? `<button type="button" class="why-btn" data-why="${key}" aria-expanded="${open}" aria-controls="why-${key}">${open ? "Hide" : "Why?"}</button>`
         : "";
       const radio = l.choice
         ? `<input type="radio" class="pick" name="tub" value="${l.key}"${l.picked ? " checked" : ""} aria-label="Buy the ${esc(TUB_NAMES[l.key])}">`
@@ -332,7 +333,7 @@ function shopTable(lines, cards, shown) {
         : `${money(l.cost)}${l.priceNote ? `<small>${esc(l.priceNote)}</small>` : ""}`;
       return `
       <tr${cls ? ` class="${cls}"` : ""}>
-        <th scope="row"><span class="item-line">${radio}${l.choice && i ? '<span class="or">or</span> ' : ""}<a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a>${why}</span>${hint ? `<small class="keeps">${esc(hint)}</small>` : ""}${have}</th>
+        <th scope="row"><span class="item-line">${radio}<span class="item-name">${l.choice && i ? '<span class="or">or</span> ' : ""}<a href="${l.url}" target="_blank" rel="noopener">${esc(l.item)}</a></span>${why}</span>${hint ? `<small class="keeps">${esc(hint)}</small>` : ""}${have}</th>
         <td>${esc(l.pack)}</td>
         <td class="num">${l.qty}</td>
         <td>${esc(l.amountText)}</td>
@@ -661,8 +662,11 @@ function init() {
       const key = whyBtn.dataset.why;
       const row = document.getElementById(`why-${key}`);
       const open = whyBtn.getAttribute("aria-expanded") !== "true";
-      whyBtn.setAttribute("aria-expanded", String(open));
-      whyBtn.textContent = open ? "Hide" : "Why?";
+      // Rows that share an explanation share its state (buckets and mylar bags).
+      document.querySelectorAll(`[data-why="${key}"]`).forEach((b) => {
+        b.setAttribute("aria-expanded", String(open));
+        b.textContent = open ? "Hide" : "Why?";
+      });
       row.hidden = !open;
       if (open) openWhy.add(key); else openWhy.delete(key);
       return;

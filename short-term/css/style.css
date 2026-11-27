@@ -312,6 +312,11 @@ table.data { width: 100%; border-collapse: collapse; font-variant-numeric: tabul
 .shop tr.joined > th, .shop tr.joined > td { border-bottom: 0; padding-bottom: 0.15rem; }
 .shop tr.cont > th, .shop tr.cont > td { padding-top: 0.15rem; }
 /* Gear ticked "Already have", and the bathtub choice not picked: greyed, price struck through. */
+/* The item name wraps on its own; "Why?" always stays to its right. */
+.shop .item-line { display: flex; align-items: baseline; gap: 0.4rem; }
+.shop .item-name { min-width: 0; }
+.shop .item-line .why-btn { flex: none; margin-left: 0; }
+.shop .item-line input.pick { flex: none; align-self: center; margin: 0; }
 .shop tr.off > td, .shop tr.off .item-line a { color: var(--ink-2); }
 .shop tr.off .item-line a { text-decoration-color: var(--line); }
 .shop td.num s { color: var(--ink-2); }
