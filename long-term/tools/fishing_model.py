@@ -40,7 +40,7 @@ SURVEY = dict(
 
 # Net survey yardstick: bay fish per survey fish, from the counted alewife run. Used only for smelt and
 # silverside, which the survey caught mostly in the shore seine, as it did the alewives.
-RUN = 500_000 + 58_000                   # Pennamaquan 2023 (~500,000) + Dennys 2024 (58,000+)
+RUN = 500_000 + 58_000                   # Pennamaquan 2023 (~500,000) + Dennys 2008 (58,000+, the last count found)
 SURVEY_ALEWIFE_MAYJUN = (SURVEY["alewife"][0] + SURVEY["alewife"][1]) / 3   # alewives caught a year in May-June
 F = RUN / SURVEY_ALEWIFE_MAYJUN          # about 2,259
 
@@ -161,7 +161,7 @@ SP = [
          source="State dredge survey, fall 2015: 376,300 lb of harvestable meat, the last bay total DMR published (2012–15 ran 376,000–636,000). Legal scallops have fallen since 2021"),
     dict(id="alewives", name="Alewives", short="alewives", group="fish", conf=4,
          lb=from_peak(RUN * 0.45, [0, 5, 100, 5, 0, 0]), meat=0.4, kcal=470,
-         source="Run counts: Pennamaquan about 500,000 (2023), Dennys 58,000+ (2024)"),
+         source="Run counts: Pennamaquan about 500,000 (2023), Dennys 58,000+ (2008, the last count found)"),
     # Swept area from the bay survey's bottom trawl, all sizes, at the 60-90% of flounder in its path a
     # survey trawl catches (Miller and others 2023; 75% used). November-December weren't surveyed and
     # take September's level. January-April are 0: adult winter flounder were rare or absent in
