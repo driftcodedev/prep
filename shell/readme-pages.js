@@ -165,6 +165,153 @@ export const PAGES = [
 `,
   },
   {
+    id: "nets-and-traps",
+    title: "Nets and traps",
+    names: ["Nets", "Traps", "Fishing gear", "Gill nets", "Passive fishing", "Fishing nets"],
+    html: `
+<p>How to catch fish while you do other work: which nets and traps to use, what size, how many, and how to keep them hidden. It's written for one person fishing to feed two adults, in a long grid-down with no rules to follow. Netting spots will get a page of their own later. Checked 27 November 2026.</p>
+<h3>The short answer</h3>
+<ul>
+<li><b>Gill nets do most of the work:</b> 10 small ones in two mesh sizes, with 6 fishing at a time.</li>
+<li><b>Two fyke nets</b> go in streams for the spring alewife and smelt runs.</li>
+<li><b>A cast net</b> for schools of small herring, and <b>5–10 lobster traps</b>.</li>
+<li><b>Check everything at low tide and keep a catch log.</b> After a couple of weeks, the log tells you how many nets you really need and where they catch.</li>
+</ul>
+<h3>Passive or not</h3>
+<p>Passive gear fishes while you're away. Active gear needs you there the whole time.</p>
+<table>
+<tr><th>Gear</th><th>Passive?</th><th>Best for</th><th>Notes</th></tr>
+<tr><td><b>Gill net</b></td><td>Yes</td><td>Herring, mackerel, alewives</td><td>Fish die in the net, so check it every tide</td></tr>
+<tr><td><b>Fyke net</b> (a hoop net with wings that steer fish in)</td><td>Yes</td><td>Alewives, smelt</td><td>Fish stay alive inside</td></tr>
+<tr><td><b>Traps</b></td><td>Yes</td><td>Lobster, green crabs</td><td>Bait with fish heads and guts</td></tr>
+<tr><td><b>Set line</b> (baited hooks left on the bottom)</td><td>Yes</td><td>Flounder, hake, sculpin</td><td>Cheap and easy to hide; small catches</td></tr>
+<tr><td><b>Weir</b></td><td>Yes</td><td>Herring schools</td><td>Too big a build for one person</td></tr>
+<tr><td><b>Stop seine</b></td><td>Partly: you close off a cove when a school comes in, then haul it</td><td>Herring schools</td><td>Needs 2–3 people</td></tr>
+<tr><td><b>Beach seine</b></td><td>No</td><td>Anything close to shore</td><td>Needs 2 people</td></tr>
+<tr><td><b>Cast net</b></td><td>No</td><td>Small herring, silversides</td><td>One good throw can bring up dozens</td></tr>
+<tr><td><b>Dip net</b></td><td>No</td><td>The alewife run</td><td>Only worth it at the peak of the run</td></tr>
+</table>
+<h3>How much two people need</h3>
+<p>Two active adults eat about 6,000 calories a day. In fish, that's:</p>
+<table>
+<tr><th>Fish</th><th>Size</th><th>Calories each</th><th>A day for two</th></tr>
+<tr><td>Mackerel</td><td>about 13 in, 0.7 lb</td><td>about 325</td><td>about 18</td></tr>
+<tr><td>Adult herring</td><td>10–11 in, about 0.3 lb</td><td>about 130</td><td>about 46</td></tr>
+<tr><td>Alewife</td><td>10–11 in, about 0.45 lb</td><td>about 85</td><td>about 70</td></tr>
+<tr><td>Small herring</td><td>about 6 in, about 1 oz</td><td>about 27</td><td>about 220</td></tr>
+<tr><td>Lobster</td><td>about 1¼ lb</td><td>about 90</td><td>about 70</td></tr>
+</table>
+<p>Calories each = weight × the share that's meat × calories in a pound of meat, all from the Fishing view.</p>
+<p><b>Then there's winter.</b> Say smoked and salted fish covers half your food for January–April, and clams, game and stored food cover the rest. Then you need about 360,000 calories put away: about 1,100 mackerel (770 lb). That's about 9 extra a day from July to October. So in the main season, aim for about 27 mackerel's worth a day: 18 to eat and 9 to store.</p>
+<h3>Which gear for which fish</h3>
+<ul>
+<li><b>Herring and mackerel, July–October: gill nets.</b> They're the main food, and gill nets are the only passive gear one person can run for them.</li>
+<li><b>Small herring: a cast net</b> on schools close to shore. They slip through the gill nets.</li>
+<li><b>Alewives, May–June: fyke nets</b> where streams meet the bay, and a dip net at the peak of the run. Both gill net sizes catch some out in the bay.</li>
+<li><b>Smelt, March–April: fyke nets</b> in the streams they run up.</li>
+<li><b>Lobster and green crabs, May–December: traps.</b> Lobster is a side dish: two people would need about 70 a day to live on it.</li>
+<li><b>Flounder, hake and sculpin: a set line,</b> if you have hooks and bait to spare. The bay holds far less of these.</li>
+<li><b>Clams, mussels and periwinkles</b> need no gear, just a low tide and a rake or bucket.</li>
+</ul>
+<h3>Mesh size</h3>
+<ul>
+<li><b>A gill net catches one size of fish best.</b> Smaller fish swim through it, and bigger ones bounce off.</li>
+<li><b>Herring are caught best at about 5 times the stretched mesh in length,</b> and mackerel at about the same. Alewives are deeper-bodied, so they need a bigger mesh for their length.</li>
+</ul>
+<table>
+<tr><th>Stretched mesh</th><th>Catches best</th></tr>
+<tr><td>2 in</td><td>Herring about 10 in</td></tr>
+<tr><td><b>2¼ in</b></td><td><b>Herring about 11 in</b></td></tr>
+<tr><td>2½ in</td><td>Herring about 12½ in; alewives</td></tr>
+<tr><td><b>2¾ in</b></td><td><b>Mackerel about 13–14 in</b>; herring about 13½ in</td></tr>
+</table>
+<ul>
+<li><b>Stretched mesh</b> is one mesh pulled tight, measured from knot to knot. <b>Square</b> or <b>bar</b> mesh is one side of it, half as much, so "1¼ in square" is the same net as "2½ in stretched". Check which one a seller means.</li>
+<li><b>Gill net material:</b> dark multifilament nylon lasts longer and is easy to mend by hand. Clear monofilament often catches more but is hard to mend.</li>
+<li><b>Traps and fyke nets</b> don't need to fit the fish, only hold it. ½ in square mesh holds smelt and alewives. Cast nets are usually sold by square mesh.</li>
+</ul>
+<h3>Many small nets beat a few big ones</h3>
+<ul>
+<li><b>One person can set and pull a 50-ft net.</b> A big net needs a powerboat and a crew.</li>
+<li><b>Fish move around, so some spots will catch nothing.</b> Spread the nets out, and one bad spot won't empty your day.</li>
+</ul>
+<p>The chance that at least one net has fish on a given night:</p>
+<table>
+<tr><th>Nets</th><th>If each net has a 30% chance</th><th>If each has a 50% chance</th></tr>
+<tr><td>1</td><td>30%</td><td>50%</td></tr>
+<tr><td>3</td><td>66%</td><td>88%</td></tr>
+<tr><td>6</td><td>88%</td><td>98%</td></tr>
+<tr><td>10</td><td>97%</td><td>almost 100%</td></tr>
+</table>
+<p>The 30% and 50% are examples, not Cobscook numbers. The table assumes the nets are far enough apart that one's luck doesn't depend on another's.</p>
+<p><b>How many nets you need.</b> No number of nets guarantees a catch, so let the catch log decide:</p>
+<ul>
+<li><b>Nets needed = your daily target ÷ what one net catches on a bad night.</b> Use the average of your worst third of nights, not your best.</li>
+<li><b>For example:</b> 27 mackerel a day ÷ 5 a net = 6 nets. If bad nights bring only 2 a net, you'd need 14 nets. That's more than one person can check, so make up the gap with clams, periwinkles and traps.</li>
+</ul>
+<h3>What one person can keep up with</h3>
+<ul>
+<li><b>About 6 gill nets fishing at once,</b> all checked in one low-tide trip.</li>
+<li><b>Fish die in a gill net.</b> If it's left too long, crabs, sea lice and seals eat the catch, and in summer it spoils. Check every tide, and at least once a day.</li>
+<li><b>Catch only what you can clean, smoke or salt the same day.</b></li>
+<li><b>No weir or stop seine for one person.</b> If your second person can help a few days a week, a short stop seine (about 150 ft) in a small cove becomes realistic.</li>
+</ul>
+<h3>The kit</h3>
+<table>
+<tr><th>Item</th><th>How many</th><th>For</th></tr>
+<tr><td>Gill nets, 50 ft long × 6–8 ft deep, 2¼ in stretched, dark multifilament</td><td>5</td><td>Adult herring, Jul–Oct; smaller alewives, May–Jun</td></tr>
+<tr><td>Gill nets, 50 ft long × 6–8 ft deep, 2¾ in stretched, dark multifilament</td><td>5</td><td>Mackerel, Jul–Oct; big herring and alewives</td></tr>
+<tr><td>Fyke nets, 2–3 ft hoops, ½ in square mesh, with wings</td><td>2, in different streams</td><td>Alewives, May–Jun; smelt, Mar–Apr</td></tr>
+<tr><td>Cast net, 6 ft, ⅜ in square mesh</td><td>1, plus a spare</td><td>Small herring schools, Jul–Oct</td></tr>
+<tr><td>Dip net, ½ in mesh</td><td>1</td><td>The peak of the alewife run</td></tr>
+<tr><td>Lobster traps</td><td>5–10 to start</td><td>Lobster and green crabs, May–Dec</td></tr>
+<tr><td>Mending kit: netting needle, twine, spare floats and weights, rope, a small grapple</td><td>1</td><td>All year</td></tr>
+</table>
+<p>Of the 10 gill nets, 6 are fishing, 2 are out being cleaned and mended, and 2 stay hidden as spares.</p>
+<h3>Keeping nets hidden</h3>
+<ul>
+<li><b>Set below the lowest low-tide line,</b> so the net is always under water. With 18–24 ft tides, it's deep for most of the day.</li>
+<li><b>Nothing at the surface.</b> Small floats on the top line keep the net standing, but under water. No buoy.</li>
+<li><b>Find it again by shore marks</b> (two pairs of landmarks that line up) or your phone's GPS, which works without cell service. Pull it up with the grapple.</li>
+<li><b>Dark netting and dark line.</b></li>
+<li><b>Set at dusk and check at dawn,</b> when fewer people are around.</li>
+<li><b>Set out of the main current,</b> in coves and back eddies. Cobscook's currents can roll a net up or drag it away.</li>
+<li><b>Traps the same way:</b> tie several to one sunken line with no buoy, and grapple for the line.</li>
+<li><b>Hide the spares in separate places,</b> so one find doesn't cost you everything.</li>
+<li><b>Setting below the low-tide line takes a small rowboat or canoe,</b> or wading at the lowest tides.</li>
+<li><b>The trade-off:</b> herring and mackerel often swim higher than a net on the bottom, so a hidden net may catch fewer of them than one at the surface. The difference is smaller in shallow coves. Try both and compare them in the log.</li>
+</ul>
+<h3>The catch log</h3>
+<p>For each net, at each check, write down: the date, which net, the spot, the depth, the tide, the hours in the water, and what it caught and how many.</p>
+<ul>
+<li><b>After 3 empty checks in a row,</b> move the net near your best one.</li>
+<li><b>After 2 weeks,</b> use the log to work out how many nets you need (see above).</li>
+<li><b>The log also checks the Fishing view's numbers</b> against what the bay actually gives.</li>
+</ul>
+<h3>A day</h3>
+<ul>
+<li><b>Each low tide:</b> check nets and traps, then dig clams and pick periwinkles on the same trip.</li>
+<li><b>Between tides:</b> firewood and hunting.</li>
+<li><b>Evenings:</b> clean, smoke and salt the day's catch.</li>
+</ul>
+<h3>Not worked out yet</h3>
+<ul>
+<li>Netting spots. These will get a page of their own.</li>
+<li>How much salt and firewood the winter store of smoked and salted fish needs.</li>
+<li>How many lobsters a trap catches in the bay today. The log will show it.</li>
+<li>Whether hidden bottom nets catch enough herring and mackerel. The log will show this too.</li>
+</ul>
+<h3>Where the numbers come from</h3>
+<ul>
+<li><b>Calories:</b> the Fishing view on the Long Term tab.</li>
+<li><b>Herring mesh sizes:</b> DFO's 2016 study of herring gill nets in the southern Gulf of St. Lawrence (Research Document 2016/067). Each ⅛ in of mesh adds about 0.6 in to the herring it catches best.</li>
+<li><b>Mackerel mesh:</b> DFO's 2026 gill net rules for the Gulf of St. Lawrence mackerel bait fishery, which allow 2¾–2⅞ in.</li>
+<li><b>Alewife mesh:</b> the Virginia Institute of Marine Science's river herring sampling, which uses 2½ and 3 in nets.</li>
+<li><b>Stretched and bar mesh:</b> the USGS fish sampling protocols.</li>
+</ul>
+`,
+  },
+  {
     id: "species-extinction",
     title: "Species extinction",
     names: ["Special extinction", "Extinction", "Overfishing", "Population decline"],
