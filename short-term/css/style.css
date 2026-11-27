@@ -348,6 +348,21 @@ table.shop { table-layout: fixed; min-width: 38rem; }
 .gear-buy { font-weight: 700; color: var(--lid); }
 .gear-item .gear-links { margin-top: -0.25rem; font-weight: 700; }
 
+/* The folded guides at the bottom: each heading opens and closes its section. */
+.more { margin-top: 2.75rem; max-width: 62rem; border-bottom: 1px solid var(--line); }
+.more-item { border-top: 1px solid var(--line); }
+.more-item:first-child { border-top: 3px solid var(--ink); }
+.more-item > summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.85rem 0; list-style: none; cursor: pointer; }
+.more-item > summary::-webkit-details-marker { display: none; }
+.more-item > summary .section-title { margin: 0; font-size: 1.35rem; }
+.more-item > summary::after { content: "+"; flex: none; display: grid; place-items: center; width: 1.7rem; height: 1.7rem; border: 1.5px solid var(--lid); border-radius: 50%; color: var(--lid); font-size: 1.2rem; font-weight: 700; line-height: 1; }
+.more-item[open] > summary::after { content: "\2212"; color: #fff; background: var(--lid); }
+.more-item > summary:hover .section-title { color: var(--lid); }
+.more-item > summary:focus-visible { outline: 2px solid var(--lid); outline-offset: 2px; }
+.more-body { padding-bottom: 1.5rem; }
+.more-body > p, .more-body .sources { max-width: 68ch; }
+.more-body > .sub-title:first-child { margin-top: 0.5rem; }
+
 .notes, .plain { padding-left: 1.2rem; max-width: 68ch; }
 .notes li, .plain li { margin-top: 0.5rem; }
 .sources { font-size: 0.95rem; }
@@ -389,6 +404,8 @@ table.shop { table-layout: fixed; min-width: 38rem; }
   body { background: #fff; font-size: 10.5pt; }
   .setup, .people-actions, .privacy, .intro, .report-actions, .report-foot, .shop-compare .btn-link, .goal-toggle { display: none !important; }
   .why-btn { display: none !important; }
+  .more-item > summary::after { display: none; }
+  .more-item > summary { padding: 0; margin-top: 1.25rem; }
   .why-row[hidden] { display: table-row !important; }
   .why-panel { position: static; width: auto; }
   .print-meta { display: block; margin: 0 0 6pt; font-size: 9pt; color: var(--ink-2); }

@@ -227,46 +227,37 @@ function card(pl, hh) {
   </article>`;
 }
 
-function cookRow(r) {
+function cookRow(r, pot) {
   const amount = (x) => `<td>${esc(x.cooked)}${x.dry ? `<small>${esc(x.dry)}</small>` : ""}</td>`;
-  return `<tr><th scope="row">${esc(r.name)}</th>${amount(r.rice)}${amount(r.beans)}<td>${esc(r.oats)}</td></tr>`;
+  return `<tr><th scope="row">${esc(r.name)}</th>${amount(r.rice)}${amount(r.beans)}<td>${esc(r.oats)}</td>${pot === undefined ? "" : `<td>${esc(pot)}</td>`}</tr>`;
 }
 
-function cookingSection(hh) {
+// Cooking for everyone and All in one pot share one table: each person's rice, beans and oats,
+// then their share if it's all cooked in one pot.
+function cookingBody(hh) {
   const c = cookingData(hh);
+  const d = onePotData(hh);
+  const share = d ? new Map(d.rows) : null;
+  const potCell = (name) => (share ? share.get(name) || "none" : undefined);
   return `
-  <section class="block" aria-labelledby="cook-title">
-    <h2 id="cook-title" class="section-title">Cooking for everyone</h2>
     <p>Each day, cook <strong>${esc(c.rice)}</strong> and <strong>${esc(c.beans)}</strong> ${esc(c.rest)}</p>
-    <div class="table-scroll"><table class="data">
-      <thead><tr>${c.head.map((h) => `<th scope="col">${h}</th>`).join("")}</tr></thead>
-      <tbody>${c.rows.map(cookRow).join("")}</tbody>
-      <tfoot>${cookRow(c.total)}</tfoot>
+    <div class="table-scroll"><table class="data cook">
+      <thead><tr>${c.head.map((h) => `<th scope="col">${h}</th>`).join("")}${d ? '<th scope="col">Or all in one pot</th>' : ""}</tr></thead>
+      <tbody>${c.rows.map((r) => cookRow(r, potCell(r.name))).join("")}</tbody>
+      <tfoot>${cookRow(c.total, d ? d.total[1] : undefined)}</tfoot>
     </table></div>
     ${c.milk ? `<p>${esc(c.milk)}</p>` : ""}
     <h3 class="sub-title">Cooking over a fire</h3>
     <p>${esc(c.fireLead)}</p>
     <ul class="plain">${c.water.map((w) => `<li><strong>${esc(w.label)}:</strong> ${esc(w.text)}</li>`).join("")}</ul>
     <p>${esc(c.waterTotal)}</p>
-    ${onePotBlock(hh)}
-    <p class="muted">${esc(COOK_NOTE)}</p>
-  </section>`;
-}
-
-function onePotBlock(hh) {
-  const d = onePotData(hh);
-  if (!d) return "";
-  return `
-    <h3 class="sub-title">All in one pot</h3>
+    ${d ? `
+    <h3 class="sub-title">Or all in one pot</h3>
     <p>${esc(d.lead)}</p>
-    <ol class="steps">${d.steps.map((s) => `<li>${esc(s)}</li>`).join("")}</ol>
-    <p>${esc(d.servingLead)}</p>
-    <div class="table-scroll"><table class="data serve">
-      <thead><tr>${d.head.map((h) => `<th scope="col">${esc(h)}</th>`).join("")}</tr></thead>
-      <tbody>${d.rows.map(([n, a]) => `<tr><th scope="row">${esc(n)}</th><td>${esc(a)}</td></tr>`).join("")}</tbody>
-      <tfoot><tr><th scope="row">${esc(d.total[0])}</th><td>${esc(d.total[1])}</td></tr></tfoot>
-    </table></div>
-    <p>${esc(d.note)}</p>`;
+    <ol class="steps">${d.steps.map((st) => `<li>${esc(st)}</li>`).join("")}</ol>
+    <p>${esc(d.servingLeadTable)}</p>
+    <p>${esc(d.note)}</p>` : ""}
+    <p class="muted">${esc(COOK_NOTE)}</p>`;
 }
 
 // "Why?" panels that are open, by gear card key, so they stay open when the list redraws.
@@ -322,10 +313,6 @@ function shoppingSection(hh) {
       <summary>${esc(it.title)}</summary>
       <div class="why-panel">${gearBody(it)}</div>
     </details>`).join("")}` : ""}
-    <h3 class="sub-title">How long it keeps</h3>
-    <p class="keeps-lead">${esc(KEEPS_LEAD)}</p>
-    ${leadList(keepsNotes(hh))}
-    <p class="sources">Shelf-life sources: ${KEEPS_SOURCES.map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>`).join(", ")}.</p>
   </section>`;
 }
 
@@ -355,40 +342,55 @@ function gearBody(it) {
       ${it.packs ? `<p class="muted">${esc(it.packs)}</p>` : ""}`;
 }
 
-function rulesSection(hh) {
+function keepsBody(hh) {
+  return `
+    <p class="keeps-lead">${esc(KEEPS_LEAD)}</p>
+    ${leadList(keepsNotes(hh))}
+    <p class="sources">Shelf-life sources: ${KEEPS_SOURCES.map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>`).join(", ")}.</p>`;
+}
+
+function rulesBody(hh) {
   const hasAdults = hh.plans.some((pl) => !pl.isChild);
   const hasKids = hh.plans.some((pl) => pl.isChild);
   return `
-  <section class="block" aria-labelledby="rules-title">
-    <h2 id="rules-title" class="section-title">Weekly weigh-in</h2>
     <p>${esc(WEIGH_INTRO)}</p>
     ${hasAdults ? `
     <div class="table-scroll"><table class="data rules">
       <thead><tr><th scope="col">If you're</th><th scope="col">And the scale shows</th><th scope="col">Do this</th></tr></thead>
       <tbody>${WEIGH_RULES.map((r) => `<tr>${r.map((c) => `<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</tbody>
     </table></div>` : ""}
-    ${hasKids ? `<p>${esc(WEIGH_KIDS)}</p>` : ""}
-  </section>`;
+    ${hasKids ? `<p>${esc(WEIGH_KIDS)}</p>` : ""}`;
 }
 
 const leadList = (items) => `<ul class="plain">${items.map((it) => `<li><strong>${esc(it.lead)}:</strong> ${esc(it.text)}</li>`).join("")}</ul>`;
 
-function careSection() {
-  return `
-  <section class="block" aria-labelledby="care-title">
-    <h2 id="care-title" class="section-title">Cooking and storage</h2>
-    ${leadList(CARE)}
-  </section>`;
-}
+const careBody = () => leadList(CARE);
 
-function aboutSection() {
+function aboutBody() {
   return `
-  <section class="block about" aria-labelledby="about-title">
-    <h2 id="about-title" class="section-title">How the numbers are worked out</h2>
     ${leadList(ABOUT)}
     <p class="sources">Sources: ${SOURCES.map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener">${esc(label)}</a>`).join(", ")}.</p>
-    <p class="muted">${esc(DISCLAIMER)}</p>
-  </section>`;
+    <p class="muted">${esc(DISCLAIMER)}</p>`;
+}
+
+// The guides at the very bottom, folded so the page stays short. Tap a heading to open it.
+const MORE = [
+  ["cook", "Cooking for everyone", cookingBody],
+  ["keeps", "How long it keeps", keepsBody],
+  ["rules", "Weekly weigh-in", rulesBody],
+  ["care", "Cooking and storage", careBody],
+  ["about", "How the numbers are worked out", aboutBody],
+];
+const openMore = new Set(); // which ones are open, so they stay open when the page redraws
+
+function moreSection(hh) {
+  return `
+  <div class="more">${MORE.map(([id, title, body]) => `
+    <details class="more-item" id="more-${id}" data-more="${id}"${openMore.has(id) ? " open" : ""}>
+      <summary><h2 class="section-title">${esc(title)}</h2></summary>
+      <div class="more-body">${body(hh)}</div>
+    </details>`).join("")}
+  </div>`;
 }
 
 function reportActions(where) {
@@ -435,11 +437,8 @@ function renderResults() {
     ${incomplete}
     <p class="results-intro">Measure dry food with level cups and spoons. Each card shows one person's day.</p>
     <div class="cards">${hh.plans.map((pl) => card(pl, hh)).join("")}</div>
-    ${cookingSection(hh)}
     ${shoppingSection(hh)}
-    ${rulesSection(hh)}
-    ${careSection()}
-    ${aboutSection()}
+    ${moreSection(hh)}
     <div class="report-foot">
       <p>Keep a paper copy. Print the whole report, or save it as a PDF to print later.</p>
       ${reportActions("bottom")}
@@ -498,14 +497,22 @@ async function downloadPdf(button) {
 
 // ---------- events ----------
 
-// Printing shows every explanation: open the folded "Gear you're not buying" items for the
+// Printing shows everything: open the folded guides and "Gear you're not buying" items for the
 // printout, then close them again. (The "Why?" rows are shown by the print CSS.)
 let printOpened = [];
+let printing = false;
 window.addEventListener("beforeprint", () => {
-  printOpened = [...document.querySelectorAll("details.off-list:not([open])")];
+  if (printing) return; // some browsers fire it twice
+  printing = true;
+  printOpened = [...document.querySelectorAll("#results details:not([open])")];
   printOpened.forEach((d) => { d.open = true; });
 });
-window.addEventListener("afterprint", () => { printOpened.forEach((d) => { d.open = false; }); printOpened = []; });
+window.addEventListener("afterprint", () => {
+  if (!printing) return;
+  printOpened.forEach((d) => { d.open = false; });
+  printOpened = [];
+  setTimeout(() => { printing = false; }); // after the toggle events from closing them
+});
 
 function init() {
   $("#prices-date").textContent = PRICES_CHECKED;
@@ -528,6 +535,12 @@ function init() {
     if (!k) return;
     state[k] = e.target.checked; save(); scheduleRender();
   });
+
+  $("#results").addEventListener("toggle", (e) => {
+    const id = e.target.dataset?.more;
+    if (!id || printing) return;
+    if (e.target.open) openMore.add(id); else openMore.delete(id);
+  }, true);
 
   $("#results").addEventListener("click", (e) => {
     const goalBtn = e.target.closest("[data-goal]");

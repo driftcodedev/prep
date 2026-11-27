@@ -274,6 +274,8 @@ export function onePotData(hh) {
     lead: `Rather cook everything together? This makes the whole day's beans, rice and oats in one pot: about 2¼ hours, plus soaking the beans overnight. It comes out thick, like a stew. ${fit}`,
     steps,
     servingLead: "Then serve each person this much over the day. The shares follow each person's card by calories, so everyone still gets their planned amount.",
+    // On the page the shares sit in the cooking table's last column instead of their own table.
+    servingLeadTable: "Then serve each person their amount from the \"Or all in one pot\" column in the table above, spread over the day. The shares follow each person's card by calories, so everyone still gets their planned amount.",
     head: ["Person", "Serve, cooked"],
     rows: o.servings.map((s) => [s.name, `${cupsText(s.cups)}${s.young ? ", mashed" : ""}`]),
     total: ["Whole pot", `about ${fraction(o.cups)} cups`],
