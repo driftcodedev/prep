@@ -30,7 +30,7 @@ long-term/            YOUR FOLDER
   js/geo.js           pure helpers: distances, ring colors, filters, formatting
   js/popup.js         HTML for house popups and list cards
   js/map.js           the live Leaflet map (browser only)
-  js/fishing.js       the Fishing view: season detail and the table of every season
+  js/fishing.js       the Fishing view: one sortable table of every species by season
   js/currents.js      tidal currents and flats: tide clock, speeds, and the live map layers
   js/report.js        the paper copy: one list of blocks, and the printout HTML
   js/report-pdf.js    the same blocks as a pdfmake PDF (Download PDF)
@@ -170,11 +170,13 @@ is shown, so opening straight to Fishing doesn't download it.
   seasons. Active adults fed a year = calories ÷ 3,000 a day ÷ 365.
 - **Words:** `data/fishing-notes.js` holds the page text, the 1–5 confidence scale, species notes
   (size, gear, rules, safety), one color per species, the herring methods, the method and the sources.
-- **Views** (`js/fishing.js`): season buttons, then every species for that season, largest share
-  first, each with its 1–5 score and opening to where its number comes from and its notes. Below
-  that, "Every season at a glance" is a table of every species by season, with totals and adults
-  fed. "Show" switches between calories and pounds. The choice is kept in `localStorage`
-  (`prep-lt-fish`); the season starts on today's.
+- **The view** (`js/fishing.js`) is one table: a row per species, a column per season. Tapping a
+  season header sorts the rows by that season, most to least (then none counted, not counted that
+  season, and no count). "Show" picks calories or pounds. "Numbers" picks amounts, "% of season"
+  (each species' share of that season's total, by column) or "% of best season" (each season as a
+  % of the species' own best season, by row; seasons are never added up). Tapping a species opens
+  its notes in a row under it. Show and Numbers are kept in `localStorage` (`prep-lt-fish`); the
+  season starts on today's.
 - **Parked until fishing methods are picked:** cutoffs, catch per hour, cleaning time and the 2025
   scallop drop. The old per-trip numbers are gone (they're in git history before Nov 27, 2026).
 

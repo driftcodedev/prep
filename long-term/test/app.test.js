@@ -264,8 +264,8 @@ import { VIEWS } from "../app.js";
 import { SEASONS, SPECIES, ADULT_KCAL_YEAR, HERRING_CATCH } from "../data/fishing.js";
 import { SPECIES_COLORS, PROFILES, CONFIDENCE, FISH_SOURCES } from "../data/fishing-notes.js";
 import {
-  counted, seasonTotal, adultsFed, fedText, seasonRanking, seasonRows, rankingText, donutSlices, herringCatch, meatText,
-  round2, millions, thousands, caloriesText, poundsText, pct, drawSeason, drawTable, renderFishing, seasonOfDate,
+  counted, seasonTotal, adultsFed, fedText, seasonRanking, sortRows, bestOf, cellText, rankingText, donutSlices, herringCatch,
+  meatText, round2, millions, thousands, caloriesText, poundsText, pct, drawTable, renderFishing, seasonOfDate,
 } from "../js/fishing.js";
 
 test("the tab has a Map and a Fishing view, Map first", () => {
@@ -341,16 +341,44 @@ test("each season's ranking adds to 100% and matches the doc's order", () => {
   assert.equal(seasonRanking(SPECIES, "kcal", 5)[0].sp.id, "herring");
 });
 
-test("every species shows in every season: ranked, none counted, not counted this season, or no count", () => {
+test("rows sort by the picked season: most to least, then none counted, not counted, no count", () => {
   for (let b = 0; b < 6; b++) {
-    const rows = seasonRows(SPECIES, "kcal", b);
+    const rows = sortRows(SPECIES, "kcal", b);
     assert.equal(rows.length, SPECIES.length, `season ${b}`);
-    assert.equal(new Set(rows.map((x) => x.sp.id)).size, SPECIES.length);
+    assert.equal(new Set(rows.map((sp) => sp.id)).size, SPECIES.length);
+    const vals = rows.map((sp) => sp.kcal[b]).filter((v) => v > 0);
+    assert.ok(vals.every((v, i) => i === 0 || vals[i - 1] >= v), `season ${b} order`);
   }
-  const jan = seasonRows(SPECIES, "kcal", 0);
-  assert.equal(jan.find((x) => x.sp.id === "herring").status, "none");
-  assert.equal(jan.find((x) => x.sp.id === "lobster").status, "season");
-  assert.equal(jan.find((x) => x.sp.id === "urchins").status, "nocount");
+  const jan = sortRows(SPECIES, "kcal", 0).map((sp) => sp.id);
+  assert.deepEqual(jan.slice(0, 3), ["shellfish", "periwinkles", "scallops"]);
+  assert.ok(jan.indexOf("herring") < jan.indexOf("lobster"), "none counted comes before not counted this season");
+  assert.ok(jan.indexOf("lobster") < jan.indexOf("urchins"), "not counted this season comes before no count");
+  assert.equal(sortRows(SPECIES, "kcal", 4)[0].id, "herring");
+  assert.equal(sortRows(SPECIES, "lb", 0)[0].id, "periwinkles"); // by pounds, periwinkles edge out clams
+});
+
+test("percent views: share of the season (columns) and % of the species' own best season (rows)", () => {
+  const sp = (id) => SPECIES.find((x) => x.id === id);
+  // Columns: Jan–Feb shellfish against scallops.
+  assert.equal(cellText(sp("shellfish"), "kcal", "col", 0), "41%");
+  assert.equal(cellText(sp("scallops"), "kcal", "col", 0), "18%");
+  assert.equal(cellText(sp("herring"), "kcal", "col", 4), "70%");
+  // Rows: each season against the species' own best.
+  assert.equal(cellText(sp("herring"), "kcal", "row", 4), "100%");
+  assert.equal(cellText(sp("herring"), "kcal", "row", 0), "0%");
+  assert.equal(cellText(sp("flounder"), "kcal", "row", 2), "100%");
+  assert.equal(cellText(sp("flounder"), "kcal", "row", 3), "57%");
+  assert.equal(cellText(sp("scallops"), "lb", "row", 1), "100%");
+  // Not counted stays "?" in every view; amounts read as in the doc.
+  for (const view of ["amount", "col", "row"]) assert.equal(cellText(sp("lobster"), "kcal", view, 0), "?");
+  assert.equal(cellText(sp("herring"), "kcal", "amount", 4), "1,540");
+  assert.equal(cellText(sp("herring"), "lb", "amount", 4), "3,580");
+  assert.equal(bestOf(sp("urchins"), "kcal"), 0);
+  // Each season's column shares add to 100%.
+  for (let b = 0; b < 6; b++) {
+    const sum = SPECIES.reduce((s, x) => s + (x.kcal[b] || 0), 0) / seasonTotal(SPECIES, "kcal", b);
+    assert.ok(Math.abs(sum - 1) < 1e-9);
+  }
 });
 
 test("rings fold small species into Other and keep the total", () => {
@@ -389,27 +417,37 @@ test("fishing numbers read plainly", () => {
   assert.equal(seasonOfDate(new Date(2026, 0, 3)), 0);
 });
 
-test("fishing drawings: a season with every species, and a table of every season", () => {
-  const det = drawSeason({ measure: "kcal" }, 4);
-  assert.match(det, /September–October/);
-  assert.match(det, /2\.2 billion calories/);
-  assert.match(det, /about <b>2,020 active adults<\/b>/);
-  assert.match(det, /Biggest share: Atlantic herring, <b>70%<\/b>/);
-  assert.equal((det.match(/<details class="ltf-row/g) || []).length, SPECIES.length);
-  assert.match(det, /no count yet/);
-  assert.match(det, /data-season="4" data-local aria-pressed="true"/);
-  const tbl = drawTable({ measure: "kcal" }, 4);
-  assert.equal((tbl.match(/<tr><th scope="row"><span class="ltf-swatch"/g) || []).length, SPECIES.length);
+test("fishing table: a row per species with its notes, sorted by the picked season, in every view", () => {
+  const tbl = drawTable({ measure: "kcal", view: "amount" }, 4);
+  assert.equal((tbl.match(/<tr class="ltf-tbl-row/g) || []).length, SPECIES.length);
+  assert.equal((tbl.match(/<tr class="ltf-tbl-detail" id="ltf-d-[a-z]+" hidden>/g) || []).length, SPECIES.length);
+  assert.match(tbl, /data-season="4" aria-pressed="true"/);
+  assert.match(tbl, /aria-sort="descending"/);
   assert.match(tbl, /Active adults fed a year/);
   assert.match(tbl, />2,210</);
-  const lb = drawTable({ measure: "lb" }, 4);
+  assert.ok(tbl.indexOf('data-sp="herring"') < tbl.indexOf('data-sp="mackerel"'), "Sep–Oct: herring first");
+  const open = drawTable({ measure: "kcal", view: "amount" }, 0, new Set(["flounder"]));
+  assert.match(open, /data-sp="flounder" aria-expanded="true"/);
+  assert.match(open, /id="ltf-d-flounder"><td colspan="8">/);
+  assert.match(open, /Calories in Jan–Feb/);
+  assert.match(open, /Adults leave when the water is under 43°F/);
+  const col = drawTable({ measure: "kcal", view: "col" }, 0);
+  assert.match(col, />41%</);
+  assert.match(col, /<th scope="row">Total<\/th>(<td[^>]*>100%<\/td>){6}/);
+  const row = drawTable({ measure: "kcal", view: "row" }, 4);
+  assert.match(row, /class="is-on is-best">100%</);
+  assert.match(row, /All species/);
+  const lb = drawTable({ measure: "lb", view: "amount" }, 4);
   assert.match(lb, /Sea scallops \(meat\)/);
   assert.doesNotMatch(lb, /<tfoot>/);
-  assert.doesNotMatch(det + tbl + lb, /undefined|NaN/);
+  for (const html of [tbl, open, col, row, lb, drawTable({ measure: "lb", view: "row" }, 2), drawTable({ measure: "lb", view: "col" }, 5)]) {
+    assert.doesNotMatch(html, /undefined|NaN/);
+  }
   const page = renderFishing();
   assert.match(page, /name="ltf-measure"/);
+  assert.match(page, /name="ltf-view" value="row"/);
   assert.match(page, /Herring: three ways to measure it/);
   assert.match(page, /Herring caught in Cobscook, 1947–58/);
   assert.equal((page.match(/<li><a href=/g) || []).length, FISH_SOURCES.length);
-  assert.doesNotMatch(page, /One trip|a trip/);
+  assert.doesNotMatch(page, /One trip|a trip|ltf-row/);
 });

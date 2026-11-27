@@ -285,8 +285,10 @@
 
 #lt-root .ltf-intro { margin: 0 0 1rem; max-width: 62ch; }
 #lt-root .ltf-draft { display: inline-block; margin-left: 0.25rem; padding: 0 0.4rem; border-radius: 999px; background: var(--bean-tint); color: var(--bean); font-size: 0.8rem; font-weight: 700; }
-#lt-root .ltf-controls { display: grid; gap: 0.85rem; max-width: 26rem; }
+#lt-root .ltf-controls { display: grid; gap: 0.85rem; max-width: 30rem; }
 #lt-root .ltf-seg-2 { grid-template-columns: repeat(2, 1fr); }
+#lt-root .ltf-seg-3 { grid-template-columns: repeat(3, 1fr); }
+#lt-root .ltf-seg-3 .ltm-seg-item span { padding-left: 0.3rem; padding-right: 0.3rem; }
 
 #lt-root .ltf-swatch { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 2px; flex: none; vertical-align: -0.05rem; margin-right: 0.35rem; }
 
@@ -298,34 +300,14 @@
 #lt-root .ltf-conf-1 { background: #f6e1df; color: #8f2a20; }
 #lt-root .ltf-conf-list { list-style: none; padding: 0; margin: 0.2rem 0 0; display: grid; gap: 0.3rem; font-size: 0.92rem; }
 
-/* season detail */
-#lt-root .ltf-detail { margin-top: 1.25rem; padding-top: 0.25rem; scroll-margin-top: 1rem; }
-#lt-root .ltf-stabs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.25rem; }
-#lt-root .ltf-stab { min-height: 2.4rem; padding: 0.2rem; font: inherit; font-size: 0.78rem; font-weight: 700; color: var(--lid); background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); cursor: pointer; }
-#lt-root .ltf-stab[aria-pressed="true"] { background: var(--lid); border-color: var(--lid); color: #fff; }
-#lt-root .ltf-detail-title { margin: 0.9rem 0 0.25rem; }
-#lt-root .ltf-detail-lead { margin: 0 0 0.75rem; }
-#lt-root .ltf-h4 { margin: 1rem 0 0.4rem; font-size: 0.95rem; }
-#lt-root .ltf-hint { margin: 0 0 0.4rem; font-size: 0.82rem; color: var(--ink-2); }
-
-#lt-root .ltf-bars { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3rem; }
-#lt-root .ltf-row { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); }
-#lt-root .ltf-row[open] { border-color: var(--lid); }
-#lt-root .ltf-row > summary { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "name val" "bar bar"; gap: 0.25rem 0.6rem; align-items: center; padding: 0.45rem 0.6rem; cursor: pointer; list-style: none; }
-#lt-root .ltf-row > summary::-webkit-details-marker { display: none; }
-@media (min-width: 640px) { #lt-root .ltf-row > summary { grid-template-columns: 15rem 1fr 13rem; grid-template-areas: "name bar val"; } }
-#lt-root .ltf-row-name { grid-area: name; font-weight: 700; font-size: 0.92rem; }
-#lt-root .ltf-row-bar { grid-area: bar; height: 0.6rem; background: color-mix(in srgb, var(--line) 45%, var(--card)); border-radius: 999px; overflow: hidden; }
-#lt-root .ltf-row-bar span { display: block; height: 100%; border-radius: 999px; min-width: 2px; }
-#lt-root .ltf-row.is-blank .ltf-row-bar span { min-width: 0; }
-#lt-root .ltf-row.is-blank .ltf-row-name { color: var(--ink-2); }
-#lt-root .ltf-row-val { grid-area: val; font-size: 0.85rem; color: var(--ink-2); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
-#lt-root .ltf-row-val b { color: var(--ink); }
-#lt-root .ltf-profile { margin: 0; padding: 0.1rem 0.6rem 0.6rem; display: grid; gap: 0.3rem; font-size: 0.88rem; }
+/* species notes, opened under a table row */
+#lt-root .ltf-profile { margin: 0; padding: 0.1rem 0 0.2rem; display: grid; gap: 0.3rem; font-size: 0.88rem; }
 #lt-root .ltf-profile div { display: grid; grid-template-columns: 9.5rem 1fr; gap: 0.5rem; }
 #lt-root .ltf-profile dt { color: var(--ink-2); }
 #lt-root .ltf-profile dd { margin: 0; }
 @media (max-width: 420px) { #lt-root .ltf-profile div { grid-template-columns: 1fr; gap: 0; } #lt-root .ltf-profile dt { font-size: 0.78rem; } }
+#lt-root .ltf-hint { margin: 0 0 0.4rem; font-size: 0.82rem; color: var(--ink-2); }
+#lt-root .ltf-tbl-hint { margin: 1rem 0 0.5rem; max-width: 62ch; }
 
 /* every season at a glance */
 #lt-root .ltf-tbl-wrap { background: var(--card); border: 1.5px solid var(--line); border-radius: var(--radius); }
@@ -336,13 +318,20 @@
 #lt-root .ltf-tbl thead th:first-child { text-align: left; padding-left: 0.45rem; }
 #lt-root .ltf-tbl thead button { font: inherit; font-weight: 700; color: var(--lid); background: none; border: 0; border-radius: 4px; padding: 0.25rem 0.15rem; cursor: pointer; line-height: 1.15; text-align: right; }
 #lt-root .ltf-tbl thead th.is-on button { background: var(--lid); color: #fff; }
-#lt-root .ltf-tbl tbody th, #lt-root .ltf-tbl tfoot th { text-align: left; font-weight: 600; line-height: 1.2; padding-left: 0.4rem; min-width: 5.9rem; }
+#lt-root .ltf-tbl tbody th, #lt-root .ltf-tbl tfoot th { text-align: left; font-weight: 600; line-height: 1.2; padding-left: 0.4rem; min-width: 5.2rem; }
 #lt-root .ltf-tbl th:first-child { position: sticky; left: 0; z-index: 1; background: var(--card); }
 #lt-root .ltf-tbl tbody th .ltf-swatch { width: 0.55rem; height: 0.55rem; margin-right: 0.25rem; }
 #lt-root .ltf-tbl td { text-align: right; white-space: nowrap; }
 #lt-root .ltf-tbl td.is-on { background: color-mix(in srgb, var(--lid) 10%, var(--card)); font-weight: 700; }
 #lt-root .ltf-tbl td.is-unknown { color: var(--ink-2); }
 #lt-root .ltf-tbl .ltf-tbl-conf { text-align: center; padding-right: 0.3rem; }
+#lt-root .ltf-tbl td.is-best { color: var(--bean); font-weight: 700; }
+#lt-root .ltf-sp { display: block; width: 100%; padding: 0; font: inherit; font-weight: 600; text-align: left; color: var(--ink); background: none; border: 0; cursor: pointer; line-height: 1.2; }
+#lt-root .ltf-sp::after { content: "▸"; margin-left: 0.25rem; color: var(--lid); font-size: 0.8em; }
+#lt-root .ltf-sp[aria-expanded="true"]::after { content: "▾"; }
+#lt-root .ltf-sp:focus-visible { outline: 2px solid var(--lid); outline-offset: 2px; border-radius: 3px; }
+#lt-root .ltf-tbl-row.is-open > th, #lt-root .ltf-tbl-row.is-open > td { border-bottom: 0; background: color-mix(in srgb, var(--lid) 6%, var(--card)); }
+#lt-root .ltf-tbl-detail > td { text-align: left; white-space: normal; padding: 0.3rem 0.6rem 0.7rem; background: color-mix(in srgb, var(--lid) 6%, var(--card)); }
 #lt-root .ltf-tbl tfoot th, #lt-root .ltf-tbl tfoot td { font-weight: 700; border-bottom: 0; }
 #lt-root .ltf-tbl tfoot tr:first-child th, #lt-root .ltf-tbl tfoot tr:first-child td { border-top: 2px solid var(--line); }
 @media (min-width: 640px) { #lt-root .ltf-tbl { font-size: 0.85rem; } #lt-root .ltf-tbl tbody th, #lt-root .ltf-tbl tfoot th { min-width: 14rem; } }

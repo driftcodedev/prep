@@ -23,6 +23,13 @@ export const MEASURES = {
   lb: { label: "Pounds", short: "pounds" },
 };
 
+// How the table shows its numbers.
+export const NUMBER_VIEWS = {
+  amount: "Amount",
+  col: "% of season",
+  row: "% of best season",
+};
+
 // How sure each number is.
 export const CONFIDENCE = {
   5: "Counted in the bay every year; likely within 25%",
