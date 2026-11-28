@@ -31,6 +31,7 @@ long-term/            YOUR FOLDER
   data/depth.json     water depth layer: tile list, color bands, datum, depths by place (tools/build_depth.py)
   data/depth/         depth map tiles (zoom 11-15), their band tiles (depth/b/) and the tap-for-depth value tiles (depth/v/)
   data/depth-print.png the printed depth map
+  data/netting/       netting research notes, key numbers and a copy of the fyke calculator (not used by the site)
   js/geo.js           pure helpers: distances, ring colors, filters, formatting
   js/popup.js         HTML for house popups and list cards
   js/map.js           the live Leaflet map (browser only)

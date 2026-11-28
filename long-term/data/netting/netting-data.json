@@ -1,0 +1,62 @@
+{
+  "about": "Key numbers from the netting research, saved Nov 28, 2026. See findings.md for context and sources. Not used by the site.",
+  "need": {
+    "kcalPerPersonDay": 3100,
+    "basis": "180 lb, 5 ft 10 in, age 30, man, hard work: Mifflin-St Jeor x 1.725",
+    "kcalPerLbDay": 17.22,
+    "people": 2,
+    "seasonDays": 61,
+    "safeShareFromAlewives": 0.36,
+    "maxShareFromAlewives": 0.51,
+    "proteinShareOfAlewifeCalories": 0.69
+  },
+  "alewife": {
+    "weightG": { "low": 180, "mid": 230, "high": 250 },
+    "meatShare": { "low": 0.40, "mid": 0.46, "high": 0.61 },
+    "meatKcalPer100g": 96,
+    "meatComposition": { "waterPct": 78.9, "fatPct": 3.32, "proteinPctByDifference": 16.5 },
+    "kcalPerFish": { "cautious": 69, "typical": 101, "hopeful": 159 },
+    "runTiming": "early May to early June; about 80% of a run passes in roughly two weeks"
+  },
+  "catchShareModel": {
+    "formula": "share per net = e x min(reach / width, 0.75) x min(1, net height / water depth); n nets set apart: 1 - (1 - share)^n",
+    "e": { "cautious": 0.065, "typical": 0.12, "hopeful": 0.22 },
+    "records": [
+      { "name": "Fore River fyke comparison (smelt, tidal)", "smallNetCatch": 1623, "fullWidthNetCatch": 47736, "shareOfPassing": 0.033, "maxWidthBlocked": 0.26, "e": "0.125 or more (0.155 if wings angled; up to 0.25-0.31 if water deeper than the 1.2 m net)" },
+      { "name": "Margaree River alewife tip traps", "widthBlocked": 0.5, "traps": "27-44 active", "totalTake": "0.70-0.96 (1991-1994)", "shareEachTrap": "0.033-0.079", "e": "0.066-0.157", "caveat": "assumes one trap per licence" }
+    ],
+    "ceilingFullBlock": 0.57,
+    "badYearFactor": 0.5,
+    "badYearEvidence": { "kennebecLockwood": 0.47, "kennebecBentonFalls": 0.61, "unionRiver": 0.87, "gaspereauRiverNS": 0.51 }
+  },
+  "runs": [
+    { "stream": "Pennamaquan", "counts": { "2014": 71680, "2018": 400000, "2023": 500000, "2024": 500000 }, "note": "2014 was with poor fish passage; 2018-2024 rounded ('nearly' or 'almost'); a Passamaquoddy biologist said in 2025 the trend is down" },
+    { "stream": "Dennys", "counts": { "2008": 58000, "2025": 1000000 }, "note": "2025 is a newspaper report after fishway work at Meddybemps; the Fishing tab still uses 58,000" },
+    { "stream": "Little River (Perry)", "counts": {}, "note": "2018 commercial harvest site; no count" },
+    { "stream": "Boyden Stream (Perry)", "counts": {}, "note": "has a run; no count" },
+    { "stream": "Orange River (Whiting)", "counts": {}, "note": "no access to upper spawning grounds" }
+  ],
+  "eastBayBrookSmeltPerNight": { "2008": 15.48, "2009": 4.42, "2010": 21.66, "2011": 11.86, "allYears": 13.35, "net": "4 x 4 ft frame, six 2.5 ft hoops, 1/4 in mesh, about 75% of the channel" },
+  "cobscookFyke2012": {
+    "nets": "1.2 m high, 9.1 m and 18.3 m wings, 2.5 cm mesh; 2 nets per set; median set about 3 h",
+    "sets": { "May": 3, "June": 7, "Aug": 8, "Sep": 7 },
+    "catch": {
+      "Atlantic tomcod": { "May": 2, "June": 11, "Aug": 25, "Sep": 22 },
+      "Rainbow smelt": { "May": 0, "June": 0, "Aug": 9, "Sep": 11 },
+      "Winter flounder": { "May": 0, "June": 2, "Aug": 5, "Sep": 0 },
+      "Pollock": { "May": 0, "June": 0, "Aug": 0, "Sep": 5 },
+      "Alewife": { "May": 0, "June": 1, "Aug": 0, "Sep": 0 },
+      "Atlantic herring": { "May": 0, "June": 0, "Aug": 0, "Sep": 1 }
+    },
+    "total": 94
+  },
+  "suggestedPurchase": {
+    "nets": 2,
+    "reachFt": "25-30 (mouth plus wings)",
+    "heightFt": "at least the high-tide water depth, about 4",
+    "budgetUsd": "1,000-2,000 at most",
+    "assumes": "50 ft wide, 4 ft deep spot (a guess until spots are picked)"
+  },
+  "fykeDepth": "about the net's height at high tide (3-5 ft for a 3-4 ft net); bag stays wet at low tide",
+  "calculator": { "file": "fyke-calculator.html", "live": "https://claude.ai/artifact/4WEzbwYvAboqQmTCV4NnP7" }
+}

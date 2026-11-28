@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fyke Net Calorie Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE work tool: a field biologist's sizing sheet, exact and calm
+   IDEA a stream survey sheet: the stream drawn from above with your nets in it, the catch tallied beside it
+   PICTURE top-down stream at true proportion, nets drawn to the reach you enter, alewives passing; a meter of calories against two people's need
+   COLOUR tannin stream brown ground for the picture, white page, alewife green-blue for marks, net orange for the accent
+   TYPE Barlow Semi Condensed (signage) + Source Sans 3
+   LAYOUT laptop: inputs left, picture and result right; phone: title, picture, result, inputs */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#15100b);--ink:light-dark(#1b1712,#f1ece4);--mute:light-dark(#5d554b,#b9b0a3);--line:light-dark(#ded6ca,#3a3027);--panel:light-dark(#f6f2ec,#1f1811);--water:light-dark(#5a4128,#3a2a1a);--water2:light-dark(#7a5a38,#4d3822);--bank:light-dark(#c9bfa8,#2a2219);--fish:light-dark(#a9c9c6,#a9c9c6);--net:#ff7a1a;--ok:light-dark(#1f6f6a,#7fd1c8)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 "Source Sans 3",system-ui,sans-serif;overflow-x:clip}
+h1,h2{font-family:"Barlow Semi Condensed","Arial Narrow",sans-serif;letter-spacing:-.02em;line-height:1.05;margin:0}
+h1{font-size:clamp(32px,4.4vw,46px);text-wrap:balance}
+h2{font-size:26px;margin-bottom:10px}
+.band{padding:clamp(22px,3.4vw,48px) max(4vw,16px)}
+.wrap{max-width:1240px;margin:0 auto}
+.lead{color:var(--mute);margin:8px 0 0;max-width:70ch}
+.grid{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:28px;margin-top:22px;align-items:start}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+label,.lab{display:block;font-weight:600;font-size:15px;margin:14px 0 6px}
+label:first-child{margin-top:0}
+select,input[type=number]{width:100%;font:16px "Source Sans 3",sans-serif;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);min-height:44px}
+select:focus,input:focus,button:focus-visible{outline:3px solid color-mix(in srgb,var(--net) 70%,transparent);outline-offset:1px}
+.row2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+.seg{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{flex:1;min-height:44px;font:600 15px "Source Sans 3",sans-serif;border:0;background:var(--bg);color:var(--ink);cursor:pointer;border-left:1px solid var(--line)}
+.seg button:first-child{border-left:0}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.hint{font-size:13px;color:var(--mute);margin:6px 0 0}
+.stage{background:var(--water);border-radius:10px;overflow:hidden}
+.fig{position:relative;height:260px}
+.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.result{padding:18px}
+.big{font-family:"Barlow Semi Condensed",sans-serif;font-size:clamp(40px,6vw,64px);line-height:1;font-weight:700;white-space:nowrap}
+.res-top{display:flex;flex-wrap:wrap;gap:8px 28px;align-items:flex-end}
+.res-top p{margin:0}
+.sub{color:var(--mute);font-size:15px}
+.meter{position:relative;height:30px;background:color-mix(in srgb,var(--ink) 9%,transparent);border-radius:6px;margin:16px 0 6px;overflow:hidden}
+.meter .catch{position:absolute;inset:0 auto 0 0;background:var(--fish)}
+.meter .safe{position:absolute;inset:0 auto 0 0;background:var(--ok)}
+.meter .cap{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--net)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--mute)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.size{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:8px}
+.size b{white-space:nowrap}
+.warn{margin-top:10px;padding:10px 14px;border-left:3px solid var(--net);background:color-mix(in srgb,var(--net) 10%,transparent);font-size:15px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:14px;color:var(--mute);font-weight:600}
+tr.on td{font-weight:700}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:28px}
+.cols p,.cols li{max-width:70ch}
+.cols ul{padding-left:20px;margin:6px 0}
+.cols li+li{margin-top:6px}
+.formula{font-family:"Barlow Semi Condensed",sans-serif;font-size:21px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px}
+.fishbox{margin:0 0 6px;padding:10px 12px;border-left:3px solid var(--fish);background:color-mix(in srgb,var(--fish) 14%,transparent);font-size:15px}
+.fishline{margin:12px 0 0;font-size:16px}
+.fishline b{white-space:nowrap}
+.range{margin:6px 0 0;font-size:15px;color:var(--mute)}
+.range b{white-space:nowrap;color:var(--ink)}
+a{color:var(--ok)}
+.foot{color:var(--mute);font-size:14px}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}.out{order:-1}}
+@media(max-width:600px){.fig{height:200px}table{font-size:13px}th,td{padding:6px 4px}}
+</style>
+</head>
+<body>
+<header class="band">
+  <div class="wrap">
+    <h1>How many calories will my fyke nets catch?</h1>
+    <p class="lead">For fykes set in a Cobscook stream during the May–June alewife run. Enter your people, your stream and your nets, and see how much of your food the catch covers.</p>
+    <div class="grid">
+      <form class="panel" id="f" autocomplete="off">
+        <p class="fishbox"><b>The fish: alewives</b> (river herring). Blueback herring run with them and are counted together. Adults are about 11–12 in long and weigh about 8 oz. They come up the streams from early May to early June, and most pass in about two weeks.</p>
+        <div class="row2">
+          <div><label for="people">People</label><input id="people" type="number" min="1" max="50" step="1" value="2"></div>
+          <div><label for="weight">Weight each (lb)</label><input id="weight" type="number" min="60" max="400" step="5" value="180"></div>
+        </div>
+        <p class="hint" id="needHint">About 17 calories per lb a day, for hard daily work.</p>
+        <label for="stream">Stream and run size</label>
+        <select id="stream">
+          <option value="1000000" selected>Dennys: about 1,000,000 (counted 2025)</option>
+          <option value="500000">Pennamaquan: about 500,000 (counted 2023 and 2024)</option>
+          <option value="58000">Dennys, old count: 58,000 (2008)</option>
+          <option value="custom">My own run size</option>
+        </select>
+        <div id="customBox" hidden>
+          <label for="run">Fish in the run</label>
+          <input id="run" type="number" min="1000" step="1000" value="100000">
+        </div>
+        <span class="lab" id="yl">Year</span>
+        <div class="seg" role="group" aria-labelledby="yl" id="year">
+          <button type="button" data-v="1" aria-pressed="true">Typical</button><button type="button" data-v="0.5">Bad: half</button><button type="button" data-v="0.25">Very bad: a quarter</button>
+        </div>
+        <p class="hint">On Maine's counted runs, the worst year of the last 11 was half to nine-tenths of a typical year. Small runs can fall further.</p>
+        <div class="row2">
+          <div><label for="width">Stream width (ft)</label><input id="width" type="number" min="5" step="1" value="50"></div>
+          <div><label for="depth">Water depth at high tide (ft)</label><input id="depth" type="number" min="1" step="0.5" value="4"></div>
+        </div>
+        <p class="hint">At the spot where the net would sit. A guess for now, until you've picked spots.</p>
+        <label for="preset">Net</label>
+        <select id="preset">
+          <option value="18,3">Small hoop net: 3 ft hoops, two 10 ft wings</option>
+          <option value="30,4" selected>Maine survey net: 4 ft frame, two 16 ft wings</option>
+          <option value="70,4">Cobscook survey net: 4 ft high, 30 ft and 60 ft wings</option>
+          <option value="custom">My own net</option>
+        </select>
+        <div class="row2">
+          <div><label for="reach">Reach across (ft)</label><input id="reach" type="number" min="1" step="1" value="30"></div>
+          <div><label for="height">Net height (ft)</label><input id="height" type="number" min="1" step="0.5" value="4"></div>
+        </div>
+        <p class="hint">Reach is how far the mouth and wings span across the stream. Wings angled toward the mouth reach a little less than their length.</p>
+        <span class="lab" id="nl">Nets</span>
+        <div class="seg" role="group" aria-labelledby="nl" id="nets">
+          <button type="button" data-v="1">1</button><button type="button" data-v="2" aria-pressed="true">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button>
+        </div>
+        <p class="hint">Set apart along the stream, so each takes its share of what the others let past.</p>
+        <span class="lab" id="cl">Estimate</span>
+        <div class="seg" role="group" aria-labelledby="cl" id="case">
+          <button type="button" data-v="low">Cautious</button><button type="button" data-v="mid" aria-pressed="true">Typical</button><button type="button" data-v="high">Hopeful</button>
+        </div>
+        <p class="hint">The two least certain numbers: how much of the passing fish a net catches, and calories per fish. Cautious uses the low end (6.5%, 69 calories), typical the middle (12%, 101), hopeful the high end (22%, 159).</p>
+      </form>
+      <section class="out" aria-live="polite">
+        <div class="stage"><div class="fig" id="fig"><svg id="svg" role="img" aria-label="The stream from above, with your nets drawn to scale"></svg></div></div>
+        <div class="result">
+          <div class="res-top">
+            <p><span class="big" id="safe">–</span><br><span class="sub">safe to eat a day: <b id="safeP"></b> of the <span id="needT"></span> your people need</span></p>
+            <p><span class="big" id="catch" style="font-size:clamp(28px,3.6vw,40px)">–</span><br><span class="sub">caught a day, averaged over May–June: <b id="catchP"></b> of need</span></p>
+          </div>
+          <p class="fishline" id="fishline"></p>
+          <p class="range" id="range"></p>
+          <div class="meter" id="meter"><div class="catch" id="mC"></div><div class="safe" id="mS"></div><div class="cap" id="mK"></div></div>
+          <div class="legend"><span><i style="background:var(--ok)"></i>safe to eat</span><span><i style="background:var(--fish)"></i>caught, beyond the safe limit</span><span><i style="background:var(--net)"></i>protein limit, 36% of need</span></div>
+          <div class="size" id="size"></div>
+          <div class="warn" id="warn" hidden></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</header>
+
+<section class="band" style="padding-top:0">
+  <div class="wrap">
+    <h2>Your stream with 1 to 4 nets</h2>
+    <div class="scroll"><table id="tbl"><thead><tr><th>Nets</th><th>Share of run</th><th>Fish a season</th><th>Fish a day at peak</th><th>Calories caught a day</th><th>Caught, % of need</th><th>Safe to eat, calories a day</th><th>Safe to eat, % of need</th></tr></thead><tbody></tbody></table></div>
+    <p class="hint"><b>Fish</b> columns count alewives; <b>calories</b> columns are food. <b>% of need</b> compares with what your people need a day. <b>Safe to eat</b> stops at 36% of need: alewives are lean, and eating more would make too much of your diet protein. Fish caught beyond that are extra, to release or keep in reserve.</p>
+    <p class="hint">Peak: about 80% of a run passes in roughly two weeks. "Calories caught a day" spreads the season's catch over all 61 days of May–June, which means storing it.</p>
+  </div>
+</section>
+
+<section class="band" style="background:var(--panel)">
+  <div class="wrap cols">
+    <div>
+      <h2>How it works</h2>
+      <p class="formula">Share one net takes = 12% × part of the stream it blocks × part of the depth it fills</p>
+      <ul>
+        <li><b>The 12%</b> comes from two records. In the Fore River, Massachusetts (2009–2012), a small fyke with two 4 ft wings sat in a 45 ft channel with a full-width net behind it. It caught 1,623 smelt to the big net's 47,736: 3.3% of the fish passing, while blocking at most a quarter of the channel. That's 12.5% of the fish in the part it blocked, or more if its wings were angled or the water was deeper than the net. On the Margaree River, Nova Scotia, alewife traps that filter half the river each took about 3–8% of the fish passing them: 6.5–16% of the fish in their half. The middle of where the two agree is about 12–15%; the calculator uses 12%.</li>
+        <li><b>Longer wings:</b> the calculator assumes catch grows with the share of the stream blocked. Studies of wing length mostly support that for fish on the move (doubling a small fyke's lead tripled its catch in one), but not every study found a difference.</li>
+        <li><b>Night to night,</b> catches swing a lot: the Fore River fyke caught anywhere from under 1% to 19% as many fish as the big net in a given week. Season totals are much steadier than single days.</li>
+        <li><b>Bad years may hurt less than the run size suggests.</b> On the Margaree, alewives swam in small schools near the banks when runs were small, and spread across the river when runs were big. So a trap set from the bank took a bigger share of a small run.</li>
+        <li><b>Bad years:</b> on Maine's counted runs and on Nova Scotia's Gaspereau River, the worst year was about half of a typical year.</li>
+        <li><b>Calories needed:</b> about 17 per lb of body weight a day for hard daily work, from a standard formula for a 30-year-old, 5 ft 10 in man (3,100 a day at 180 lb). Women and lighter work need less.</li>
+        <li><b>The protein limit:</b> spawning alewives are lean, about 69% of their calories from protein. A review of protein intake suggests keeping protein to about 25% of calories and calls over 35% dangerous. So alewives can safely be about 36% of your calories.</li>
+      </ul>
+    </div>
+    <div>
+      <h2>What it doesn't cover</h2>
+      <ul>
+        <li><b>Blocking more than three-quarters of the stream.</b> Fish can't easily swim around, so the catch could be far higher, but neither record covers it. It also stops the run, which hurts next year's.</li>
+        <li><b>Other seasons.</b> This is the alewife run only. Smelt (March–May) add about 320 calories a night per net, and they count toward the same protein limit.</li>
+        <li><b>Run sizes.</b> The Dennys figure is a 2025 newspaper report of one million counted after fishway work at Meddybemps. The Pennamaquan was counted at nearly 500,000 in 2024, but a Passamaquoddy biologist said in 2025 that "the trend is down."</li>
+        <li><b>Floods, seals and people.</b> Floods can lift a net, so anchor it well. Seals follow the runs: add a seal excluder. Endangered wild salmon in the Dennys must be let go.</li>
+        <li><b>Confidence:</b> 3 out of 5 on either stream. The weakest link is the 12%: no study has measured a winged fyke against a counted alewife run, so it rests on a smelt fyke and alewife river traps.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer class="band">
+  <div class="wrap foot">
+    <p>Sources: <a href="https://repository.library.noaa.gov/view/noaa/57102">Fore River fyke net comparison (NOAA, 2021)</a>; <a href="https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/228877.pdf">Margaree River gaspereau fishery, 1995 and 1996 (DFO)</a>; <a href="https://waves-vagues.dfo-mpo.gc.ca/library-bibliotheque/267281.pdf">Margaree, 1997 to 2000 (DFO)</a>; <a href="https://www.quoddytides.com/whiting-mill-pond-dam-project-to-boost-more-than-alewife-numbers/">Dennys count, 2025 (Quoddy Tides)</a>; <a href="https://www.quoddytides.com/passamaquoddy-celebrate-success-in-restoring-alewife-populations/">Pennamaquan count, 2024 (Quoddy Tides)</a>; <a href="https://www.quoddytides.com/harvesting-of-alewives-returns-to-pennamaquan-after-15-years/">Pennamaquan counts, 2014–2023 (Quoddy Tides)</a>; <a href="https://www.maine.gov/dmr/sites/maine.gov.dmr/files/inline-files/Trap%20Counts%20for%20Web%20Page%202025.pdf">Maine run counts by year, 2015–2025 (DMR)</a>; <a href="https://www.maine.gov/dmr/science-research/searun/alewife.html">alewife weight (Maine DMR)</a>; <a href="https://core.ac.uk/download/346214478.pdf">alewife fat and size during the run (UMaine, 2020)</a>; <a href="https://pubmed.ncbi.nlm.nih.gov/16779921/">protein limits (Bilsborough and Mann, 2006)</a>; <a href="https://www.maine.gov/dmr/sites/maine.gov.dmr/files/docs/fykeplan.pdf">Maine smelt fyke net plan, 2013</a>; <a href="https://ojs.library.okstate.edu/osu/index.php/OAS/article/download/7198/6631">fyke lead length study (Oklahoma Academy of Science)</a>; <a href="https://www.dfo-mpo.gc.ca/fisheries-peches/ifmp-gmp/gaspereau-gaspareau/index-eng.html">Gaspereau River runs by year (DFO, 2021)</a>.</p>
+    <p>An estimate for planning, Nov 27, 2026. Net reaches for the presets are rough.</p>
+  </div>
+</footer>
+
+<script>
+{
+  const DAYS = 61, MAXW = 0.75, PER_LB = 3100 / 180, SAFE = 0.36;
+  const CASES = { low: { e: 0.065, kcal: 69, name: "cautious" }, mid: { e: 0.12, kcal: 101, name: "typical" }, high: { e: 0.22, kcal: 159, name: "hopeful" } };
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => Math.round(n).toLocaleString("en-US");
+  const pct = (x) => (x >= 0.1 ? fmt(x * 100) : (Math.round(x * 1000) / 10).toLocaleString("en-US")) + "%";
+  const state = { nets: 2, kase: "mid", year: 1 };
+  const num = (id, min) => { const v = parseFloat($(id).value); return isFinite(v) && v >= min ? v : null; };
+  let lastR = null;
+
+  function inputs() {
+    const s = $("stream").value;
+    const run = s === "custom" ? num("run", 1) : Number(s);
+    return { run, people: num("people", 1), weight: num("weight", 1), width: num("width", 1), depth: num("depth", 0.5), reach: num("reach", 0.5), height: num("height", 0.5) };
+  }
+  function model(p, n, kase) {
+    const c = CASES[kase];
+    const need = p.people * p.weight * PER_LB, cap = SAFE * need;
+    const run = p.run * state.year;
+    const wRaw = p.reach / p.width, w = Math.min(wRaw, MAXW), h = Math.min(1, p.height / p.depth);
+    const s = c.e * w * h, total = 1 - (1 - s) ** n, fish = run * total, perDay = fish * c.kcal / DAYS;
+    const fishForCap = cap * DAYS / c.kcal;
+    const runForCap = total > 0 ? fishForCap / total : Infinity;
+    return { need, cap, run, wRaw, w, h, s, total, fish, perDay, safe: Math.min(perDay, cap), peak: fish * 0.8 / 13, kcal: c.kcal, fishForCap, runForCap };
+  }
+  function reachNeeded(p, n, kase) {
+    const c = CASES[kase], m = model(p, n, kase);
+    const frac = m.fishForCap / m.run;
+    if (frac >= 1) return null;
+    const s = 1 - (1 - frac) ** (1 / n), w = s / (c.e * m.h);
+    return w > MAXW ? Infinity : w * p.width;
+  }
+
+  function draw(p, r) {
+    const svg = $("svg"), W = svg.clientWidth, H = svg.clientHeight;
+    if (!W || !H) return;
+    const bank = Math.max(18, H * 0.12), top = bank, bot = H - bank, span = bot - top;
+    let g = `<rect width="${W}" height="${H}" fill="var(--bank)"/><rect x="0" y="${top}" width="${W}" height="${span}" fill="var(--water)"/>`;
+    g += `<rect x="0" y="${top}" width="${W}" height="${span * 0.18}" fill="var(--water2)" opacity=".5"/>`;
+    for (let x = W * 0.08; x < W; x += W * 0.22) g += `<path d="M${x} ${bot - span * 0.12}h28m-7-5l7 5-7 5" stroke="var(--fish)" stroke-opacity=".35" fill="none" stroke-width="2"/>`;
+    let seed = 7; const rnd = () => (seed = seed * 16807 % 2147483647) / 2147483647;
+    const count = Math.round(Math.min(90, W / 8) * Math.max(0.35, Math.min(1, state.year)));
+    for (let i = 0; i < count; i++) {
+      const x = rnd() * W, y = top + 6 + rnd() * (span - 12);
+      g += `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)})" opacity=".85"><ellipse rx="7" ry="2.6" fill="var(--fish)"/><path d="M6 0l5-3v6z" fill="var(--fish)"/></g>`;
+    }
+    const n = state.nets, reachPx = span * Math.min(r.wRaw, 1);
+    for (let k = 0; k < n; k++) {
+      const x = W * (0.2 + 0.6 * (n === 1 ? 0.5 : k / (n - 1)));
+      const y0 = top, y1 = top + reachPx, ym = (y0 + y1) / 2;
+      g += `<path d="M${x + 22} ${y0 + 2}L${x} ${ym}L${x + 22} ${y1}" fill="none" stroke="var(--net)" stroke-width="3" stroke-linejoin="round"/>`;
+      g += `<path d="M${x} ${ym}l-30 -8v16z" fill="var(--net)" opacity=".9"/>`;
+    }
+    g += `<text x="12" y="${top - 5}" fill="var(--ink)" font-size="13" font-family="Source Sans 3,sans-serif">Bank</text>`;
+    g += `<text x="${W - 12}" y="${bot + 15}" text-anchor="end" fill="var(--ink)" font-size="13" font-family="Source Sans 3,sans-serif">Water flows to the sea →  alewives swim upstream ←</text>`;
+    svg.innerHTML = g;
+  }
+
+  function render() {
+    const p = inputs();
+    if (Object.values(p).some((v) => v == null)) { $("size").textContent = "Enter a number in every box to see the catch."; return; }
+    const r = model(p, state.nets, state.kase), c = CASES[state.kase];
+    $("needHint").textContent = `About 17 calories per lb a day, for hard daily work: ${fmt(r.need)} a day for ${p.people} ${p.people === 1 ? "person" : "people"}.`;
+    $("needT").textContent = fmt(r.need);
+    $("safe").textContent = fmt(r.safe) + " cal";
+    $("catch").textContent = fmt(r.perDay) + " cal";
+    $("safeP").textContent = pct(r.safe / r.need);
+    $("catchP").textContent = pct(r.perDay / r.need);
+    const lo = model(p, state.nets, "low"), hi = model(p, state.nets, "high");
+    $("range").innerHTML = `Across the estimates, cautious to hopeful: <b>${fmt(lo.perDay)}–${fmt(hi.perDay)} calories</b> caught a day, from <b>${fmt(lo.fish)}–${fmt(hi.fish)} alewives</b> a season.`;
+    const keep = Math.min(r.fish, r.fishForCap);
+    $("fishline").innerHTML = `That's about <b>${fmt(r.fish)} alewives</b> over the season, or <b>${fmt(r.peak)} a day</b> at the two-week peak. To eat the safe amount all season you'd keep about <b>${fmt(keep)}</b> in all${r.fish > r.fishForCap ? " and let the rest go" : ""}.`;
+    $("mC").style.width = Math.min(100, r.perDay / r.need * 100) + "%";
+    $("mS").style.width = Math.min(100, r.safe / r.need * 100) + "%";
+    $("mK").style.left = (SAFE * 100) + "%";
+    const one = reachNeeded(p, 1, state.kase), two = reachNeeded(p, 2, state.kase);
+    const who = (n) => (n === 1 ? "1 net" : n + " nets");
+    const say = (x, n) => x == null ? `${who(n)}: the run is too small to reach the safe limit`
+      : x === Infinity ? `${who(n)}: can't reach the limit without blocking more than three-quarters of the stream`
+      : x <= p.height ? `${who(n)}: any net of this size; its mouth alone is about that wide`
+      : `${who(n)}: a reach of <b>${fmt(x)} ft</b> or more`;
+    const ratio = r.runForCap / r.run;
+    const margin = ratio < 1 ? `With your ${who(state.nets)}, the run could be <b>${pct(1 - ratio)} smaller</b> and you'd still reach the safe limit.`
+      : `With your ${who(state.nets)}, the run would need to be <b>${pct(ratio - 1)} bigger</b> to reach the safe limit.`;
+    const tooShallow = p.depth < p.height;
+    $("size").innerHTML = tooShallow
+      ? `<b>This net doesn't fit this spot.</b> Pick a spot at least ${fmt(p.height)} ft deep at high tide, or a net no taller than ${fmt(p.depth)} ft.`
+      : `${margin}<br><b>Smallest net that reaches the safe limit</b> (${c.name} estimate, a ${fmt(p.height)} ft net in ${fmt(p.depth)} ft of water):<br>${say(one, 1)}<br>${say(two, 2)}`;
+    const notes = [];
+    if (tooShallow) notes.push(`At high tide the water is only ${p.depth} ft deep, so ${p.height - p.depth} ft of this ${p.height} ft net stands above it. A fyke's mouth and funnels have to be under water to hold fish, and the part above water is easy to see. The numbers above assume a net that fits the water.`);
+    if (r.wRaw > MAXW) notes.push(`Your net reaches ${pct(r.wRaw)} of the stream. The estimate stops at 75%: past that, fish can't easily go around, and neither record covers it.`);
+    if (r.h < 1) notes.push(`The net is shorter than the water, so it fills only ${pct(r.h)} of the depth and fish can pass over it. A taller net catches more.`);
+    const perNetPeak = r.peak / state.nets;
+    if (perNetPeak > 500) notes.push(`At the peak, about ${fmt(perNetPeak)} alewives a day would swim into each net. That's more than a fyke's bag can hold between checks (a rough guess: several hundred), and crowded fish die. Empty it often, or leave the bag open and close it only when you want fish. You need about ${fmt(r.fishForCap / 13)} a day during the peak.`);
+    $("warn").hidden = !notes.length; $("warn").textContent = notes.join(" ");
+    $("tbl").tBodies[0].innerHTML = [1, 2, 3, 4].map((n) => {
+      const m = model(p, n, state.kase);
+      return `<tr class="${n === state.nets ? "on" : ""}"><td>${n}</td><td>${pct(m.total)}</td><td>${fmt(m.fish)}</td><td>${fmt(m.peak)}</td><td>${fmt(m.perDay)}</td><td>${pct(m.perDay / m.need)}</td><td>${fmt(m.safe)}</td><td>${pct(m.safe / m.need)}</td></tr>`;
+    }).join("");
+    lastR = r; draw(p, r);
+  }
+
+  function seg(id, key) {
+    $(id).addEventListener("click", (e) => {
+      const b = e.target.closest("button"); if (!b) return;
+      for (const x of $(id).querySelectorAll("button")) x.setAttribute("aria-pressed", String(x === b));
+      state[key] = key === "kase" ? b.dataset.v : Number(b.dataset.v);
+      render();
+    });
+  }
+  seg("nets", "nets"); seg("case", "kase"); seg("year", "year");
+  $("stream").addEventListener("change", () => { $("customBox").hidden = $("stream").value !== "custom"; render(); });
+  $("preset").addEventListener("change", () => {
+    const v = $("preset").value; if (v === "custom") return;
+    const [reach, height] = v.split(",").map(Number); $("reach").value = reach; $("height").value = height; render();
+  });
+  for (const id of ["run", "width", "depth", "people", "weight"]) $(id).addEventListener("input", render);
+  for (const id of ["reach", "height"]) $(id).addEventListener("input", () => { $("preset").value = "custom"; render(); });
+  $("f").addEventListener("submit", (e) => e.preventDefault());
+  const ro = new ResizeObserver(() => { const p = inputs(); if (lastR && Object.values(p).every((v) => v != null)) draw(p, lastR); });
+  ro.observe($("fig"));
+  render();
+}
+</script>
+</body>
+</html>
