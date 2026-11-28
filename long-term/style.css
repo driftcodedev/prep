@@ -77,7 +77,11 @@
 #lt-root .ltm-key-cur .ltm-key-swatch { opacity: 1; }
 #lt-root .ltm-measure-cur { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--line); font-size: 13.5px; }
 #lt-root .ltm-measure-depth { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--line); font-size: 13.5px; font-weight: 600; }
-#lt-root .ltm-depth-tiles img { image-rendering: auto; }
+#lt-root .ltm-depth-chip .ltm-swatch { border-radius: 3px; border: 1px solid rgba(28, 42, 41, 0.35); background: var(--c); opacity: 0.35; }
+#lt-root .ltm-depth-chip[aria-pressed="true"] { border-color: var(--lid); background: var(--lid-tint); }
+#lt-root .ltm-depth-chip[aria-pressed="true"] .ltm-swatch { background: var(--c); opacity: 1; }
+#lt-root .ltm-depth-chip[aria-pressed="false"] { color: var(--ink-2); }
+#lt-root .ltm-depth-chips[hidden], #lt-root .ltm-quick[hidden] { display: none; }
 #lt-root .ltm-stage.is-full .ltm-tide { padding: 0.4rem 0.5rem; }
 #lt-root .ltm-fieldset input { width: 1.15rem; height: 1.15rem; accent-color: var(--lid); }
 #lt-root .ltm-field select, #lt-root .ltm-sort select {

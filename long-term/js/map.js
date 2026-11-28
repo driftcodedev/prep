@@ -13,7 +13,7 @@ import {
 } from "./geo.js";
 import { popupHtml, cardHtml } from "./popup.js";
 import { createCurrents, tideLabel, CURRENT_BANDS, FLATS_COLOR } from "./currents.js";
-import { createDepth } from "./depth.js";
+import { createDepth, depthChipsHtml } from "./depth.js";
 import { CURRENTS, DEPTH } from "../data/plan.js";
 
 const HEIGHT_KEY = "prep-lt-map-height";
@@ -126,9 +126,12 @@ export function createMap(root, { L, geo }) {
         ${CURRENT_BANDS.map((b) => `<span class="ltm-key-band"><span class="ltm-key-swatch" style="background:${esc(mode === "peak" ? b.color : b.arrow)}"></span>${esc(b.label)}</span>`).join("")}
       </li>`;
     const flats = currents?.flats ? `<li><span class="ltm-key-swatch" style="background:${FLATS_COLOR}"></span>Dries at low tide</li>` : "";
+    const shownBands = depth?.on ? depth.data.bands.filter((_, i) => !depthHidden.has(i)) : [];
     const depthKey = depth?.on ? `
       <li class="ltm-key-cur ltm-key-depth"><span class="ltm-key-title">${esc(DEPTH.keyTitle)}</span>
-        ${depth.data.bands.map((b) => `<span class="ltm-key-band"><span class="ltm-key-swatch" style="background:${esc(b.color)}"></span>${esc(b.label)}</span>`).join("")}
+        ${shownBands.length
+          ? shownBands.map((b) => `<span class="ltm-key-band"><span class="ltm-key-swatch" style="background:${esc(b.color)}"></span>${esc(b.label)}</span>`).join("")
+          : `<span class="muted">${esc(DEPTH.noBands)}</span>`}
       </li>` : "";
     legendEl.innerHTML = `
       <ul class="ltm-key" aria-label="Map key">
@@ -254,6 +257,21 @@ export function createMap(root, { L, geo }) {
     }
     const show = e.target.closest("[data-show]");
     if (show) { showHouse(show.dataset.show); return; }
+    const band = e.target.closest("[data-depth-band]");
+    if (band && depth) {
+      const i = Number(band.dataset.depthBand);
+      depthHidden.has(i) ? depthHidden.delete(i) : depthHidden.add(i);
+      drawDepthBands();
+      root.querySelector(`[data-depth-band="${i}"]`)?.focus();
+      return;
+    }
+    const allBands = e.target.closest("[data-depth-all]");
+    if (allBands && depth) {
+      depthHidden.clear();
+      if (allBands.dataset.depthAll === "none") depth.data.bands.forEach((_, i) => depthHidden.add(i));
+      drawDepthBands();
+      return;
+    }
     const step = e.target.closest("[data-tide-step]");
     if (step) { stopPlay(); setTideStep((tideStep + Number(step.dataset.tideStep) + 12) % 12); return; }
     if (e.target.closest("[data-tide-play]")) togglePlay();
@@ -330,10 +348,25 @@ export function createMap(root, { L, geo }) {
   }
 
   // ---------- water depth ----------
-  // depth.json (the list of tiles, about 20 KB) loads the first time the box is ticked.
+  // depth.json (the list of tiles, about 20 KB) loads the first time the box is ticked. Each depth
+  // band has a toggle; the turned-off bands are kept here.
   let depth = null;
   let depthLoading = null;
+  const depthHidden = new Set();
   const depthStatus = $("[data-depth-status]");
+  const depthChips = $("[data-depth-bands]");
+  const depthQuick = $("[data-depth-quick]");
+
+  function drawDepthBands() {
+    if (!depth) return;
+    depth.setHidden(depthHidden);
+    if (depthChips) {
+      depthChips.innerHTML = depthChipsHtml(depth.data.bands, depthHidden);
+      depthChips.hidden = !depth.on;
+    }
+    if (depthQuick) depthQuick.hidden = !depth.on;
+    renderLegend();
+  }
 
   function loadDepth() {
     if (depth) return Promise.resolve(depth);
@@ -362,6 +395,7 @@ export function createMap(root, { L, geo }) {
     const d = await loadDepth();
     if (!d) return;
     d.setOn(on);
+    drawDepthBands();
     drawRings();
   }
 

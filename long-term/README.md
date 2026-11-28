@@ -29,7 +29,7 @@ long-term/            YOUR FOLDER
   data/currents.json  tidal current arrows and flats (built by tools/build_currents.py)
   data/currents-*.png strongest-current and flats layers for the map, and the printed currents map
   data/depth.json     water depth layer: tile list, color bands, datum, depths by place (tools/build_depth.py)
-  data/depth/         depth map tiles (zoom 11-15) and the tap-for-depth value tiles (depth/v/)
+  data/depth/         depth map tiles (zoom 11-15), their band tiles (depth/b/) and the tap-for-depth value tiles (depth/v/)
   data/depth-print.png the printed depth map
   js/geo.js           pure helpers: distances, ring colors, filters, formatting
   js/popup.js         HTML for house popups and list cards
@@ -163,9 +163,11 @@ and a **Flats that dry at low tide** checkbox. Nothing loads until one is used.
 
 ### Water depth
 
-The **Water depth** control above the map has one box, **Depth at low tide**. Nothing loads until
-it's ticked. Brett asked for it on Nov 27, 2026: detailed depths for Cobscook Bay that show more as
-you zoom in.
+The **Water depth** control above the map has a **Depth at low tide** box. Nothing loads until it's
+ticked. Then a toggle shows for each depth band (Dries, 0–6, 6–12 … 100+ ft) with All and Clear,
+like the distance rings; the key under the map lists only the bands that show. Brett asked for the
+layer on Nov 27, 2026 (detailed depths for Cobscook Bay that show more as you zoom in), then for the
+toggles. He doesn't want it in the README button's pages.
 
 - **Source:** NOAA Office of Coast Survey **BlueTopo**, the National Bathymetric Source's compilation
   of the best depth data it has: NOAA's 2010 multibeam surveys of the bay (H12258, H12259, H12270),
@@ -187,11 +189,16 @@ you zoom in.
   ft (`BANDS` in the build; the map reads them from depth.json). Ground above MHHW is land and left
   clear. The area is the bay's outline widened 900 m (the outline is rough and the flats run past
   it), cut 300 m past the mouth line and kept off the Passamaquoddy side of Eastport.
+- **Toggles:** each colored tile has a matching band tile (`depth/b/{z}/{x}/{y}.png`, one byte per
+  pixel: the band number, 255 where there's no depth). `createDepth()` draws tiles on canvases with
+  a Leaflet GridLayer and clears the pixels of hidden bands (`maskPixels()`), so turning a band off
+  or on redraws the tiles already loaded without fetching anything. The build checks that the band
+  tiles match the color tiles one for one.
 - **Tap for depth:** one-byte value tiles at zoom 14 (`depth/v/`), read with a canvas when someone
   taps the water. The code is in `encode()` in the build and `decodeDepth()` in `js/depth.js`; keep
   the two in step (the tests check the decoding). The popup gives the depth at low tide and at an
   average high tide (adds MHW), or how high the ground dries.
-- **Size:** about 2.5 MB of tiles. The map only asks for tiles listed in depth.json, so land tiles
+- **Size:** about 3 MB of tiles. The map only asks for tiles listed in depth.json, so land tiles
   never 404.
 - **Paper copy:** the map part has a "Water depth" section with `depth-print.png` and a table of
   typical and deepest depth and the share that dries within ½ mile of each bay name (`areas` in

@@ -16,6 +16,8 @@ Eastport, NAVD88 is 3.029 m above MLLW, mean high water 5.729 m and mean higher 
 Writes, in long-term/data/:
   depth.json             bounds, which tiles exist at each zoom, the color bands, datums and source
   depth/{z}/{x}/{y}.png  colored depth tiles with depth lines and light shading, zoom ZMIN to ZMAX
+  depth/b/{z}/{x}/{y}.png the band each pixel of those tiles is in (255 = none), so the map can
+                         hide the bands someone turns off
   depth/v/{x}/{y}.png    one-byte depth codes at zoom ZMAX - 1, read when someone taps the water
   depth-print.png        the whole bay with a key, for the printed report
 
@@ -54,19 +56,20 @@ MOUTH_ALLOW_M = 300           # ...but only this much past the mouth line, into 
 PASSY_EDGE = [(-66.984, 44.897)]  # nothing east of here and north of this (the Passamaquoddy side of Eastport)
 CHECKED = "2026-11-28"
 
-# Depth at low tide, feet: upper edge of each band. Keep in step with js/depth.js (it reads these
-# from depth.json). The first band is ground that dries at low tide (above MLLW, below MHHW).
+# Depth at low tide, feet: upper edge of each band, color, key label, toggle label. The map reads
+# these from depth.json. The first band is ground that dries at low tide (above MLLW, below MHHW).
 BANDS = [
-    (0, "#d8c28f", "Dries at low tide"),
-    (6, "#e2f2f5", "0–6 ft"),
-    (12, "#c2e3ec", "6–12 ft"),
-    (20, "#9bcfe2", "12–20 ft"),
-    (30, "#72b8d6", "20–30 ft"),
-    (50, "#4b9cc6", "30–50 ft"),
-    (75, "#2f7cb2", "50–75 ft"),
-    (100, "#205a92", "75–100 ft"),
-    (99999, "#173e6c", "Over 100 ft"),
+    (0, "#d8c28f", "Dries at low tide", "Dries"),
+    (6, "#e2f2f5", "0–6 ft", "0–6"),
+    (12, "#c2e3ec", "6–12 ft", "6–12"),
+    (20, "#9bcfe2", "12–20 ft", "12–20"),
+    (30, "#72b8d6", "20–30 ft", "20–30"),
+    (50, "#4b9cc6", "30–50 ft", "30–50"),
+    (75, "#2f7cb2", "50–75 ft", "50–75"),
+    (100, "#205a92", "75–100 ft", "75–100"),
+    (99999, "#173e6c", "Over 100 ft", "100+"),
 ]
+NO_BAND = 255   # in the band tiles: no depth here
 LINE = np.array([16, 44, 66], float)   # depth lines: dark blue-gray, drawn at the band edges
 
 
@@ -225,7 +228,7 @@ def colorize(elev_mllw, inside, res, z, shade=True):
     rgba = np.zeros(bi.shape + (4,), np.uint8)
     rgba[..., :3] = np.clip(rgb, 0, 255)
     rgba[..., 3] = np.where(valid, 255, 0)
-    return rgba, valid, depth_ft
+    return rgba, valid, depth_ft, np.where(valid, bi, NO_BAND).astype(np.uint8)
 
 
 def save_png(arr, path, mode):
@@ -291,7 +294,7 @@ def render_print(path, rgba, tfm, geo, places, source_line):
     key = fig.add_axes([0.02, 0.005, 0.96, 0.115])
     key.axis("off")
     per_row = 5
-    for i, (_, c, txt) in enumerate(BANDS):
+    for i, (_, c, txt, _short) in enumerate(BANDS):
         row, col = divmod(i, per_row)
         x = col / per_row
         y = 0.72 - row * 0.32
@@ -368,8 +371,10 @@ def main():
         else:
             tiles, tfm, e = resample(elev, tfm_max, bounds_m, z)
         inside = bay_mask(geo, tfm, e.shape)
-        rgba, valid, depth_ft = colorize(e, inside, res_at(z), z)
+        rgba, valid, depth_ft, bands = colorize(e, inside, res_at(z), z)
         listing[str(z)] = write_tiles(rgba, tiles, os.path.join(OUT_TILES, str(z)), "RGBA", lambda p: p[..., 3].any())
+        written = write_tiles(bands, tiles, os.path.join(OUT_TILES, "b", str(z)), "L", lambda p: (p != NO_BAND).any())
+        assert written == listing[str(z)], "band tiles must match the color tiles"
         if z == zmax - 1:
             codes = np.where(valid, encode(depth_ft), 0).astype(np.uint8)
             listing["v"] = write_tiles(codes, tiles, os.path.join(OUT_TILES, "v"), "L", lambda p: p.any())
@@ -398,7 +403,8 @@ def main():
         "zmin": ZMIN,
         "zmax": zmax,
         "valueZoom": zmax - 1,
-        "bands": [{"maxFt": b[0], "color": b[1], "label": b[2]} for b in BANDS],
+        "bands": [{"maxFt": b[0], "color": b[1], "label": b[2], "short": b[3]} for b in BANDS],
+        "noBand": NO_BAND,
         "stats": stats,
         "areas": areas,
         "tiles": listing,

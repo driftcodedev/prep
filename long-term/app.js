@@ -219,8 +219,15 @@ export function renderCurrentsControls(words = CURRENTS) {
 export function renderDepthControls(words = DEPTH) {
   return `
           <div class="ltm-group ltm-depth" role="group" aria-labelledby="ltm-depth-label">
-            <span id="ltm-depth-label" class="ltm-label">${esc(words.label)}</span>
+            <div class="ltm-group-head">
+              <span id="ltm-depth-label" class="ltm-label">${esc(words.label)}</span>
+              <span class="ltm-quick" data-depth-quick hidden>
+                <button type="button" class="btn-link" data-depth-all="all">All</button>
+                <button type="button" class="btn-link" data-depth-all="none">Clear</button>
+              </span>
+            </div>
             <label class="ltm-check"><input type="checkbox" data-depth> ${esc(words.checkLabel)}</label>
+            <div class="ltm-chips ltm-depth-chips" data-depth-bands role="group" aria-label="${esc(words.bandsLabel)}" hidden></div>
             <p class="ltm-hint" data-depth-status>${esc(words.hint)}</p>
           </div>`;
 }

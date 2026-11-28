@@ -1,7 +1,7 @@
 // Water depth: js/depth.js (decoding, tile math, popup lines), the control in app.js and the report part.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { decodeDepth, tileAt, depthLines, bandFor, depthTileUrl } from "../js/depth.js";
+import { decodeDepth, tileAt, depthLines, bandFor, depthTileUrl, bandTileUrl, maskPixels, depthChipsHtml } from "../js/depth.js";
 import { depthBlocks } from "../js/report.js";
 import { renderDepthControls } from "../app.js";
 import { DEPTH } from "../data/plan.js";
@@ -31,6 +31,7 @@ test("tileAt finds the web mercator tile and pixel", () => {
   const z0 = tileAt(0, 0, 0);
   assert.deepEqual([z0.x, z0.y, z0.px, z0.py], [0, 0, 128, 128]);
   assert.equal(depthTileUrl("data/depth", 15, 1, 2), "data/depth/15/1/2.png");
+  assert.equal(bandTileUrl("data/depth", 15, 1, 2), "data/depth/b/15/1/2.png");
 });
 
 test("popup lines: depth at low and high tide, or how much it dries", () => {
@@ -49,10 +50,39 @@ test("bandFor picks the band by its upper edge", () => {
   assert.equal(bandFor(bands, 300).label, "deep");
 });
 
+test("turned-off bands are cut out of a tile, and nothing else", () => {
+  // Four pixels: band 0, band 2, no band, band 2.
+  const color = new Uint8ClampedArray([10, 20, 30, 255, 40, 50, 60, 255, 0, 0, 0, 0, 70, 80, 90, 255]);
+  const band = new Uint8Array([0, 2, 255, 2]);
+  assert.deepEqual([...maskPixels(color, band, new Set())], [...color], "nothing hidden");
+  const out = maskPixels(color, band, new Set([2]));
+  assert.deepEqual([...out], [10, 20, 30, 255, 40, 50, 60, 0, 0, 0, 0, 0, 70, 80, 90, 0]);
+  assert.equal(color[7], 255, "the original stays as it was, for when the band comes back");
+  assert.deepEqual([...maskPixels(color, band, new Set([0, 1, 2]))].filter((_, i) => i % 4 === 3), [0, 0, 0, 0]);
+});
+
+test("one toggle per depth band, pressed while it shows", () => {
+  const bands = [
+    { maxFt: 0, color: "#d8c28f", label: "Dries at low tide", short: "Dries" },
+    { maxFt: 6, color: "#e2f2f5", label: "0–6 ft", short: "0–6" },
+    { maxFt: 99999, color: "#173e6c", label: "Over 100 ft", short: "100+" },
+  ];
+  const html = depthChipsHtml(bands, new Set([1]));
+  assert.equal((html.match(/data-depth-band=/g) || []).length, 3);
+  assert.match(html, /data-depth-band="0" aria-pressed="true" title="Dries at low tide"/);
+  assert.match(html, /data-depth-band="1" aria-pressed="false"/);
+  assert.match(html, /aria-label="Over 100 ft"[^>]*>.*100\+<\/button>/);
+  assert.match(html, /--c:#173e6c/);
+});
+
 test("the Water depth control", () => {
   const html = renderDepthControls();
   assert.match(html, /<input type="checkbox" data-depth>/);
   assert.match(html, /data-depth-status/);
+  assert.match(html, /data-depth-bands role="group" aria-label="Depths to show, in feet" hidden/);
+  assert.match(html, /data-depth-quick hidden/);
+  assert.match(html, /data-depth-all="all"/);
+  assert.match(html, /data-depth-all="none"/);
   assert.ok(html.includes(DEPTH.checkLabel));
   assert.match(DEPTH.hint, /Not for navigation/);
 });

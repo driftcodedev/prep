@@ -25,7 +25,9 @@ export const PAGE = {
 export const DEPTH = {
   label: "Water depth",
   checkLabel: "Depth at low tide",
-  hint: "From NOAA's depth surveys, at the lowest normal tide. Zoom in for more detail, and tap the water for the depth there. Not for navigation.",
+  bandsLabel: "Depths to show, in feet",
+  hint: "From NOAA's depth surveys, at the lowest normal tide. Tap a depth to hide or show it, zoom in for more detail, and tap the water for the depth there. Not for navigation.",
+  noBands: "No depths picked",
   loading: "Loading the depths…",
   failed: "The depths didn't load. Check your connection and try again.",
   keyTitle: "Depth at low tide:",

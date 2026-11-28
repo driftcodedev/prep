@@ -1,6 +1,7 @@
 // Water depth at low tide on the Cobscook Bay map, from NOAA's BlueTopo (built by tools/build_depth.py
-// into data/depth.json and the tiles in data/depth/). The colored tiles get sharper as you zoom in;
-// tapping the water reads the depth from a one-byte "value" tile.
+// into data/depth.json and the tiles in data/depth/). The colored tiles get sharper as you zoom in,
+// and each depth band can be turned off with its toggle; tapping the water reads the depth from a
+// one-byte "value" tile.
 //
 // The pure helpers (decodeDepth, tileAt, depthLines, bandFor) run in Node for the tests; createDepth()
 // needs the browser and Leaflet.
@@ -52,6 +53,25 @@ export function depthLines(ft, datum) {
 }
 
 export const depthTileUrl = (base, z, x, y) => `${base}/${z}/${x}/${y}.png`;
+export const bandTileUrl = (base, z, x, y) => `${base}/b/${z}/${x}/${y}.png`;
+
+// The color tile's pixels with the turned-off bands made clear. color: RGBA bytes; band: one band
+// number per pixel (noBand where there's no depth); hidden: a Set of band numbers. Returns new bytes.
+export function maskPixels(color, band, hidden, noBand = 255) {
+  const out = new Uint8ClampedArray(color);
+  if (!hidden.size) return out;
+  for (let i = 0; i < band.length; i++) {
+    const b = band[i];
+    if (b !== noBand && hidden.has(b)) out[i * 4 + 3] = 0;
+  }
+  return out;
+}
+
+// The depth toggles: one chip per band, pressed while that band shows.
+export function depthChipsHtml(bands, hidden = new Set()) {
+  const esc = (v) => String(v).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[ch]));
+  return bands.map((b, i) => `<button type="button" class="ltm-chip ltm-depth-chip" data-depth-band="${i}" aria-pressed="${!hidden.has(i)}" title="${esc(b.label)}" aria-label="${esc(b.label)}" style="--c:${esc(b.color)}"><span class="ltm-swatch" aria-hidden="true"></span>${esc(b.short || b.label)}</button>`).join("");
+}
 
 // ---------- browser ----------
 
@@ -64,14 +84,48 @@ export function createDepth(map, L, { data, base }) {
   const have = {};
   for (const [z, list] of Object.entries(data.tiles)) have[z] = new Set(list);
 
-  // Only ask for tiles that exist, so the browser doesn't log a missing file for every land tile.
-  const DepthLayer = L.TileLayer.extend({
-    getTileUrl(c) {
-      const z = String(c.z);
-      return have[z]?.has(`${c.x},${c.y}`) ? depthTileUrl(base, c.z, c.x, c.y) : BLANK;
+  // Each tile is drawn on a canvas from its color tile, with the bands someone turned off cut out
+  // using the matching band tile. Only tiles listed in depth.json are fetched, so land tiles never
+  // 404.
+  const hidden = new Set();
+  const noBand = data.noBand ?? 255;
+  const live = new Set();
+  const loadImg = (src) => new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error(`depth tile ${src}`));
+    img.src = src;
+  });
+  const paint = (tile) => {
+    const d = tile._depth;
+    if (!d) return;
+    const g = tile.getContext("2d");
+    g.putImageData(new ImageData(maskPixels(d.color, d.band, hidden, noBand), 256, 256), 0, 0);
+  };
+  const DepthLayer = L.GridLayer.extend({
+    createTile(c, done) {
+      const tile = document.createElement("canvas");
+      tile.width = 256; tile.height = 256;
+      if (!have[String(c.z)]?.has(`${c.x},${c.y}`)) { setTimeout(() => done(null, tile), 0); return tile; }
+      Promise.all([loadImg(depthTileUrl(base, c.z, c.x, c.y)), loadImg(bandTileUrl(base, c.z, c.x, c.y))])
+        .then(([colorImg, bandImg]) => {
+          const g = tile.getContext("2d", { willReadFrequently: true });
+          g.drawImage(bandImg, 0, 0);
+          const bandPx = g.getImageData(0, 0, 256, 256).data;
+          const band = new Uint8Array(256 * 256);
+          for (let i = 0; i < band.length; i++) band[i] = bandPx[i * 4];
+          g.clearRect(0, 0, 256, 256);
+          g.drawImage(colorImg, 0, 0);
+          tile._depth = { color: g.getImageData(0, 0, 256, 256).data.slice(), band };
+          live.add(tile);
+          if (hidden.size) paint(tile);
+          done(null, tile);
+        })
+        .catch((err) => { console.error(err); done(err, tile); });
+      return tile;
     },
   });
-  const layer = new DepthLayer("", {
+  const layer = new DepthLayer({
     pane: "ltmDepth",
     minZoom: 0,
     maxZoom: 22,
@@ -79,10 +133,10 @@ export function createDepth(map, L, { data, base }) {
     maxNativeZoom: data.zmax,
     bounds: L.latLngBounds(data.bounds),
     opacity: 0.92,
-    interactive: false,
     keepBuffer: 2,
     className: "ltm-depth-tiles",
   });
+  layer.on("tileunload", (e) => { live.delete(e.tile); e.tile._depth = null; });
 
   // Value tiles, decoded once each.
   const cache = new Map();
@@ -134,6 +188,13 @@ export function createDepth(map, L, { data, base }) {
   return {
     data,
     get on() { return on; },
+    get hidden() { return new Set(hidden); },
+    // Which bands to hide (a Set of band numbers); redraws the tiles already on the map.
+    setHidden(next) {
+      hidden.clear();
+      for (const b of next) hidden.add(b);
+      for (const tile of live) paint(tile);
+    },
     setOn(next) {
       on = next;
       if (on) layer.addTo(map); else layer.remove();
@@ -143,6 +204,6 @@ export function createDepth(map, L, { data, base }) {
       return depthLines(await depthAt(lat, lon), data.datum);
     },
     depthAt,
-    destroy() { layer.remove(); cache.clear(); },
+    destroy() { layer.remove(); cache.clear(); live.clear(); },
   };
 }
