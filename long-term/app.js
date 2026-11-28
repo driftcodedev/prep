@@ -19,7 +19,7 @@
 // reportHtml() draws them into the hidden .lt-print box that only shows when printing, and
 // js/report-pdf.js turns the same blocks into a PDF with pdfmake (vendor/pdfmake).
 
-import { PAGE, CURRENTS } from "./data/plan.js";
+import { PAGE, CURRENTS, DEPTH } from "./data/plan.js";
 import { HOUSES } from "./data/houses.js";
 import { RING_COLORS, DEFAULT_RINGS } from "./data/places.js";
 import { esc } from "./js/geo.js";
@@ -126,6 +126,8 @@ export function renderMap(page = PAGE, context = {}, data = { houses: HOUSES, co
 
           ${renderCurrentsControls()}
 
+          ${renderDepthControls()}
+
           <details class="ltm-more">
             <summary>More filters and map layers</summary>
             <div class="ltm-more-body">
@@ -210,6 +212,16 @@ export function renderCurrentsControls(words = CURRENTS) {
             </div>
             <label class="ltm-check"><input type="checkbox" data-flats> ${esc(words.flatsLabel)}</label>
             <p class="ltm-hint" data-cur-status>${esc(words.hint)}</p>
+          </div>`;
+}
+
+// The Water depth control. js/map.js loads data/depth.json the first time it's turned on.
+export function renderDepthControls(words = DEPTH) {
+  return `
+          <div class="ltm-group ltm-depth" role="group" aria-labelledby="ltm-depth-label">
+            <span id="ltm-depth-label" class="ltm-label">${esc(words.label)}</span>
+            <label class="ltm-check"><input type="checkbox" data-depth> ${esc(words.checkLabel)}</label>
+            <p class="ltm-hint" data-depth-status>${esc(words.hint)}</p>
           </div>`;
 }
 
@@ -376,12 +388,31 @@ async function loadReportCurrents() {
   }
 }
 
+// The depth data and the printed depth map, the same way. Optional too.
+async function loadReportDepth() {
+  try {
+    const [data, blob] = await Promise.all([
+      fetch(new URL("./data/depth.json", import.meta.url)).then((r) => (r.ok ? r.json() : null)),
+      fetch(new URL("./data/depth-print.png", import.meta.url)).then((r) => (r.ok ? r.blob() : null)),
+    ]);
+    const image = blob ? await new Promise((resolve) => {
+      const fr = new FileReader();
+      fr.onload = () => resolve(fr.result);
+      fr.onerror = () => resolve("");
+      fr.readAsDataURL(blob);
+    }) : "";
+    return { depth: data, depthImage: image };
+  } catch {
+    return { depth: null, depthImage: "" };
+  }
+}
+
 let report = null; // { day, blocks }
 async function reportBlocks() {
   const day = todayIso();
   if (report?.day === day) return report.blocks;
-  const [{ buildReport }, geo, cur] = await Promise.all([import("./js/report.js"), loadGeo(), loadReportCurrents()]);
-  const blocks = buildReport({ geo, today: day, dateText: todayText(), readme: readmePages(), ...cur });
+  const [{ buildReport }, geo, cur, dep] = await Promise.all([import("./js/report.js"), loadGeo(), loadReportCurrents(), loadReportDepth()]);
+  const blocks = buildReport({ geo, today: day, dateText: todayText(), readme: readmePages(), ...cur, ...dep });
   report = { day, blocks };
   return blocks;
 }

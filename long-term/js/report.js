@@ -18,7 +18,7 @@
 
 import { HOUSES, HOUSES_CHECKED, HOUSES_CHANGES } from "../data/houses.js";
 import { TOWNS, RING_COLORS, DENNYSVILLE } from "../data/places.js";
-import { PAGE, CURRENTS } from "../data/plan.js";
+import { PAGE, CURRENTS, DEPTH } from "../data/plan.js";
 import * as POWER from "../data/power.js";
 import { SEASONS, SPECIES, FISH_CHECKED } from "../data/fishing.js";
 import {
@@ -219,8 +219,9 @@ export function ringSvg(slices, big, small) {
 // ---------- the report ----------
 
 // opts: { geo (data/geo.json), today ("YYYY-MM-DD"), dateText, readme ([{ id, title, html }]),
-//         currents (data/currents.json), currentsImage (data: URL of data/currents-print.png) }
-export function buildReport({ geo, today, dateText, readme = [], currents = null, currentsImage = "" }) {
+//         currents (data/currents.json), currentsImage (data: URL of data/currents-print.png),
+//         depth (data/depth.json), depthImage (data: URL of data/depth-print.png) }
+export function buildReport({ geo, today, dateText, readme = [], currents = null, currentsImage = "", depth = null, depthImage = "" }) {
   const pages = README_IN_REPORT.map((id) => readme.find((pg) => pg.id === id)).filter(Boolean);
   const pageOf = (id) => pages.find((pg) => pg.id === id);
   const blocks = [];
@@ -270,6 +271,7 @@ export function buildReport({ geo, today, dateText, readme = [], currents = null
     size: "s",
   });
   if (currents) blocks.push(...currentsBlocks(currents, currentsImage));
+  if (depth) blocks.push(...depthBlocks(depth, depthImage));
   blocks.push(h3("Towns around the bay"));
   blocks.push({
     t: "table",
@@ -452,6 +454,35 @@ export function currentsBlocks(data, image = "", words = CURRENTS) {
   return out;
 }
 
+// The water depth section: the printed depth map, then typical and deepest depth by place.
+export function depthBlocks(data, image = "", words = DEPTH) {
+  // The map right under the heading, so the two stay on one page.
+  const out = [h3(words.reportHeading)];
+  if (image) out.push({ t: "img", src: image, width: 500, alt: "Map of water depth at low tide in Cobscook Bay" });
+  out.push(p(words.reportIntro));
+  const ft = (v) => (v === null || v === undefined ? "dries" : v < 10 ? (Math.round(v * 2) / 2).toString() : Math.round(v).toString());
+  const rows = (data.areas || []).map((a) => [
+    a.name,
+    ft(a.typicalFt),
+    ft(a.deepestFt),
+    a.driesShare >= 0.05 ? `${Math.round(a.driesShare * 100)}%` : "–",
+  ]);
+  if (rows.length) {
+    out.push({
+      t: "table",
+      head: ["Place", "Typical depth at low tide (ft)", "Deepest within ½ mile (ft)", "Dries at low tide"],
+      rows,
+      widths: ["*", 80, 80, 66],
+      align: ["left", "right", "right", "right"],
+      size: "s",
+    });
+  }
+  const s = data.stats || {};
+  const deepest = s.deepestFt ? ` The deepest spot in the bay is about ${Math.round(s.deepestFt)} ft at low tide.` : "";
+  out.push({ t: "note", runs: `Within ½ mile of each name on the map. Add about ${Math.round(data.datum.mhwFt)} ft for an average high tide.${deepest} Source: ${data.source} Datum: ${data.datum.name} at ${data.datum.station}.` });
+  return out;
+}
+
 function backupText(h) {
   const s = h.solar;
   const bits = [];
@@ -542,7 +573,7 @@ function tableHtml(tb) {
 }
 
 // A heading followed straight away by a table short enough to fit on one page: keep them together.
-export const keepsWithNext = (bk, next) => bk.t === "h3" && next?.t === "table" && next.rows.length <= 26;
+export const keepsWithNext = (bk, next) => bk.t === "h3" && ((next?.t === "table" && next.rows.length <= 26) || next?.t === "img");
 
 export function reportHtml(blocks) {
   const out = [];

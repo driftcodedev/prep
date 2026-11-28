@@ -21,6 +21,18 @@ export const PAGE = {
 };
 
 // The Tidal currents control on the map, and the currents section of the paper copy.
+// The Water depth control on the map, and the depth part of the paper copy (js/depth.js, js/map.js).
+export const DEPTH = {
+  label: "Water depth",
+  checkLabel: "Depth at low tide",
+  hint: "From NOAA's depth surveys, at the lowest normal tide. Zoom in for more detail, and tap the water for the depth there. Not for navigation.",
+  loading: "Loading the depths…",
+  failed: "The depths didn't load. Check your connection and try again.",
+  keyTitle: "Depth at low tide:",
+  reportHeading: "Water depth",
+  reportIntro: "Depth at low tide (mean lower low water, the level nautical charts use), from NOAA's BlueTopo: its 2010 multibeam surveys of the bay, lidar along the shore and older soundings where nothing newer exists. Add the tide for the depth at other times: an average high tide here is about 19 ft above low tide. Not for navigation.",
+};
+
 export const CURRENTS = {
   label: "Tidal currents",
   modes: [["off", "Off"], ["peak", "Strongest"], ["hour", "By hour of the tide"]],

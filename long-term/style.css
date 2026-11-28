@@ -76,6 +76,8 @@
 #lt-root .ltm-key-band { display: inline-flex; align-items: center; gap: 0.25rem; margin-right: 0.45rem; }
 #lt-root .ltm-key-cur .ltm-key-swatch { opacity: 1; }
 #lt-root .ltm-measure-cur { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--line); font-size: 13.5px; }
+#lt-root .ltm-measure-depth { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--line); font-size: 13.5px; font-weight: 600; }
+#lt-root .ltm-depth-tiles img { image-rendering: auto; }
 #lt-root .ltm-stage.is-full .ltm-tide { padding: 0.4rem 0.5rem; }
 #lt-root .ltm-fieldset input { width: 1.15rem; height: 1.15rem; accent-color: var(--lid); }
 #lt-root .ltm-field select, #lt-root .ltm-sort select {

@@ -28,12 +28,16 @@ long-term/            YOUR FOLDER
   data/geo.json       bay outline and 1-mile rings (built by tools/build_geo.py)
   data/currents.json  tidal current arrows and flats (built by tools/build_currents.py)
   data/currents-*.png strongest-current and flats layers for the map, and the printed currents map
+  data/depth.json     water depth layer: tile list, color bands, datum, depths by place (tools/build_depth.py)
+  data/depth/         depth map tiles (zoom 11-15) and the tap-for-depth value tiles (depth/v/)
+  data/depth-print.png the printed depth map
   js/geo.js           pure helpers: distances, ring colors, filters, formatting
   js/popup.js         HTML for house popups and list cards
   js/map.js           the live Leaflet map (browser only)
   js/fishing.js       the Fishing and Netting views: one sortable table of species by season
   js/salting.js       the Salting view: the salt calculator, the by-hand formulas, the guide
   js/currents.js      tidal currents and flats: tide clock, speeds, and the live map layers
+  js/depth.js         water depth: the tile layer, tap-for-depth, popup lines
   js/report.js        the paper copy: one list of blocks, and the printout HTML
   js/report-pdf.js    the same blocks as a pdfmake PDF (Download PDF)
   vendor/leaflet/     Leaflet 1.9.4 (minified ESM, CSS scoped to #lt-root, LICENSE)
@@ -41,10 +45,12 @@ long-term/            YOUR FOLDER
   tools/build_geo.py  rebuilds data/geo.json (Python; not used by the site)
   tools/fishing_model.py  the seasonal quantity model; rebuilds data/fishing.js
   tools/build_currents.py rebuilds the currents data and pictures from tools/source/
+  tools/build_depth.py rebuilds the depth tiles and printed map from NOAA BlueTopo files
   tools/source/       NOAA's WebGNOME Passamaquoddy Bay save file (the currents' source)
   test/app.test.js    tests (node:test)
   test/report.test.js tests for the paper copy
   test/currents.test.js tests for the currents and flats
+  test/depth.test.js  tests for the depth decoding, tile math, popup lines and report part
   test/salting.test.js tests for the salt math, the Salting page and its paper copy
   README.md           this guide
 package.json          npm test runs both plans' tests
@@ -155,6 +161,44 @@ and a **Flats that dry at low tide** checkbox. Nothing loads until one is used.
   build tool (`areas` in currents.json).
 - Words for the control and the report are in `CURRENTS` in `data/plan.js`.
 
+### Water depth
+
+The **Water depth** control above the map has one box, **Depth at low tide**. Nothing loads until
+it's ticked. Brett asked for it on Nov 27, 2026: detailed depths for Cobscook Bay that show more as
+you zoom in.
+
+- **Source:** NOAA Office of Coast Survey **BlueTopo**, the National Bathymetric Source's compilation
+  of the best depth data it has: NOAA's 2010 multibeam surveys of the bay (H12258, H12259, H12270),
+  lidar along the shore, and older soundings elsewhere. 4 m cells. Elevation is in meters above
+  NAVD88; the build converts it to depth below mean lower low water (MLLW, the chart datum) with
+  Eastport's numbers (NOAA station 8410140: NAVD88 is 3.029 m above MLLW, MHW 5.729 m, MHHW 5.874 m),
+  one offset for the whole bay.
+- **Files:** 10 BlueTopo tiles cover the bay: BH54P5HM, BH54Q5HL/HM/HN, BH54R5HL/HM/HN and
+  BH54S5HL/HM/HN (64 MB, versions of Jul 27 and Aug 31, 2026). They're too big for the repo, so they
+  aren't in it. To refresh: find each tile's current file with nowCOAST's tile scheme
+  (`https://nowcoast.noaa.gov/geoserver/ows`, WMS GetFeatureInfo on layer
+  `bluetopo:bluetopo_tile_scheme`, which gives `geotiff_link`), download the GeoTIFFs from the
+  `noaa-ocs-nationalbathymetry-pds` S3 bucket, and run `python3 tools/build_depth.py
+  /path/to/BlueTopo_*.tiff` from `long-term/` (needs rasterio, numpy, pillow, shapely, scipy,
+  matplotlib).
+- **What the build makes:** colored tiles at zoom 11-15 (the finest is about 3.4 m a pixel, so 4 m
+  cells show at full detail), with depth lines at the band edges and light shading so channels and
+  ledges show. Bands: dries at low tide, 0-6, 6-12, 12-20, 20-30, 30-50, 50-75, 75-100 and over 100
+  ft (`BANDS` in the build; the map reads them from depth.json). Ground above MHHW is land and left
+  clear. The area is the bay's outline widened 900 m (the outline is rough and the flats run past
+  it), cut 300 m past the mouth line and kept off the Passamaquoddy side of Eastport.
+- **Tap for depth:** one-byte value tiles at zoom 14 (`depth/v/`), read with a canvas when someone
+  taps the water. The code is in `encode()` in the build and `decodeDepth()` in `js/depth.js`; keep
+  the two in step (the tests check the decoding). The popup gives the depth at low tide and at an
+  average high tide (adds MHW), or how high the ground dries.
+- **Size:** about 2.5 MB of tiles. The map only asks for tiles listed in depth.json, so land tiles
+  never 404.
+- **Paper copy:** the map part has a "Water depth" section with `depth-print.png` and a table of
+  typical and deepest depth and the share that dries within ½ mile of each bay name (`areas` in
+  depth.json, worked out at full detail by the build).
+- Words for the control and the report are in `DEPTH` in `data/plan.js`. Not for navigation: BlueTopo
+  isn't on a chart datum and NOAA says so in every file.
+
 ## The Fishing view
 
 The tab opens on a **Map / Fishing / Netting / Salting** switch (`render()` in `app.js`). The last view picked
@@ -264,9 +308,9 @@ that salt, boiling times for a wood or gasoline fire, and by-hand formulas for w
 The same two buttons as the Short Term tab sit under the Map / Fishing switch and at the bottom of
 the tab (the bottom one in a `.report-foot` with "Keep a paper copy"). Both give everything on the
 tab, whichever view is open: a cover with contents, then each part on new pages: Why Cobscook Bay,
-the map (with tidal currents and flats), houses for sale, Solar panels, Off-grid checklist,
+the map (with tidal currents, flats and water depth), houses for sale, Solar panels, Off-grid checklist,
 fishing by season, Salting fish and game, Nov–Dec food shortage, Species extinction and Pumping gas
-out of a car. About 46
+out of a car. About 47
 letter pages.
 
 - **One content list:** `buildReport()` in `js/report.js` returns plain blocks (headings,

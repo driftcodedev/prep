@@ -13,7 +13,8 @@ import {
 } from "./geo.js";
 import { popupHtml, cardHtml } from "./popup.js";
 import { createCurrents, tideLabel, CURRENT_BANDS, FLATS_COLOR } from "./currents.js";
-import { CURRENTS } from "../data/plan.js";
+import { createDepth } from "./depth.js";
+import { CURRENTS, DEPTH } from "../data/plan.js";
 
 const HEIGHT_KEY = "prep-lt-map-height";
 const ICONS = {
@@ -105,8 +106,8 @@ export function createMap(root, { L, geo }) {
     ringLayers.forEach((layer, i) => {
       const c = ringColors[i];
       if (!c) { if (map.hasLayer(layer)) map.removeLayer(layer); return; }
-      // Lighter while the currents are shown, so their colors don't blend with the rings'.
-      const quiet = currents && currents.mode !== "off";
+      // Lighter while the currents or depths are shown, so their colors don't blend with the rings'.
+      const quiet = (currents && currents.mode !== "off") || depth?.on;
       layer.setStyle({ color: c, weight: 0.6, opacity: quiet ? 0.45 : 0.7, fillColor: c, fillOpacity: quiet ? 0.12 : 0.32 });
       if (!map.hasLayer(layer)) layer.addTo(map);
     });
@@ -125,6 +126,10 @@ export function createMap(root, { L, geo }) {
         ${CURRENT_BANDS.map((b) => `<span class="ltm-key-band"><span class="ltm-key-swatch" style="background:${esc(mode === "peak" ? b.color : b.arrow)}"></span>${esc(b.label)}</span>`).join("")}
       </li>`;
     const flats = currents?.flats ? `<li><span class="ltm-key-swatch" style="background:${FLATS_COLOR}"></span>Dries at low tide</li>` : "";
+    const depthKey = depth?.on ? `
+      <li class="ltm-key-cur ltm-key-depth"><span class="ltm-key-title">${esc(DEPTH.keyTitle)}</span>
+        ${depth.data.bands.map((b) => `<span class="ltm-key-band"><span class="ltm-key-swatch" style="background:${esc(b.color)}"></span>${esc(b.label)}</span>`).join("")}
+      </li>` : "";
     legendEl.innerHTML = `
       <ul class="ltm-key" aria-label="Map key">
         ${ringKey}
@@ -132,7 +137,7 @@ export function createMap(root, { L, geo }) {
         <li><span class="ltm-key-pin ltm-pin-backup">${ICONS.backup}</span>Backup power</li>
         <li><span class="ltm-key-pin ltm-pin-none"></span>No backup listed</li>
         <li><span class="ltm-key-pin ltm-pin-none is-approx"></span>Approximate pin</li>
-        ${bands}${flats}
+        ${bands}${flats}${depthKey}
       </ul>`;
   }
 
@@ -193,10 +198,16 @@ export function createMap(root, { L, geo }) {
     const ring = ringOf(shore);
     const where = shore === 0 ? "This spot is on the water of Cobscook Bay." : `This spot is ${milesText(shore)} from the bay${ring <= 10 ? ` (the ${ring - 1}–${ring} mi ring)` : ", past the 10-mile ring"}.`;
     const tide = currents ? currents.describe(lat, lng) : [];
-    L.popup({ className: "ltm-popup" })
+    const html = (depthText) => `<p class="ltm-measure">${esc(where)}<br>${esc(milesText(milesBetween({ lat, lon: lng }, DENNYSVILLE)))} from Dennysville in a straight line.</p>${depthText}${tide.length ? `<p class="ltm-measure ltm-measure-cur">${tide.map(esc).join("<br>")}</p>` : ""}`;
+    const depthP = (lines) => (lines.length ? `<p class="ltm-measure ltm-measure-depth">${lines.map(esc).join("<br>")}</p>` : "");
+    const popup = L.popup({ className: "ltm-popup" })
       .setLatLng(e.latlng)
-      .setContent(`<p class="ltm-measure">${esc(where)}<br>${esc(milesText(milesBetween({ lat, lon: lng }, DENNYSVILLE)))} from Dennysville in a straight line.</p>${tide.length ? `<p class="ltm-measure ltm-measure-cur">${tide.map(esc).join("<br>")}</p>` : ""}`)
+      .setContent(html(depth?.on ? depthP([DEPTH.loading]) : ""))
       .openOn(map);
+    // The depth comes from a small tile, so it fills in a moment later.
+    if (depth?.on) {
+      depth.describe(lat, lng).then((lines) => { if (map.hasLayer(popup)) popup.setContent(html(depthP(lines))); });
+    }
   });
 
   function applyFilters() {
@@ -318,6 +329,42 @@ export function createMap(root, { L, geo }) {
     if (playBtn) { playBtn.textContent = "Pause"; playBtn.setAttribute("aria-pressed", "true"); }
   }
 
+  // ---------- water depth ----------
+  // depth.json (the list of tiles, about 20 KB) loads the first time the box is ticked.
+  let depth = null;
+  let depthLoading = null;
+  const depthStatus = $("[data-depth-status]");
+
+  function loadDepth() {
+    if (depth) return Promise.resolve(depth);
+    if (!depthLoading) {
+      if (depthStatus) depthStatus.textContent = DEPTH.loading;
+      depthLoading = fetch(new URL("../data/depth.json", import.meta.url))
+        .then((r) => { if (!r.ok) throw new Error(`depth.json: ${r.status}`); return r.json(); })
+        .then((data) => {
+          if (destroyed) return null;
+          depth = createDepth(map, L, { data, base: new URL("../data/depth", import.meta.url).href });
+          if (depthStatus) depthStatus.textContent = DEPTH.hint;
+          return depth;
+        })
+        .catch((err) => {
+          console.error("Depths failed to load:", err);
+          depthLoading = null;
+          if (depthStatus) depthStatus.textContent = DEPTH.failed;
+          return null;
+        });
+    }
+    return depthLoading;
+  }
+
+  async function setDepth(on) {
+    if (!on && !depth) return;
+    const d = await loadDepth();
+    if (!d) return;
+    d.setOn(on);
+    drawRings();
+  }
+
   async function setFlats(on) {
     if (!on && !currents) return;
     const c = await loadCurrents();
@@ -337,6 +384,7 @@ export function createMap(root, { L, geo }) {
     else if (t.name === "ltm-cur") { setCurrentsMode(t.value); return; }
     else if (t.matches("[data-tide-hour]")) { setTideStep(Number(t.value)); return; }
     else if (t.matches("[data-flats]")) { setFlats(t.checked); return; }
+    else if (t.matches("[data-depth]")) { setDepth(t.checked); return; }
     else if (t.dataset.layer) {
       const layer = { towns, water, spots }[t.dataset.layer];
       t.checked ? layer.addTo(map) : map.removeLayer(layer);
@@ -437,6 +485,8 @@ export function createMap(root, { L, geo }) {
       stopPlay();
       if (currents) currents.destroy();
       currents = null;
+      if (depth) depth.destroy();
+      depth = null;
       setFull(false);
       ro.disconnect();
       for (const off of cleanups) off();
